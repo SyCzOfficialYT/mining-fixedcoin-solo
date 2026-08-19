@@ -51,6 +51,35 @@ def set_config(cfg, address):
     CFG.write_text(yaml.safe_dump(cfg, sort_keys=False))
 
 
+def valid_address(address):
+    if not address:
+        return False
+    _, error = rpc('validateaddress', [address])
+    return error is None
+
+
+def existing_wallet_address():
+    """Return an existing receive address before ever calling getnewaddress."""
+    addresses, error = rpc('getaddressesbylabel', ['solo-mining'], wallet=WALLET_NAME)
+    if error:
+        addresses = None
+
+    if isinstance(addresses, dict):
+        for address in addresses:
+            if valid_address(address):
+                return address
+
+    # FixedCoin/Bitcoin Core wallets may have receive addresses without the label.
+    addresses, error = rpc('listreceivedbyaddress', [0, True, True], wallet=WALLET_NAME)
+    if not error and isinstance(addresses, list):
+        for entry in addresses:
+            address = str(entry.get('address', '')).strip()
+            if address and valid_address(address):
+                return address
+
+    return None
+
+
 def main():
     cfg = yaml.safe_load(CFG.read_text()) if CFG.exists() else {}
     cfg.setdefault('rpc', {}).update({
@@ -68,22 +97,23 @@ def main():
         print('Payout address configured from environment.')
         return 0
 
-    # The Docker image contains /app/config, but that directory is not a
-    # persistent volume. Keep the generated payout address in the daemon
-    # datadir so recreating the container never creates a second address.
+    # Persistent datadir wins over the image/config. This survives container
+    # recreation as long as /data/fixedcoin is backed by the Docker volume.
     if PAYOUT_FILE.is_file():
         saved = PAYOUT_FILE.read_text(errors='ignore').strip()
         if saved and 'CHANGE_ME' not in saved and 'GETNEWADDRESS' not in saved:
-            set_config(cfg, saved)
-            print(f'Existing payout address restored: {saved}')
-            return 0
+            if valid_address(saved):
+                set_config(cfg, saved)
+                print(f'Existing payout address restored: {saved}')
+                return 0
 
     current = str(cfg['pool'].get('payout_address', '') or '').strip()
     if current and 'CHANGE_ME' not in current and 'GETNEWADDRESS' not in current:
-        persist_payout(current)
-        set_config(cfg, current)
-        print(f'Existing payout address retained: {current}')
-        return 0
+        if valid_address(current):
+            persist_payout(current)
+            set_config(cfg, current)
+            print(f'Existing payout address retained: {current}')
+            return 0
 
     wallets, error = rpc('listwallets')
     if error:
@@ -111,6 +141,15 @@ def main():
                     return 1
             else:
                 print('Mining wallet created.')
+
+    # Reuse an address already belonging to the persistent mining wallet.
+    # Only generate a new one when the wallet truly has no usable receive address.
+    existing = existing_wallet_address()
+    if existing:
+        persist_payout(existing)
+        set_config(cfg, existing)
+        print(f'Existing mining payout address reused: {existing}')
+        return 0
 
     address, error = rpc('getnewaddress', ['solo-mining', 'bech32'], wallet=WALLET_NAME)
     if error or not address:
