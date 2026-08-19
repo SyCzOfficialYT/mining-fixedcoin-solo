@@ -161,7 +161,7 @@ def index(): return render_template("dashboard_v2.html",payout=config().get("pay
 def dashboard_addons(response):
     if response.content_type and response.content_type.startswith("text/html"):
         body=response.get_data(as_text=True)
-        tag='<script src="/static/dashboard_wallet.js?v=2"></script>'
+        tag='<script src="/static/dashboard_wallet.js?v=3"></script>'
         if tag not in body: body=body.replace("</body>",tag+"</body>")
         response.set_data(body)
     return response
