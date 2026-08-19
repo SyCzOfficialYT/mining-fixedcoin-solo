@@ -56,11 +56,22 @@ def parse_logs():
         m = re.search(r"authorize\s+(\S+).*?(?:diff|share_diff)\s*[=:]\s*([0-9.]+)", line, re.I)
         if m:
             worker = m.group(1)
-        # Current server emits: Job <id> height=<n> ... netdiff=<d>
-        # Keep compatibility with the older Job id=<id> format as well.
-        m = re.search(r"Job\s+(?:id=)?([^\s]+).*?(?:height=)?(\d+).*?(?:net_diff|network_diff|netdiff)[≈:=~]?\s*([0-9.eE+-]+)", line, re.I)
+
+        # NEW ROUND is authoritative for network difficulty.
+        m = re.search(r"NEW ROUND\s+height=(\d+)\s+netdiff=([0-9.eE+-]+)", line, re.I)
         if m:
-            job = {"job_id": m.group(1), "height": int(m.group(2)), "network_diff": float(m.group(3))}
+            job["height"] = int(m.group(1))
+            job["network_diff"] = float(m.group(2))
+
+        # Current server emits: Job <id> height=<n> miner=... dev=... FIX.
+        # Older builds may also append netdiff/network_diff.
+        m = re.search(r"Job\s+(?:id=)?([^\s]+).*?height=(\d+)(?:.*?(?:net_diff|network_diff|netdiff)[≈:=~]?\s*([0-9.eE+-]+))?", line, re.I)
+        if m:
+            job["job_id"] = m.group(1)
+            job["height"] = int(m.group(2))
+            if m.group(3) is not None:
+                job["network_diff"] = float(m.group(3))
+
         m = re.search(r"ACCEPT\s+#(\d+)\s+work=([0-9.]+).*?(?:pool|pool_diff)=([0-9.]+).*?hash=([0-9a-fA-F]+)", line, re.I)
         if m:
             n, work, pool_diff, h = m.groups()
@@ -131,7 +142,10 @@ def status():
 
     fixed_difficulty = float(pool.get("fixed_difficulty", 13354))
     network_target_int = as_int(network_target)
-    share_target = target_hex(int(network_target_int * network_diff / fixed_difficulty)) if network_target_int and network_diff > 0 and fixed_difficulty > 0 else None
+    # Derive the fixed share target from the network target/difficulty pair.
+    # target / difficulty is constant for a given PoW network.
+    max_target = int(network_target_int * network_diff) if network_target_int and network_diff > 0 else 0
+    share_target = target_hex(int(max_target / fixed_difficulty)) if max_target and fixed_difficulty > 0 else None
 
     mine = balances.get("mine") or {}
     trusted, pending, immature = float(mine.get("trusted") or 0), float(mine.get("untrusted_pending") or 0), float(mine.get("immature") or 0)
