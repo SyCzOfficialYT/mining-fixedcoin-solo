@@ -112,57 +112,26 @@ def as_number(v,default=0.0):
 
 
 def wallet_state(current_height):
-    """Read the actual mining wallet instead of inferring balances from Stratum stats."""
     balances, balances_error = rpc("getbalances", timeout=4)
     walletinfo, _ = rpc("getwalletinfo", timeout=4)
     txs, tx_error = rpc("listtransactions", ["*", 200, 0, True], timeout=5)
-    balances = balances or {}
-    mine = balances.get("mine") or {}
-    confirmed = as_number(mine.get("trusted"), 0)
-    pending = as_number(mine.get("untrusted_pending"), 0)
-    immature = as_number(mine.get("immature"), 0)
-    blocks = []
-    seen = set()
+    balances = balances or {}; mine = balances.get("mine") or {}
+    confirmed = as_number(mine.get("trusted"), 0); pending = as_number(mine.get("untrusted_pending"), 0); immature = as_number(mine.get("immature"), 0)
+    blocks = []; seen = set()
     for tx in txs or []:
-        if not isinstance(tx, dict):
-            continue
+        if not isinstance(tx, dict): continue
         category = str(tx.get("category") or "")
-        # Core versions differ: generated/immature/receive can represent a solo reward.
-        is_reward = category in {"generate", "immature"} or bool(tx.get("generated"))
-        if not is_reward:
-            continue
+        if category not in {"generate", "immature", "receive"} and not bool(tx.get("generated")): continue
         txid = str(tx.get("txid") or "")
-        if not txid or txid in seen:
-            continue
+        if not txid or txid in seen: continue
         seen.add(txid)
-        height = int(tx.get("blockheight") or tx.get("height") or 0)
-        confirmations = int(tx.get("confirmations") or 0)
-        if height <= 0 and confirmations > 0 and current_height:
-            height = max(0, current_height - confirmations + 1)
-        reward = as_number(tx.get("amount"), 0)
-        if reward < 0:
-            reward = abs(reward)
-        maturity_height = height + MATURITY if height else 0
+        height = int(tx.get("blockheight") or tx.get("height") or 0); confirmations = int(tx.get("confirmations") or 0)
+        if height <= 0 and confirmations > 0 and current_height: height = max(0, current_height - confirmations + 1)
+        reward = abs(as_number(tx.get("amount"), 0)); maturity_height = height + MATURITY if height else 0
         remaining = max(0, maturity_height - current_height) if maturity_height and current_height else None
-        if confirmations >= MATURITY or (maturity_height and current_height >= maturity_height):
-            state = "MATURED"
-        elif confirmations > 0 or height > 0:
-            state = "IMMATURE"
-        else:
-            state = "PENDING"
-        blocks.append({
-            "txid": txid,
-            "height": height,
-            "confirmations": confirmations,
-            "reward": reward,
-            "category": category,
-            "state": state,
-            "maturity_height": maturity_height,
-            "maturity_remaining": remaining,
-            "time": int(tx.get("timereceived") or tx.get("time") or 0),
-            "blockhash": str(tx.get("blockhash") or ""),
-        })
-    blocks.sort(key=lambda x: (x.get("height") or 0, x.get("time") or 0), reverse=True)
+        state = "MATURED" if confirmations >= MATURITY or (maturity_height and current_height >= maturity_height) else ("IMMATURE" if confirmations > 0 or height > 0 else "PENDING")
+        blocks.append({"txid":txid,"height":height,"confirmations":confirmations,"reward":reward,"category":category,"state":state,"maturity_height":maturity_height,"maturity_remaining":remaining,"time":int(tx.get("timereceived") or tx.get("time") or 0),"blockhash":str(tx.get("blockhash") or "")})
+    blocks.sort(key=lambda x:(x.get("height") or 0,x.get("time") or 0), reverse=True)
     return {"confirmed":confirmed,"pending":pending,"immature":immature,"total":confirmed+pending+immature,"blocks":blocks[:50],"wallet":walletinfo or {},"error":balances_error or tx_error}
 
 
@@ -171,8 +140,7 @@ def status():
     rejected=int(stats.get("shares_bad") or log_rejected or 0); accepted=int(stats.get("shares_ok") or len(shares))
     info,info_error=rpc("getblockchaininfo"); net,_=rpc("getnetworkinfo"); mininginfo,_=rpc("getmininginfo"); info=info or {}; net=net or {}; mininginfo=mininginfo or {}
     pool=config(); fixed_diff=as_number(pool.get("fixed_difficulty",13354),13354); network_diff=as_number(stats.get("network_diff"),0) or as_number(log_job.get("network_diff"),0) or as_number(mininginfo.get("difficulty"),0)
-    height=int(stats.get("round_height") or info.get("blocks") or mininginfo.get("blocks") or log_job.get("height") or 0); headers=int(info.get("headers") or height); initial_sync=bool(info.get("initialblockdownload",False))
-    wallet=wallet_state(height)
+    height=int(stats.get("round_height") or info.get("blocks") or mininginfo.get("blocks") or log_job.get("height") or 0); headers=int(info.get("headers") or height); initial_sync=bool(info.get("initialblockdownload",False)); wallet=wallet_state(height)
     job={"job_id":log_job.get("job_id"),"height":stats.get("round_height") or log_job.get("height") or height,"network_diff":network_diff}; job.update(log_job)
     round_best=as_number(stats.get("round_best"),max((as_number(x.get("work")) for x in shares),default=0)); round_work=as_number(stats.get("round_work"),0); round_shares=int(stats.get("round_shares") or 0)
     best_pct=(round_best/network_diff*100) if network_diff else 0.0; remaining=max(0.0,network_diff-round_best) if network_diff else 0.0; round_effort=as_number(stats.get("round_effort_pct"),best_pct)
@@ -183,12 +151,21 @@ def status():
     for name in set(log_workers)|set(persisted):
         lv=log_workers.get(name,{}); pv=persisted.get(name,{}) if isinstance(persisted.get(name,{}),dict) else {}
         workers[name]={"accepted":int(pv.get("ok") or pv.get("accepted") or pv.get("shares") or lv.get("accepted") or 0),"rejected":int(pv.get("bad") or pv.get("rejected") or lv.get("rejected") or 0),"difficulty":as_number(pv.get("difficulty") or lv.get("difficulty") or fixed_diff,fixed_diff),"active":bool(lv.get("active"))}
-    active_workers=[name for name,w in workers.items() if w.get("active")]
-    blocks=wallet["blocks"] or (stats.get("blocks_log") if isinstance(stats.get("blocks_log"),list) else []) or log_blocks
+    active_workers=[name for name,w in workers.items() if w.get("active")]; blocks=wallet["blocks"] or (stats.get("blocks_log") if isinstance(stats.get("blocks_log"),list) else []) or log_blocks
     return {"status":"online" if info or stats else "degraded","last_update":int(time.time()),"node":{"online":bool(info) or bool(stats),"synced":bool(info) and not initial_sync,"initial_block_download":initial_sync,"height":height,"headers":headers,"difficulty":network_diff,"target":mininginfo.get("target"),"bits":mininginfo.get("bits"),"connections":int(net.get("connections") or 0),"network_hashrate":network_hashrate,"chain":info.get("chain") or mininginfo.get("chain") or "unknown","verification_progress":as_number(info.get("verificationprogress"),0),"rpc_error":info_error},"mining":{"accepted":accepted,"rejected":rejected,"reject_pct":round(100*rejected/max(1,accepted+rejected),3),"hashrate_5m":h5,"hashrate_1h":h1,"fixed_difficulty":fixed_diff,"best_share":round_best,"best_share_pct":best_pct,"difficulty_remaining":remaining,"round_work":round_work,"round_shares":round_shares,"round_effort":round_effort,"workers":workers,"worker_count":len(active_workers),"active_workers":active_workers},"round":{"height":int(stats.get("round_height") or height),"shares":round_shares,"work":round_work,"best_share":round_best,"effort_pct":round_effort,"best_share_pct":best_pct,"difficulty":network_diff,"remaining":remaining,"started_at":stats.get("round_started_at"),"target_seconds":ROUND_SECONDS},"competition":{"your_hashrate":h5,"network_hashrate":network_hashrate,"your_network_pct":competition,"ppm":competition*10000},"wallet":{"confirmed":wallet["confirmed"],"pending":wallet["pending"],"immature":wallet["immature"],"total":wallet["total"],"total_rewards":as_number(stats.get("block_rewards_total"),0)},"job":job,"shares":shares[-100:],"blocks":blocks[:50],"history_diff":DIFF_HISTORY,"payout":pool.get("payout_address",""),"maturity":MATURITY,"ts":int(time.time())}
 
 @app.get("/")
 def index(): return render_template("dashboard_v2.html",payout=config().get("payout_address",""),maturity=MATURITY)
+
+@app.after_request
+def dashboard_addons(response):
+    if response.content_type and response.content_type.startswith("text/html"):
+        body=response.get_data(as_text=True)
+        tag='<script src="/static/dashboard_wallet.js?v=2"></script>'
+        if tag not in body: body=body.replace("</body>",tag+"</body>")
+        response.set_data(body)
+    return response
+
 @app.get("/api/status")
 def api_status(): return jsonify(status())
 @app.get("/api/overview")
