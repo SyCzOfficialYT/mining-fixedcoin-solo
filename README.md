@@ -1,20 +1,21 @@
-# FixedCoin Solo Mining Node
+# FixedCoin Solo
 
-Reproducible Docker deployment for a **FixedCoin solo-mining node + Stratum server + live dashboard**.
+Production-oriented FixedCoin solo-mining stack for an ASIC such as the NerdQaxe++.
 
-This repository is the clean deployment/rebuild target for the known-good FixedCoin Solo implementation. The build pins the known-good upstream implementation instead of relying on a floating branch.
-
-## Components
+## Stack
 
 - FixedCoin Core 29.1.3
-- FixedCoin Solo Stratum on `3333`
-- Dashboard on `5050`
-- FixedCoin P2P/RPC: `24768` / `24761`
-- Fixed share difficulty with the validated FixedCoin Stratum flow
+- FixedCoin-derived Stratum server
+- fixed share difficulty
 - SegWit/BIP145 `getblocktemplate` negotiation
-- Immediate block-found visibility before wallet indexing catches up
-- Coinbase maturity tracking at 100 blocks
-- Persistent `/data` volume
+- automatic payout-wallet initialization when no payout address is supplied
+- rolling 5m/1h share-based hashrate telemetry
+- live network competition
+- difficulty history graph
+- current job / network target information
+- block lifecycle: found → immature → spendable
+- responsive dark dashboard inspired by the BCH Jarvis desktop layout
+- Docker Compose + GitHub Actions build validation
 
 ## Start
 
@@ -22,35 +23,35 @@ This repository is the clean deployment/rebuild target for the known-good FixedC
 git clone https://github.com/SyCzOfficialYT/mining-fixedcoin-solo.git
 cd mining-fixedcoin-solo
 cp .env.example .env
-# Set FIX_PAYOUT_ADDRESS in .env
+nano .env
 docker compose build --no-cache
 docker compose up -d
 ```
 
-Dashboard:
+Dashboard: `http://SERVER-IP:5050`
+
+Stratum: `stratum+tcp://SERVER-IP:3333`
+
+## ASIC
+
+Configure the ASIC against port `3333`. Use your FixedCoin payout address as the Stratum username and any worker suffix, for example:
 
 ```text
-http://HOST:5050
-```
-
-Stratum:
-
-```text
-HOST:3333
-```
-
-## ASIC configuration
-
-Use the Stratum endpoint exposed by the host and a worker name such as:
-
-```text
-stratum+tcp://HOST:3333
-worker: nerdqaxe++
+stratum+tcp://SERVER-IP:3333
+user: fix1...worker
 password: x
 ```
 
-The pool uses the validated fixed-difficulty path. A share is not treated as a block merely because it was accepted; a block is only recorded after the submitted header satisfies the network target and the resulting chain state is verified.
+## Maturity
 
-## Important
+`COINBASE_MATURITY=100` is the default. A found block is tracked as immature until its maturity height is reached; the dashboard shows the remaining blocks and then marks it spendable.
 
-The payout address is intentionally supplied through `.env` and is not committed as a secret/config default.
+## Security
+
+The default Compose file does **not** publish RPC `24761`. Only Stratum `3333`, dashboard `5050`, and P2P `24768` are exposed.
+
+Use a long random `FIX_RPCPASS` in `.env` and do not commit `.env`.
+
+## Telemetry correctness
+
+The dashboard does not fake an ASIC hashrate. Its rolling estimate is calculated from accepted share work over the actual time window. Network competition uses the node's reported `networkhashps` when available. The best-share progress bar compares the best accepted share against the current network difficulty/target.
