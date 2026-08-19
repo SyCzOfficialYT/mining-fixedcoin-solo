@@ -3,7 +3,11 @@ from flask import Flask, jsonify, render_template
 from requests.auth import HTTPBasicAuth
 from pathlib import Path
 from datetime import datetime
-import os, re, time, requests
+import json
+import os
+import re
+import time
+import requests
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
 DATA = Path("/app/data")
@@ -13,6 +17,7 @@ RPC_URL = f"http://127.0.0.1:{RPC_PORT}"
 RPC_AUTH = HTTPBasicAuth(os.getenv("FIX_RPCUSER", "fixrpc"), os.getenv("FIX_RPCPASS", ""))
 MATURITY = int(os.getenv("COINBASE_MATURITY", "100"))
 LOG = DATA / "stratum.log"
+STATS = DATA / "stats.json"
 DIFF_HISTORY = []
 
 
@@ -27,14 +32,26 @@ def config():
 
 def rpc(method, params=None, timeout=3):
     try:
-        response = requests.post(RPC_URL, json={"jsonrpc": "1.0", "id": "dashboard", "method": method, "params": params or []}, auth=RPC_AUTH, timeout=timeout)
-        data = response.json()
+        r = requests.post(
+            RPC_URL,
+            json={"jsonrpc": "1.0", "id": "dashboard", "method": method, "params": params or []},
+            auth=RPC_AUTH,
+            timeout=timeout,
+        )
+        data = r.json()
         return data.get("result"), data.get("error")
     except Exception as exc:
         return None, str(exc)
 
 
-def lines(path, n=1500):
+def read_stats():
+    try:
+        return json.loads(STATS.read_text()) if STATS.exists() else {}
+    except Exception:
+        return {}
+
+
+def lines(path, n=1800):
     try:
         return path.read_text(errors="replace").splitlines()[-n:]
     except Exception:
@@ -43,136 +60,209 @@ def lines(path, n=1500):
 
 def parse_ts(s):
     try:
-        return datetime.strptime(s[:19], "%Y-%m-%d %H:%M:%S").timestamp()
+        return datetime.strptime(str(s)[:19], "%Y-%m-%d %H:%M:%S").timestamp()
     except Exception:
         return 0.0
 
 
 def parse_logs():
-    accepted, rejected, blocks = [], 0, []
-    worker = "unknown"
-    job = {}
+    accepted, rejected, blocks, workers, job = [], 0, [], {}, {}
     for line in lines(LOG):
         m = re.search(r"authorize\s+(\S+).*?(?:diff|share_diff)\s*[=:]\s*([0-9.]+)", line, re.I)
         if m:
-            worker = m.group(1)
+            workers.setdefault(m.group(1), {"accepted": 0, "rejected": 0, "difficulty": float(m.group(2))})["difficulty"] = float(m.group(2))
 
-        # NEW ROUND is authoritative for network difficulty.
         m = re.search(r"NEW ROUND\s+height=(\d+)\s+netdiff=([0-9.eE+-]+)", line, re.I)
         if m:
             job["height"] = int(m.group(1))
             job["network_diff"] = float(m.group(2))
 
-        # Current server emits: Job <id> height=<n> miner=... dev=... FIX.
-        # Older builds may also append netdiff/network_diff.
-        m = re.search(r"Job\s+(?:id=)?([^\s]+).*?height=(\d+)(?:.*?(?:net_diff|network_diff|netdiff)[≈:=~]?\s*([0-9.eE+-]+))?", line, re.I)
+        m = re.search(r"Job\s+([^\s]+).*?height=(\d+).*?(?:miner=([0-9.eE+-]+))?.*?(?:dev=([0-9.eE+-]+))?", line, re.I)
         if m:
-            job["job_id"] = m.group(1)
-            job["height"] = int(m.group(2))
-            if m.group(3) is not None:
-                job["network_diff"] = float(m.group(3))
+            job.update({"job_id": m.group(1), "height": int(m.group(2))})
+            if m.group(3):
+                job["miner_value"] = float(m.group(3))
+            if m.group(4):
+                job["dev_value"] = float(m.group(4))
 
         m = re.search(r"ACCEPT\s+#(\d+)\s+work=([0-9.]+).*?(?:pool|pool_diff)=([0-9.]+).*?hash=([0-9a-fA-F]+)", line, re.I)
         if m:
-            n, work, pool_diff, h = m.groups()
-            accepted.append({"ts": line[:19], "epoch": parse_ts(line), "num": int(n), "work": float(work), "pool_diff": float(pool_diff), "hash": h[:16], "worker": worker})
-        if re.search(r"\bREJECT\b", line, re.I):
+            num, work, diff, h = m.groups()
+            worker = "unknown"
+            before = line[: line.find("ACCEPT")]
+            auth = re.findall(r"authorize\s+(\S+)", "\n".join(lines(LOG, 250)))
+            if auth:
+                worker = auth[-1]
+            accepted.append({"ts": line[:19], "epoch": parse_ts(line), "num": int(num), "work": float(work), "pool_diff": float(diff), "hash": h[:16], "worker": worker})
+            workers.setdefault(worker, {"accepted": 0, "rejected": 0, "difficulty": float(diff)})["accepted"] += 1
+
+        if re.search(r"\bREJECT\b|\blow difficulty\b|stale job|bad params|invalid", line, re.I):
             rejected += 1
-        m = re.search(r"BLOCK ACCEPTED.*?height=(\d+).*?hash=([0-9a-fA-F]{16,64})(?:.*?reward=([0-9.]+))?", line, re.I)
+
+        m = re.search(r"(?:BLOCK FOUND|BLOCK ACCEPTED|submitblock.*?accepted).*?height[= ](\d+).*?(?:hash[= ]([0-9a-fA-F]{16,64}))?", line, re.I)
         if m:
-            h, block_hash, reward = m.groups()
-            blocks.append({"height": int(h), "hash": block_hash[:16], "reward": float(reward or 0), "mature_at": int(h) + MATURITY})
-    return accepted[-100:], rejected, blocks[-100:], job
+            h, bh = m.groups()
+            blocks.append({"height": int(h), "hash": (bh or "")[:16], "reward": 0, "mature_at": int(h) + MATURITY})
+    return accepted[-120:], rejected, blocks[-100:], workers, job
 
 
 def hashrate(shares, window):
     now = time.time()
-    recent = [x for x in shares if x.get("epoch", 0) and now - x["epoch"] <= window]
-    return sum(x["work"] for x in recent) * (2**32) / window if recent else 0.0
+    recent = [x for x in shares if x.get("epoch") and now - x["epoch"] <= window]
+    return sum(float(x.get("work") or 0) for x in recent) * (2 ** 32) / window if recent else 0.0
 
 
-def as_int(value):
-    if value is None or value == "":
-        return 0
+def normalize_recent(raw):
+    out = []
+    if not isinstance(raw, list):
+        return out
+    for x in raw[-120:]:
+        if not isinstance(x, dict):
+            continue
+        ts = x.get("ts") or x.get("time") or x.get("timestamp")
+        epoch = parse_ts(ts) if isinstance(ts, str) else float(ts or 0)
+        out.append({
+            "ts": datetime.fromtimestamp(epoch).strftime("%Y-%m-%d %H:%M:%S") if epoch else str(ts or "—"),
+            "epoch": epoch,
+            "num": x.get("num") or x.get("id") or 0,
+            "work": float(x.get("work") or x.get("share_work") or x.get("difficulty") or 0),
+            "pool_diff": float(x.get("pool_diff") or x.get("credited") or x.get("share_diff") or 0),
+            "hash": str(x.get("hash") or x.get("share_hash") or "")[:16],
+            "worker": str(x.get("worker") or "unknown"),
+        })
+    return out
+
+
+def as_number(v, default=0.0):
     try:
-        if isinstance(value, str):
-            text = value.strip().lower().removeprefix("0x")
-            if re.fullmatch(r"[0-9a-f]+", text) and any(c in "abcdef" for c in text):
-                return int(text, 16)
-            return int(text)
-        return int(value)
+        return float(v)
     except Exception:
-        return 0
-
-
-def target_hex(value):
-    if value in (None, ""):
-        return None
-    try:
-        if isinstance(value, int):
-            return f"{value:064x}"
-        text = str(value).strip().lower().removeprefix("0x")
-        if re.fullmatch(r"[0-9a-f]{1,64}", text):
-            return text.zfill(64)
-        return f"{int(float(text)):064x}"
-    except Exception:
-        return None
+        return default
 
 
 def status():
-    info, _ = rpc("getblockchaininfo")
+    stats = read_stats()
+    log_shares, log_rejected, log_blocks, log_workers, log_job = parse_logs()
+    shares = normalize_recent(stats.get("recent_shares")) or log_shares
+    rejected = int(stats.get("shares_bad") or log_rejected or 0)
+    accepted = int(stats.get("shares_ok") or len(shares))
+
+    info, info_error = rpc("getblockchaininfo")
     net, _ = rpc("getnetworkinfo")
     mininginfo, _ = rpc("getmininginfo")
     balances, _ = rpc("getbalances")
-    shares, rejected, blocks, parsed_job = parse_logs()
+    info = info or {}
+    net = net or {}
+    mininginfo = mininginfo or {}
+    balances = balances or {}
+
     pool = config()
-    info, mininginfo, net, balances = info or {}, mininginfo or {}, net or {}, balances or {}
-
-    height = int(info.get("blocks") or mininginfo.get("blocks") or 0)
+    fixed_diff = as_number(pool.get("fixed_difficulty", 13354), 13354)
+    network_diff = as_number(stats.get("network_diff"), 0)
+    if not network_diff:
+        network_diff = as_number(mininginfo.get("difficulty"), 0)
+    height = int(stats.get("round_height") or info.get("blocks") or mininginfo.get("blocks") or log_job.get("height") or 0)
     headers = int(info.get("headers") or height)
-    network_diff = float(mininginfo.get("difficulty") or parsed_job.get("network_diff") or 0)
-    network_hashrate = float(mininginfo.get("networkhashps") or 0)
-    network_target = target_hex(mininginfo.get("target"))
-    nbits = str(mininginfo.get("bits") or "")
-    next_info = mininginfo.get("next") or {}
-    next_height = int(next_info.get("height") or (height + 1 if height else 0))
-    next_diff = float(next_info.get("difficulty") or 0)
-    next_target = target_hex(next_info.get("target"))
-    next_bits = str(next_info.get("bits") or "")
+    initial_sync = bool(info.get("initialblockdownload", False))
 
-    fixed_difficulty = float(pool.get("fixed_difficulty", 13354))
-    network_target_int = as_int(network_target)
-    # Derive the fixed share target from the network target/difficulty pair.
-    # target / difficulty is constant for a given PoW network.
-    max_target = int(network_target_int * network_diff) if network_target_int and network_diff > 0 else 0
-    share_target = target_hex(int(max_target / fixed_difficulty)) if max_target and fixed_difficulty > 0 else None
+    job = {
+        "job_id": log_job.get("job_id"),
+        "height": stats.get("round_height") or log_job.get("height") or height,
+        "network_diff": network_diff,
+    }
+    job.update(log_job)
 
-    mine = balances.get("mine") or {}
-    trusted, pending, immature = float(mine.get("trusted") or 0), float(mine.get("untrusted_pending") or 0), float(mine.get("immature") or 0)
-    best = max((x["work"] for x in shares), default=0)
-    effort = min(100.0, 100.0 * best / network_diff) if network_diff else 0.0
-    h5, h1 = hashrate(shares, 300), hashrate(shares, 3600)
-    competition = h5 / network_hashrate * 100.0 if network_hashrate else 0.0
+    round_best = as_number(stats.get("round_best"), max((as_number(x.get("work")) for x in shares), default=0))
+    round_work = as_number(stats.get("round_work"), 0)
+    round_shares = int(stats.get("round_shares") or 0)
+    round_effort = as_number(stats.get("round_effort_pct"), (round_best / network_diff * 100 if network_diff else 0))
+    h5 = hashrate(shares, 300)
+    h1 = hashrate(shares, 3600)
+    network_hashrate = as_number(mininginfo.get("networkhashps"), 0)
+    competition = h5 / network_hashrate * 100 if network_hashrate else 0
 
     if network_diff:
         DIFF_HISTORY.append({"ts": int(time.time()), "height": height, "difficulty": network_diff})
-    cutoff = time.time() - 86400
-    DIFF_HISTORY[:] = [x for x in DIFF_HISTORY if x["ts"] >= cutoff][-120:]
+    DIFF_HISTORY[:] = [x for x in DIFF_HISTORY if x["ts"] >= time.time() - 86400][-180:]
 
-    workers = {}
-    for share in shares:
-        w = workers.setdefault(share["worker"], {"accepted": 0, "rejected": 0, "difficulty": share["pool_diff"]})
-        w["accepted"] += 1
-    if workers and rejected:
-        next(iter(workers.values()))["rejected"] = rejected
+    mine = balances.get("mine") or {}
+    confirmed = as_number(mine.get("trusted"), 0)
+    pending = as_number(mine.get("untrusted_pending"), 0)
+    immature = as_number(mine.get("immature"), 0)
+
+    workers = stats.get("workers") if isinstance(stats.get("workers"), dict) else log_workers
+    workers_out = {}
+    for name, value in workers.items():
+        if not isinstance(value, dict):
+            value = {}
+        workers_out[name] = {
+            "accepted": int(value.get("ok") or value.get("accepted") or value.get("shares") or 0),
+            "rejected": int(value.get("bad") or value.get("rejected") or 0),
+            "difficulty": as_number(value.get("difficulty") or fixed_diff, fixed_diff),
+        }
+
+    blocks = stats.get("blocks_log") if isinstance(stats.get("blocks_log"), list) else []
+    if not blocks:
+        blocks = log_blocks
 
     return {
-        "node": {"online": bool(info), "synced": bool(info) and not info.get("initialblockdownload", False), "initial_block_download": bool(info.get("initialblockdownload", False)), "height": height, "headers": headers, "difficulty": network_diff, "target": network_target, "bits": nbits, "connections": int(net.get("connections") or 0), "network_hashrate": network_hashrate, "chain": info.get("chain") or mininginfo.get("chain") or "unknown", "verification_progress": float(info.get("verificationprogress") or 0)},
-        "next": {"height": next_height, "difficulty": next_diff, "target": next_target, "bits": next_bits},
-        "competition": {"your_hashrate": h5, "network_hashrate": network_hashrate, "your_network_pct": competition, "network_share_ppm": competition * 10000},
-        "mining": {"accepted": len(shares), "rejected": rejected, "reject_pct": round(100 * rejected / max(1, len(shares) + rejected), 2), "hashrate": h5, "hashrate_1h": h1, "fixed_difficulty": fixed_difficulty, "share_target": share_target, "best_share": best, "effort": round(effort, 8), "workers": workers},
-        "wallet": {"confirmed": trusted, "pending": pending, "immature": immature, "total_rewards": sum(x["reward"] for x in blocks)},
-        "blocks": blocks, "shares": shares, "job": parsed_job, "history_diff": DIFF_HISTORY, "payout": pool.get("payout_address", ""), "maturity": MATURITY, "ts": int(time.time()),
+        "status": "online" if info or stats else "degraded",
+        "last_update": int(time.time()),
+        "node": {
+            "online": bool(info) or bool(stats),
+            "synced": bool(info) and not initial_sync,
+            "initial_block_download": initial_sync,
+            "height": height,
+            "headers": headers,
+            "difficulty": network_diff,
+            "target": mininginfo.get("target"),
+            "bits": mininginfo.get("bits"),
+            "connections": int(net.get("connections") or 0),
+            "network_hashrate": network_hashrate,
+            "chain": info.get("chain") or mininginfo.get("chain") or "unknown",
+            "verification_progress": as_number(info.get("verificationprogress"), 0),
+            "rpc_error": info_error,
+        },
+        "mining": {
+            "accepted": accepted,
+            "rejected": rejected,
+            "reject_pct": round(100 * rejected / max(1, accepted + rejected), 3),
+            "hashrate_5m": h5,
+            "hashrate_1h": h1,
+            "fixed_difficulty": fixed_diff,
+            "best_share": round_best,
+            "round_work": round_work,
+            "round_shares": round_shares,
+            "round_effort": round_effort,
+            "workers": workers_out,
+        },
+        "round": {
+            "height": int(stats.get("round_height") or height),
+            "shares": round_shares,
+            "work": round_work,
+            "best_share": round_best,
+            "effort_pct": round_effort,
+            "started_at": stats.get("round_started_at"),
+        },
+        "competition": {
+            "your_hashrate": h5,
+            "network_hashrate": network_hashrate,
+            "your_network_pct": competition,
+            "ppm": competition * 10000,
+        },
+        "wallet": {
+            "confirmed": confirmed,
+            "pending": pending,
+            "immature": immature,
+            "total_rewards": as_number(stats.get("block_rewards_total"), 0),
+        },
+        "job": job,
+        "shares": shares[-100:],
+        "blocks": blocks[-100:],
+        "history_diff": DIFF_HISTORY,
+        "payout": pool.get("payout_address", ""),
+        "maturity": MATURITY,
+        "ts": int(time.time()),
     }
 
 
@@ -186,6 +276,11 @@ def api_status():
     return jsonify(status())
 
 
+@app.get("/api/overview")
+def api_overview():
+    return jsonify(status())
+
+
 @app.get("/api/stats")
 def api_stats():
     return jsonify(status())
@@ -193,12 +288,12 @@ def api_stats():
 
 @app.get("/api/logs")
 def api_logs():
-    out = []
-    for line in lines(LOG, 180):
-        if any(k in line for k in ("ACCEPT", "REJECT", "BLOCK", "ERROR", "NEW ROUND", "authorize", "Job ")):
-            level = "success" if "ACCEPT" in line or "BLOCK" in line else "danger" if "ERROR" in line else "warning" if "REJECT" in line else "info"
-            out.append({"ts": line[:19], "level": level, "message": line[20:].strip() if len(line) > 20 else line})
-    return jsonify({"events": out[-120:]})
+    events = []
+    for line in lines(LOG, 220):
+        if any(k in line for k in ("ACCEPT", "REJECT", "BLOCK", "ERROR", "NEW ROUND", "authorize", "Job ", "GBT", "notify")):
+            level = "success" if "ACCEPT" in line or "BLOCK" in line else "danger" if "ERROR" in line or "REJECT" in line else "warning" if "WARN" in line else "info"
+            events.append({"ts": line[:19], "level": level, "message": line[20:].strip() if len(line) > 20 else line})
+    return jsonify({"events": events[-160:]})
 
 
 if __name__ == "__main__":
