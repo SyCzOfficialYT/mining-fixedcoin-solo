@@ -11,7 +11,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 FULL = HERE / "server_full.py"
 URL = "https://raw.githubusercontent.com/SyCzOfficialYT/freecash-coin/a88d89675b3a41cc6774e1b975e57e050d4892cc/stratum/server.py"
-ADAPT_VERSION = "fixedcoin-fch-dashboard-repair-2026-08-20-v10"
+ADAPT_VERSION = "fixedcoin-fch-dashboard-repair-2026-08-20-v11"
 
 
 def replace_function(source, name, replacement):
@@ -36,21 +36,82 @@ def adapt(t):
     t = t.replace('FreeCash', 'FixedCoin')
     t = t.replace('/FCH-Solo/', '/FIX-Solo/')
 
-    # FixedCoin's getblocktemplate requires a template request object with
-    # the mandatory segwit rule. The old FreeCash code used rules=[] and
-    # then retried with no parameters; FixedCoin rejects both with -1.
+    # FixedCoin requires a BIP145 template request with the mandatory segwit rule.
     gbt_pattern = re.compile(
         r'rpc\("getblocktemplate",\s*\[\{\s*"rules"\s*:\s*\[\]\s*\}\]\)\s*or\s*rpc\("getblocktemplate",\s*\[\]\)'
     )
     t, n = gbt_pattern.subn('rpc("getblocktemplate", [{"rules": ["segwit"]}])', t, count=1)
     if n == 0:
-        # Also handle a base that contains only one of the two old forms.
         t = t.replace('rpc("getblocktemplate", [{"rules": []}])', 'rpc("getblocktemplate", [{"rules": ["segwit"]}])', 1)
         t = t.replace('rpc("getblocktemplate", [])', 'rpc("getblocktemplate", [{"rules": ["segwit"]}])', 1)
     if 'rpc("getblocktemplate", [{"rules": ["segwit"]}])' not in t:
         raise RuntimeError('segwit GBT patch failed')
     if 'rpc("getblocktemplate", [{"rules": []}])' in t:
         raise RuntimeError('old invalid GBT request remains')
+
+    # Do not depend on config.yaml containing a live RPC secret. The entrypoint
+    # creates the secret in the persistent datadir and exports FIX_RPCPASS.
+    # Also support Core's cookie authentication as a recovery path. This fixes
+    # the situation where the daemon is healthy but Stratum gets HTTP 401/500
+    # and therefore never publishes jobs.
+    rpc_replacement = '''def rpc(method, params=None):
+    import json as _json
+    import requests as _requests
+    from requests.auth import HTTPBasicAuth as _HTTPBasicAuth
+
+    endpoint = f"http://{RPC_HOST}:{RPC_PORT}"
+    payload = {"jsonrpc": "1.0", "id": "stratum", "method": method, "params": params or []}
+    user = os.getenv("FIX_RPCUSER", RPC_USER) or RPC_USER
+    password = os.getenv("FIX_RPCPASS", RPC_PASS) or RPC_PASS
+
+    attempts = []
+    if password:
+        attempts.append(_HTTPBasicAuth(user, password))
+
+    cookie_path = Path(os.getenv("FIX_DATADIR", "/data/fixedcoin")) / ".cookie"
+    if cookie_path.is_file():
+        try:
+            raw = cookie_path.read_text().strip()
+            if ":" in raw:
+                cuser, cpass = raw.split(":", 1)
+                attempts.append(_HTTPBasicAuth(cuser, cpass))
+        except Exception:
+            pass
+
+    if not attempts:
+        attempts.append(_HTTPBasicAuth(user, password))
+
+    last_error = None
+    for auth in attempts:
+        try:
+            r = _requests.post(endpoint, json=payload, auth=auth, timeout=60)
+            try:
+                data = r.json()
+            except ValueError:
+                last_error = f"HTTP {r.status_code}: {r.text[:500]}"
+                continue
+
+            if data.get("error"):
+                last_error = data.get("error")
+                # A bad credential should try the next auth method.
+                if r.status_code in (401, 403):
+                    continue
+                return None
+
+            if r.status_code >= 400:
+                last_error = {"code": r.status_code, "message": r.text[:500]}
+                continue
+            return data.get("result")
+        except Exception as exc:
+            last_error = str(exc)
+
+    try:
+        log.error("RPC %s failed: %s", method, last_error)
+    except Exception:
+        print(f"[stratum] RPC {method} failed: {last_error}", file=sys.stderr)
+    return None
+'''
+    t = replace_function(t, 'rpc', rpc_replacement)
 
     marker = 'MAX_DIFF = int(cfg["pool"].get("vardiff_max", 50_000_000))'
     if marker not in t:
@@ -149,6 +210,7 @@ def generate_server():
     ast.parse(adapted)
     assert 'rpc("getblocktemplate", [{"rules": ["segwit"]}])' in adapted
     assert 'rpc("getblocktemplate", [{"rules": []}])' not in adapted
+    assert 'def rpc(method, params=None):' in adapted
     FULL.write_text(f"# ADAPT_VERSION={ADAPT_VERSION}\n" + adapted)
     print("Wrote", FULL, FULL.stat().st_size, flush=True)
 
