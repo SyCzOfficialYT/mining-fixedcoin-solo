@@ -1,0 +1,6 @@
+flask>=3.0,<4
+gunicorn>=22,<24
+requests>=2.32,<3
+python-dotenv>=1,<2
+pyyaml>=6,<7
+base58>=2.1,<3
