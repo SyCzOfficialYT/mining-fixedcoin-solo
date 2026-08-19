@@ -1,0 +1,16 @@
+rpc:
+  host: 127.0.0.1
+  port: 24761
+  user: fixrpc
+  password: change-me
+pool:
+  payout_address: ""
+  start_difficulty: 13354
+  fixed_difficulty: 13354
+  min_difficulty: 13354
+  job_interval: 30
+  stratum_host: 0.0.0.0
+  stratum_port: 3333
+monitor:
+  host: 0.0.0.0
+  port: 5050
