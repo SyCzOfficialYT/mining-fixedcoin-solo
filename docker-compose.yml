@@ -1,0 +1,34 @@
+services:
+  fixedcoin-solo:
+    build:
+      context: .
+      args:
+        FIX_VER: "29.1.3"
+        SOURCE_COMMIT: "dc4857d81fc63d33c111861ec429a7e2f9fd06ba"
+    container_name: fixedcoin-solo
+    restart: unless-stopped
+    ports:
+      - "3333:3333"
+      - "5050:5050"
+      - "24761:24761"
+      - "24768:24768"
+    volumes:
+      - fix-data:/data
+    env_file:
+      - .env
+    environment:
+      FIX_DATADIR: /data/fixedcoin
+      FIX_RPCUSER: ${FIX_RPCUSER:-fixrpc}
+      FIX_RPCPASS: ${FIX_RPCPASS:-change-me}
+      FIX_RPCPORT: ${FIX_RPCPORT:-24761}
+      FIX_P2PPORT: ${FIX_P2PPORT:-24768}
+      FIX_DASH_PORT: ${FIX_DASH_PORT:-5050}
+      FIX_PAYOUT_ADDRESS: ${FIX_PAYOUT_ADDRESS:?Set FIX_PAYOUT_ADDRESS in .env}
+      STATS_PATH: /app/data/stats.json
+      EVENTS_PATH: /app/data/events.jsonl
+      STRATUM_LOG: /app/data/stratum.log
+      COINBASE_MATURITY: ${COINBASE_MATURITY:-100}
+    shm_size: "1gb"
+
+volumes:
+  fix-data:
