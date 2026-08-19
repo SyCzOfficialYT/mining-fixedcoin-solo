@@ -8,8 +8,7 @@ P2PPORT="${FIX_P2PPORT:-24768}"
 DASH_PORT="${FIX_DASH_PORT:-5050}"
 mkdir -p "$DATADIR" "$DATADIR/wallets" /app/data /app/logs
 
-# Secrets are generated inside the private Docker volume and never committed
-# to Git, never printed, and never required in .env.
+# Secrets live only in the persistent datadir. They survive container recreation.
 if [[ -z "$RPCPASS" ]]; then
   if [[ -s "$DATADIR/.rpcpassword" ]]; then
     RPCPASS="$(cat "$DATADIR/.rpcpassword")"
@@ -40,7 +39,10 @@ chmod 600 "$DATADIR/fixedcoin.conf" "$DATADIR/.rpcpassword"
 
 fixedcoind -datadir="$DATADIR" -conf="$DATADIR/fixedcoin.conf" >>/app/data/node.log 2>&1 &
 NODE_PID=$!
-trap 'kill "$NODE_PID" 2>/dev/null || true; kill "${STRATUM_PID:-0}" 2>/dev/null || true; kill "${DASH_PID:-0}" 2>/dev/null || true' EXIT
+STRATUM_PID=0
+DASH_PID=0
+LOG_PID=0
+trap 'kill "$NODE_PID" 2>/dev/null || true; kill "$STRATUM_PID" 2>/dev/null || true; kill "$DASH_PID" 2>/dev/null || true; kill "$LOG_PID" 2>/dev/null || true' EXIT
 
 for i in $(seq 1 180); do
   if fixedcoin-cli -datadir="$DATADIR" -rpcuser="$RPCUSER" -rpcpassword="$RPCPASS" getblockchaininfo >/dev/null 2>&1; then break; fi
@@ -49,7 +51,7 @@ for i in $(seq 1 180); do
 done
 fixedcoin-cli -datadir="$DATADIR" -rpcuser="$RPCUSER" -rpcpassword="$RPCPASS" getblockchaininfo >/dev/null
 
-# Creates the mining wallet and payout address automatically when none is configured.
+# The setup script reuses the persistent payout address/wallet before ever calling getnewaddress.
 python3 /app/scripts/setup_address.py
 
 python3 /app/monitor/app.py >>/app/data/dashboard.log 2>&1 &
@@ -58,4 +60,9 @@ python3 /app/stratum/server.py >>/app/data/stratum.log 2>&1 &
 STRATUM_PID=$!
 
 echo "FixedCoin Solo online: dashboard :${DASH_PORT}, stratum :3333, RPC :${RPCPORT}"
+
+# Keep the full Stratum stream visible in `docker logs -f` while retaining the file for the dashboard.
+tail -n 0 -F /app/data/stratum.log &
+LOG_PID=$!
+
 wait "$NODE_PID"
