@@ -6,10 +6,10 @@ RPCPASS="${FIX_RPCPASS:-}"
 RPCPORT="${FIX_RPCPORT:-24761}"
 P2PPORT="${FIX_P2PPORT:-24768}"
 DASH_PORT="${FIX_DASH_PORT:-5050}"
-mkdir -p "$DATADIR" /app/data /app/logs
+mkdir -p "$DATADIR" "$DATADIR/wallets" /app/data /app/logs
 
 # Secrets are generated inside the private Docker volume and never committed
-# to Git, never printed, and never required in .env.
+a# to Git, never printed, and never required in .env.
 if [[ -z "$RPCPASS" ]]; then
   if [[ -s "$DATADIR/.rpcpassword" ]]; then
     RPCPASS="$(cat "$DATADIR/.rpcpassword")"
@@ -31,6 +31,7 @@ rpcuser=${RPCUSER}
 rpcpassword=${RPCPASS}
 rpcallowip=127.0.0.1
 txindex=1
+walletdir=${DATADIR}/wallets
 printtoconsole=1
 addnode=node1.fixedcoin.org
 addnode=node2.fixedcoin.org
