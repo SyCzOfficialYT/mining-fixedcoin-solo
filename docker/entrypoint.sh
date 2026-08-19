@@ -9,7 +9,7 @@ DASH_PORT="${FIX_DASH_PORT:-5050}"
 mkdir -p "$DATADIR" "$DATADIR/wallets" /app/data /app/logs
 
 # Secrets are generated inside the private Docker volume and never committed
-a# to Git, never printed, and never required in .env.
+# to Git, never printed, and never required in .env.
 if [[ -z "$RPCPASS" ]]; then
   if [[ -s "$DATADIR/.rpcpassword" ]]; then
     RPCPASS="$(cat "$DATADIR/.rpcpassword")"
