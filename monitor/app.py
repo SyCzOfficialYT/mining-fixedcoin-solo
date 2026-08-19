@@ -119,7 +119,10 @@ def as_int(value):
         return 0
     try:
         if isinstance(value, str):
-            return int(value, 16) if value.lower().startswith("0x") else int(value)
+            text = value.strip().lower().removeprefix("0x")
+            if re.fullmatch(r"[0-9a-f]+", text) and any(c in "abcdef" for c in text):
+                return int(text, 16)
+            return int(text)
         return int(value)
     except Exception:
         return 0
@@ -144,7 +147,6 @@ def status():
     net, _ = rpc("getnetworkinfo")
     mininginfo, _ = rpc("getmininginfo")
     balances, _ = rpc("getbalances")
-
     shares, rejected, blocks, parsed_job = parse_logs()
     pool = config()
     info = info or {}
