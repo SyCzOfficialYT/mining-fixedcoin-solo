@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate the FixedCoin Stratum server from the known-good FreeCash base."""
+"""Generate the FixedCoin Stratum server from the pinned FreeCash base."""
 import ast
 import os
 import re
@@ -11,7 +11,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 FULL = HERE / "server_full.py"
 URL = "https://raw.githubusercontent.com/SyCzOfficialYT/freecash-coin/a88d89675b3a41cc6774e1b975e57e050d4892cc/stratum/server.py"
-ADAPT_VERSION = "fixedcoin-fch-dashboard-repair-2026-08-20-v11"
+ADAPT_VERSION = "fixedcoin-fch-dashboard-repair-2026-08-20-v12"
 
 
 def replace_function(source, name, replacement):
@@ -49,13 +49,11 @@ def adapt(t):
     if 'rpc("getblocktemplate", [{"rules": []}])' in t:
         raise RuntimeError('old invalid GBT request remains')
 
-    # Do not depend on config.yaml containing a live RPC secret. The entrypoint
-    # creates the secret in the persistent datadir and exports FIX_RPCPASS.
-    # Also support Core's cookie authentication as a recovery path. This fixes
-    # the situation where the daemon is healthy but Stratum gets HTTP 401/500
-    # and therefore never publishes jobs.
+    # RPC credentials are generated in the persistent daemon datadir by the
+    # Docker entrypoint. Prefer the exported secret and fall back to Core's
+    # cookie when available. A failed RPC must never silently look like an
+    # empty job stream: log the exact failure and let job_loop retry.
     rpc_replacement = '''def rpc(method, params=None):
-    import json as _json
     import requests as _requests
     from requests.auth import HTTPBasicAuth as _HTTPBasicAuth
 
@@ -66,7 +64,7 @@ def adapt(t):
 
     attempts = []
     if password:
-        attempts.append(_HTTPBasicAuth(user, password))
+        attempts.append(("basic-env", _HTTPBasicAuth(user, password)))
 
     cookie_path = Path(os.getenv("FIX_DATADIR", "/data/fixedcoin")) / ".cookie"
     if cookie_path.is_file():
@@ -74,15 +72,15 @@ def adapt(t):
             raw = cookie_path.read_text().strip()
             if ":" in raw:
                 cuser, cpass = raw.split(":", 1)
-                attempts.append(_HTTPBasicAuth(cuser, cpass))
+                attempts.append(("cookie", _HTTPBasicAuth(cuser, cpass)))
         except Exception:
             pass
 
     if not attempts:
-        attempts.append(_HTTPBasicAuth(user, password))
+        attempts.append(("basic-config", _HTTPBasicAuth(user, password)))
 
     last_error = None
-    for auth in attempts:
+    for auth_name, auth in attempts:
         try:
             r = _requests.post(endpoint, json=payload, auth=auth, timeout=60)
             try:
@@ -93,9 +91,9 @@ def adapt(t):
 
             if data.get("error"):
                 last_error = data.get("error")
-                # A bad credential should try the next auth method.
                 if r.status_code in (401, 403):
                     continue
+                log.error("RPC %s via %s: %s", method, auth_name, last_error)
                 return None
 
             if r.status_code >= 400:
@@ -105,10 +103,7 @@ def adapt(t):
         except Exception as exc:
             last_error = str(exc)
 
-    try:
-        log.error("RPC %s failed: %s", method, last_error)
-    except Exception:
-        print(f"[stratum] RPC {method} failed: {last_error}", file=sys.stderr)
+    log.error("RPC %s failed after %d auth attempt(s): %s", method, len(attempts), last_error)
     return None
 '''
     t = replace_function(t, 'rpc', rpc_replacement)
@@ -136,48 +131,58 @@ def adapt(t):
 '''
     t = replace_function(t, 'parse_fixed_diff', fixed_parser)
 
-    coinbase = '''def build_coinbase_parts(height, miner_value_sats, miner_spk, dev_spk=None, en1_size=4, en2_size=4, witness_commitment_hex=None, *args, **kwargs):
+    # FixedCoin consensus expects the miner + governance outputs. If SegWit is
+    # active, the witness commitment is an additional third output. The miner
+    # amount is the GBT coinbasevalue; the governance amount is separate.
+    coinbase = '''def build_coinbase_parts(height, miner_value_sats, miner_spk, dev_spk=None, dev_value_sats=0, en1_size=4, en2_size=4, witness_commitment_hex=None, *args, **kwargs):
     tag = b"/FIX-Solo/"
     height_script = bip34_height(height)
     scriptsig_len = len(height_script) + en1_size + en2_size + len(tag)
     part1 = struct.pack("<I", 2) + b"\\x01" + b"\\x00" * 32 + struct.pack("<I", 0xFFFFFFFF)
     part1 += encode_varint(scriptsig_len) + height_script
+
     witness = b""
     if witness_commitment_hex:
         try:
             witness = binascii.unhexlify(witness_commitment_hex)
         except Exception:
             witness = b""
-    outputs = 2 if witness else 1
+
+    outputs = 1 + (1 if dev_spk and int(dev_value_sats or 0) > 0 else 0) + (1 if witness else 0)
     part2 = tag + struct.pack("<I", 0xFFFFFFFF) + encode_varint(outputs)
     part2 += struct.pack("<Q", int(miner_value_sats)) + encode_varint(len(miner_spk)) + miner_spk
+
+    if dev_spk and int(dev_value_sats or 0) > 0:
+        part2 += struct.pack("<Q", int(dev_value_sats)) + encode_varint(len(dev_spk)) + dev_spk
+
     if witness:
         part2 += struct.pack("<Q", 0) + encode_varint(len(witness)) + witness
+
     part2 += struct.pack("<I", 0)
     return binascii.hexlify(part1).decode(), binascii.hexlify(part2).decode()
 '''
     t = replace_function(t, 'build_coinbase_parts', coinbase)
 
+    # Carry the template's witness commitment and the governance reward into the job.
     old = '"other_tx": other_tx, "created": time.time(),'
     if old in t:
         t = t.replace(old, old + '\n                "witness_commitment": tmpl.get("default_witness_commitment"),', 1)
 
-    oldcall = '''build_coinbase_parts(
-            job["height"], job["value"], job["spk"], job["dev_spk"],
-            len(self.en1), self.en2_size,
-        )'''
-    newcall = '''build_coinbase_parts(
-            job["height"], job["value"], job.get("spk"), job.get("dev_spk"),
-            len(self.en1), self.en2_size, job.get("witness_commitment"),
-        )'''
-    if oldcall in t:
-        t = t.replace(oldcall, newcall, 1)
-
+    # The original FreeCash adapter only passed the governance script. FixedCoin
+    # needs the governance amount as well.
     t = t.replace(
-        'build_coinbase_parts(job["height"], job["value"], job["spk"], job["dev_spk"]',
-        'build_coinbase_parts(job["height"], job["value"], job.get("spk"), job.get("dev_spk")',
-        1,
+        'len(self.en1), self.en2_size, job.get("witness_commitment"),',
+        'job.get("dev_value", 0), len(self.en1), self.en2_size, job.get("witness_commitment"),',
     )
+    t = t.replace(
+        'len(self.en1), self.en2_size,\n        )',
+        'job.get("dev_value", 0), len(self.en1), self.en2_size, job.get("witness_commitment"),\n        )',
+    )
+
+    # Store the actual governance reward on every job.
+    old_job = '"dev_value": dev_sats,'
+    if old_job not in t:
+        raise RuntimeError('dev_value job field missing')
 
     witness = '''def coinbase_add_witness(tx_nowitness, enabled):
     if not enabled or len(tx_nowitness) < 8 or tx_nowitness[4:6] == b"\\x00\\x01":
@@ -189,22 +194,57 @@ def adapt(t):
     else:
         t = t.replace('\ndef assemble_coinbase(', '\n' + witness + '\ndef assemble_coinbase(', 1)
 
-    oldblock = 'block = header + encode_varint(tx_count) + coinbase_tx'
-    newblock = 'block = header + encode_varint(tx_count) + coinbase_add_witness(coinbase_tx, bool(job.get("witness_commitment")))'
-    if oldblock in t:
-        t = t.replace(oldblock, newblock, 1)
+    # Candidate blocks must contain the exact same witness-enabled coinbase that
+    # the miner hashed, followed by all GBT transactions.
+    t = t.replace(
+        'block = header + encode_varint(tx_count) + coinbase_tx',
+        'block = header + encode_varint(tx_count) + coinbase_add_witness(coinbase_tx, bool(job.get("witness_commitment")))',
+        1,
+    )
 
+    # Do not depend on getaddressinfo for the fixed bech32 address when the node
+    # rejects that RPC shape. validateaddress already returns scriptPubKey.
     oldaddr = '''    info2 = rpc("getaddressinfo", [addr])
     if info2 and info2.get("scriptPubKey"):
         return binascii.unhexlify(info2["scriptPubKey"])
 '''
     t = t.replace(oldaddr, '')
-    t = t.replace('"mature_at_height": job["height"] + 14400,', '"mature_at_height": job["height"] + 100,', 1)
+
+    # Emit useful job/notify diagnostics. This makes a broken RPC path or a
+    # disconnected ASIC immediately visible instead of looking like "no jobs".
+    t = t.replace(
+        'def broadcast_job(clean=True):\n    with _clients_lock:',
+        'def broadcast_job(clean=True):\n    with _clients_lock:',
+        1,
+    )
+    t = t.replace(
+        '        try:\n            c.push_job(clean=clean, force_refresh=False)\n        except Exception as e:\n            emit("WARN", f"push {c.worker}: {e}")',
+        '        try:\n            c.push_job(clean=clean, force_refresh=False)\n            emit("INFO", f"notify worker={c.worker} job={store.current_id} height={store.last_height} clean={clean}")\n        except Exception as e:\n            emit("WARN", f"push {c.worker}: {e}")',
+        1,
+    )
+
+    # Log every successful template acquisition. This is intentionally INFO so
+    # the dashboard can distinguish an RPC problem from an ASIC connection.
+    needle = '        height = tmpl["height"]\n        prevhash = tmpl["previousblockhash"]'
+    replacement = '        height = tmpl["height"]\n        prevhash = tmpl["previousblockhash"]\n        emit("INFO", f"GBT height={height} prev={prevhash[:16]} bits={tmpl.get(\'bits\')} txs={len(tmpl.get(\'transactions\', []))}")'
+    if needle in t:
+        t = t.replace(needle, replacement, 1)
+
+    # If an ASIC authorizes while the first RPC attempt fails, retrying in the
+    # background is not enough for a client that is already connected. The
+    # existing job_loop will broadcast once the first valid job arrives; force
+    # a clean notify for all connected miners whenever a new height appears.
+    t = t.replace(
+        'if job is not None and clean:\n                broadcast_job(clean=True)',
+        'if job is not None and clean:\n                emit("INFO", f"broadcast new job={job[\"id\"]} height={job[\"height\"]}")\n                broadcast_job(clean=True)',
+        1,
+    )
+
     return t
 
 
 def generate_server():
-    print("Fetching known-good FreeCash stratum base…", flush=True)
+    print("Fetching pinned FreeCash stratum base…", flush=True)
     raw = urllib.request.urlopen(URL, timeout=60).read().decode()
     adapted = adapt(raw)
     ast.parse(adapted)
