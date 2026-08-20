@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Persist every wallet-generated solo block and track confirmations/maturity."""
-import json, os, time
+import json, os, subprocess, time
 from pathlib import Path
 from datetime import datetime, timezone
 from urllib.parse import quote
@@ -15,28 +15,35 @@ PORT = int(os.getenv("FIX_RPCPORT", "24761"))
 WALLET = os.getenv("FIX_WALLET_NAME", "mining")
 MATURITY = int(os.getenv("COINBASE_MATURITY", "100"))
 POLL = float(os.getenv("BLOCK_LEDGER_POLL", "2"))
+CLI = os.getenv("FIXCOIN_CLI", "fixedcoin-cli")
 
 
 def rpc(method, params=None, wallet=None):
-    """Call Core RPC, optionally against the mining wallet endpoint."""
-    endpoint = f"http://127.0.0.1:{PORT}"
+    """Call Core RPC. Wallet RPCs use fixedcoin-cli -rpcwallet for maximum compatibility."""
     if wallet:
-        endpoint += f"/wallet/{quote(wallet, safe='')}"
+        cmd = [CLI, f"-datadir={DATADIR}", f"-rpcwallet={WALLET}", method]
+        for value in (params or []):
+            cmd.append(json.dumps(value, separators=(",", ":")) if isinstance(value, (dict, list, bool)) else str(value))
+        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+        if proc.returncode != 0:
+            raise RuntimeError(proc.stderr.strip() or proc.stdout.strip() or f"{method}: fixedcoin-cli exit {proc.returncode}")
+        try:
+            return json.loads(proc.stdout)
+        except ValueError as exc:
+            raise RuntimeError(f"{method}: invalid CLI JSON: {proc.stdout[:500]}") from exc
 
+    endpoint = f"http://127.0.0.1:{PORT}"
     response = requests.post(
         endpoint,
         json={"jsonrpc": "1.0", "id": "ledger", "method": method, "params": params or []},
         auth=HTTPBasicAuth(USER, PASS),
         timeout=15,
     )
-
-    # Do not hide the actual Core RPC error behind a generic HTTP 500.
     try:
         data = response.json()
     except ValueError:
         response.raise_for_status()
         raise RuntimeError(f"{method}: RPC returned non-JSON HTTP {response.status_code}")
-
     if data.get("error"):
         raise RuntimeError(data["error"])
     if response.status_code >= 400:
@@ -64,7 +71,6 @@ def now():
 
 
 def sync():
-    # Always materialize the persistent ledger, even while Core is still syncing.
     rows = load()
     if not LEDGER.exists():
         save(rows)
@@ -72,7 +78,9 @@ def sync():
     chain = rpc("getblockchaininfo") or {}
     tip = int(chain.get("blocks") or 0)
 
-    # listtransactions is a wallet RPC and therefore MUST use /wallet/mining.
+    # IMPORTANT: listtransactions is wallet-scoped. FixedCoin's wallet RPC
+    # endpoint is inconsistent in some builds, while the CLI's -rpcwallet
+    # selector is reliable and is also the documented wallet selection method.
     txs = rpc("listtransactions", ["*", 1000, 0, True], wallet=WALLET) or []
 
     by_key = {(str(x.get("txid") or ""), int(x.get("height") or 0)): x for x in rows}
@@ -132,16 +140,12 @@ def sync():
             except Exception:
                 pass
 
-    rows.sort(
-        key=lambda x: (int(x.get("height") or 0), str(x.get("found_at") or "")),
-        reverse=True,
-    )
+    rows.sort(key=lambda x: (int(x.get("height") or 0), str(x.get("found_at") or "")), reverse=True)
     save(rows)
     return len(rows), tip
 
 
 def main():
-    # Create the file immediately so its absence never looks like a missing ledger.
     if not LEDGER.exists():
         save([])
 
