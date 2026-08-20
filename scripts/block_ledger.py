@@ -1,20 +1,21 @@
 #!/usr/bin/env python3
 """Persist solo-found coinbase blocks and track confirmations/maturity from the chain."""
-import json, os, subprocess, time
+import json, os, re, subprocess, time
 from pathlib import Path
 from datetime import datetime, timezone
 
 DATADIR = Path(os.getenv("FIX_DATADIR", "/data/fixedcoin"))
 LEDGER = Path(os.getenv("BLOCK_LEDGER_PATH", str(DATADIR / "solo-blocks.json")))
 PAYOUT_FILE = DATADIR / "payout_address"
+EVENTS_PATH = Path(os.getenv("STRATUM_EVENTS_PATH", "/app/data/events.jsonl"))
 USER = os.getenv("FIX_RPCUSER", "fixrpc")
 PASS = os.getenv("FIX_RPCPASS", "")
 PORT = int(os.getenv("FIX_RPCPORT", "24761"))
-WALLET = os.getenv("FIX_WALLET_NAME", "mining")
 PAYOUT_ADDRESS = os.getenv("FIX_PAYOUT_ADDRESS", "").strip()
 MATURITY = int(os.getenv("COINBASE_MATURITY", "100"))
 POLL = float(os.getenv("BLOCK_LEDGER_POLL", "2"))
-SCAN_BACK = max(1, int(os.getenv("BLOCK_LEDGER_SCAN_BACK", "12")))
+SCAN_BACK = max(1, int(os.getenv("BLOCK_LEDGER_SCAN_BACK", "24")))
+EVENT_SCAN_LINES = max(100, int(os.getenv("BLOCK_LEDGER_EVENT_SCAN_LINES", "5000")))
 CLI = os.getenv("FIXCOIN_CLI", "fixedcoin-cli")
 
 
@@ -97,18 +98,64 @@ def now():
     return datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
 
 
-def payout_matches(vout, payout_address):
-    """Return true when a coinbase output pays our configured solo address."""
+def payout_script_hex(payout_address):
+    """Get the canonical scriptPubKey for our payout address."""
+    if not payout_address:
+        return ""
+    try:
+        info = cli("validateaddress", payout_address) or {}
+        script = str(info.get("scriptPubKey") or "").lower()
+        if script:
+            return script
+    except Exception:
+        pass
+    return ""
+
+
+def payout_matches(vout, payout_address, target_script_hex=""):
+    """Recognize our payout using address fields OR the canonical scriptPubKey."""
     if not payout_address:
         return False
     spk = vout.get("scriptPubKey") or {}
+    target = str(target_script_hex or "").lower()
+    actual = str(spk.get("hex") or "").lower()
+    if target and actual and target == actual:
+        return True
     addresses = spk.get("addresses") or []
     if payout_address in addresses:
         return True
     return spk.get("address") == payout_address
 
 
-def find_solo_block(height, payout_address):
+def accepted_heights_from_events():
+    """Recover exact block heights reported as accepted by Stratum.
+
+    This is the important recovery path: a found block can be many heights
+    behind the current tip by the time the ledger process restarts. Looking only
+    at the newest N blocks therefore loses historical solo blocks. Stratum's
+    persistent events.jsonl already records successful submitblock results.
+    """
+    heights = set()
+    try:
+        lines = EVENTS_PATH.read_text(errors="ignore").splitlines()[-EVENT_SCAN_LINES:]
+    except OSError:
+        return heights
+
+    for line in lines:
+        try:
+            row = json.loads(line)
+            msg = str(row.get("msg") or "")
+        except Exception:
+            msg = line
+        if "BLOCK ACCEPTED" not in msg:
+            continue
+        match = re.search(r"height=(\d+)", msg)
+        if match:
+            heights.add(int(match.group(1)))
+    return heights
+
+
+def find_solo_block(height, payout_address, target_script_hex=""):
     """Inspect the canonical block and recognize our coinbase payout.
 
     This intentionally does NOT use listtransactions/getwalletinfo. A solo pool
@@ -130,7 +177,7 @@ def find_solo_block(height, payout_address):
     reward = sum(
         float(v.get("value") or 0)
         for v in (coinbase.get("vout") or [])
-        if payout_matches(v, payout_address)
+        if payout_matches(v, payout_address, target_script_hex)
     )
     if reward <= 0:
         return None
@@ -154,6 +201,7 @@ def sync():
     payout_address = resolve_payout_address()
     if not payout_address:
         raise RuntimeError("payout address is not available yet")
+    target_script_hex = payout_script_hex(payout_address)
 
     chain = cli("getblockchaininfo") or {}
     tip = int(chain.get("blocks") or 0)
@@ -165,11 +213,15 @@ def sync():
         for x in rows
     }
 
-    # Scan the newest blocks every cycle. This catches a newly submitted block
-    # without depending on wallet notifications and survives ledger restarts.
-    start = max(0, tip - SCAN_BACK + 1)
-    for height in range(start, tip + 1):
-        found = find_solo_block(height, payout_address)
+    # Always inspect the recent chain window, plus every exact height that
+    # Stratum recorded as a successfully submitted block. The event-derived
+    # heights survive a ledger restart and can be hundreds/thousands of blocks
+    # behind the current tip.
+    heights = set(range(max(0, tip - SCAN_BACK + 1), tip + 1))
+    heights.update(h for h in accepted_heights_from_events() if 0 <= h <= tip)
+
+    for height in sorted(heights):
+        found = find_solo_block(height, payout_address, target_script_hex)
         if not found:
             continue
         key = (found["blockhash"], found["height"])
