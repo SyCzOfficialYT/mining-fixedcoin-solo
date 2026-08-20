@@ -53,8 +53,7 @@ def parse_ts(s):
 
 def parse_logs():
     accepted, rejected, blocks, workers, job = [], 0, [], {}, {}
-    now = time.time()
-    current_worker = None
+    now = time.time(); current_worker = None
     for line in lines(LOG):
         m = re.search(r"authorize\s+(\S+).*?(?:diff|share_diff)\s*[=:]\s*([0-9.]+)", line, re.I)
         if m:
@@ -62,8 +61,7 @@ def parse_logs():
             w = workers.setdefault(name, {"accepted":0,"rejected":0,"difficulty":float(diff)})
             w["difficulty"] = float(diff); w["last_seen"] = parse_ts(line[:19])
         m = re.search(r"NEW ROUND\s+height=(\d+)\s+netdiff=([0-9.eE+-]+)", line, re.I)
-        if m:
-            job["height"] = int(m.group(1)); job["network_diff"] = float(m.group(2))
+        if m: job["height"] = int(m.group(1)); job["network_diff"] = float(m.group(2))
         m = re.search(r"Job\s+([^\s]+).*?height=(\d+).*?(?:miner=([0-9.eE+-]+))?.*?(?:dev=([0-9.eE+-]+))?", line, re.I)
         if m:
             job.update({"job_id":m.group(1),"height":int(m.group(2))})
@@ -75,10 +73,8 @@ def parse_logs():
             accepted.append({"ts":line[:19],"epoch":parse_ts(line),"num":int(num),"work":float(work),"pool_diff":float(diff),"hash":h[:16],"worker":worker})
             w = workers.setdefault(worker, {"accepted":0,"rejected":0,"difficulty":float(diff)})
             w["accepted"] += 1; w["last_seen"] = parse_ts(line)
-        if re.search(r"\bREJECT\b|\blow difficulty\b|stale job|bad params|invalid", line, re.I):
-            rejected += 1
-    for w in workers.values():
-        w["active"] = bool(w.get("last_seen") and now - w["last_seen"] <= 600)
+        if re.search(r"\bREJECT\b|\blow difficulty\b|stale job|bad params|invalid", line, re.I): rejected += 1
+    for w in workers.values(): w["active"] = bool(w.get("last_seen") and now - w["last_seen"] <= 600)
     return accepted[-200:], rejected, blocks[-100:], workers, job
 
 def hashrate(shares, window):
@@ -131,13 +127,6 @@ def status():
 
 @app.get("/")
 def index(): return render_template("dashboard_v3.html",payout=config().get("payout_address",""),maturity=MATURITY)
-
-@app.after_request
-def dashboard_addons(response):
-    if response.content_type and response.content_type.startswith("text/html"):
-        body=response.get_data(as_text=True); tag='<script src="/static/dashboard_wallet.js?v=3"></script>'
-        if tag not in body: body=body.replace("</body>",tag+"</body>"); response.set_data(body)
-    return response
 
 @app.get("/api/status")
 def api_status(): return jsonify(status())
