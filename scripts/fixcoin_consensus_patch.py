@@ -2,6 +2,7 @@
 """Apply FixedCoin-only consensus corrections to the generated Stratum adapter."""
 from pathlib import Path
 import ast
+import re
 
 ROOT = Path(__file__).resolve().parent.parent
 FULL = ROOT / "stratum" / "server_full.py"
@@ -9,20 +10,19 @@ FULL = ROOT / "stratum" / "server_full.py"
 PATH = FULL
 text = PATH.read_text()
 
-new_version = 'fixedcoin-consensus-repair-2026-08-20-v22'
-old_versions = (
-    'fixedcoin-consensus-repair-2026-08-20-v21',
-    'fixedcoin-consensus-repair-2026-08-20-v20',
-    'fixedcoin-consensus-repair-2026-08-20-v19',
-    'fixedcoin-consensus-repair-2026-08-20-v18',
-    'fixedcoin-consensus-repair-2026-08-20-v17',
-    'fixedcoin-consensus-repair-2026-08-20-v16',
-    'fixedcoin-consensus-repair-2026-08-20-v14',
-    'fixedcoin-fch-dashboard-repair-2026-08-20-v15',
-    'fixedcoin-fch-dashboard-repair-2026-08-20-v14',
-    'fixedcoin-fch-dashboard-repair-2026-08-20-v13',
-    'fixedcoin-fch-dashboard-repair-2026-08-20-v12',
-)
+new_version = 'fixedcoin-consensus-repair-2026-08-21-v23'
+
+# The generated adapter is intentionally regenerated from a pinned upstream
+# source. Do not couple this patch to one particular generator version: that
+# made otherwise-valid builds fail with "unexpected generated adapter version"
+# when server.py was bumped independently.
+marker = re.search(r'^# ADAPT_VERSION=([^\n]+)$', text, re.MULTILINE)
+if not marker:
+    raise SystemExit("generated adapter version marker missing; refusing to patch")
+version = marker.group(1)
+if not version.startswith(("fixedcoin-fch-dashboard-repair-", "fixedcoin-consensus-repair-")):
+    raise SystemExit(f"unexpected generated adapter version {version!r}; refusing to patch")
+text = text[:marker.start()] + f"# ADAPT_VERSION={new_version}" + text[marker.end():]
 
 
 def replace_function(source, name, replacement):
@@ -37,12 +37,6 @@ def replace_function(source, name, replacement):
     start = sum(map(len, lines[: target.lineno - 1]))
     end = sum(map(len, lines[: target.end_lineno]))
     return source[:start] + replacement.rstrip() + "\n" + source[end:]
-
-for version in old_versions:
-    text = text.replace(f"# ADAPT_VERSION={version}", f"# ADAPT_VERSION={new_version}", 1)
-
-if f"# ADAPT_VERSION={new_version}" not in text:
-    raise SystemExit("unexpected generated adapter version; refusing to patch")
 
 # FixedCoin uses the standard minimal positive CScriptNum encoding for BIP34.
 bip34 = '''def bip34_height(height):
@@ -87,9 +81,13 @@ text = text.replace(
         if miner_value + dev_sats != new_value:''',
     1,
 )
-text = text.replace('''        dev_sats = min(get_dev_reward_sats(height), new_value)
-        miner_value = new_value - dev_sats''', '''        dev_sats = 0
-        miner_value = new_value''', 1)
+text = text.replace(
+    '''        dev_sats = min(get_dev_reward_sats(height), new_value)
+        miner_value = new_value - dev_sats''',
+    '''        dev_sats = 0
+        miner_value = new_value''',
+    1,
+)
 
 coinbase = '''def build_coinbase_parts(height, miner_value_sats, miner_spk, dev_spk=None, dev_value_sats=0, en1_size=4, en2_size=4, witness_commitment_hex=None, *args, **kwargs):
     """Build a FixedCoin coinbase with miner output and optional witness commitment only."""
@@ -159,11 +157,12 @@ assert ns["bip34_height"](32767) == b"\x02\xff\x7f"
 assert ns["bip34_height"](32768) == b"\x03\x00\x80\x00"
 assert ns["bip34_height"](44343) == b"\x03\x37\xad\x00"
 
-# Hard regression: a 97,656-sat GBT must never produce a 2.5B-sat coinbase.
+# Hard regression: the full GBT coinbasevalue belongs to the miner.
 assert ns.get("get_dev_reward_sats")(44445) > 0
 assert "dev_sats = 0" in text
 assert 'miner_value = new_value' in text
 assert 'miner_value = new_value - dev_sats' not in text
+assert 'DEV_ADDRESS = None' in text
 
 PATH.write_text(text)
 print(f"patched {PATH} -> {new_version}")
