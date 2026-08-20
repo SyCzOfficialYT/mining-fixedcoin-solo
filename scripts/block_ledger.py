@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 
 DATADIR = Path(os.getenv("FIX_DATADIR", "/data/fixedcoin"))
 LEDGER = Path(os.getenv("BLOCK_LEDGER_PATH", str(DATADIR / "solo-blocks.json")))
+PAYOUT_FILE = DATADIR / "payout_address"
 USER = os.getenv("FIX_RPCUSER", "fixrpc")
 PASS = os.getenv("FIX_RPCPASS", "")
 PORT = int(os.getenv("FIX_RPCPORT", "24761"))
@@ -17,8 +18,31 @@ SCAN_BACK = max(1, int(os.getenv("BLOCK_LEDGER_SCAN_BACK", "12")))
 CLI = os.getenv("FIXCOIN_CLI", "fixedcoin-cli")
 
 
+def resolve_payout_address():
+    """Resolve the same persistent payout address used by setup_address.py."""
+    if PAYOUT_ADDRESS:
+        return PAYOUT_ADDRESS
+    try:
+        saved = PAYOUT_FILE.read_text(errors="ignore").strip()
+        if saved:
+            return saved
+    except OSError:
+        pass
+    try:
+        cfg = Path("/app/config/config.yaml")
+        if cfg.exists():
+            import yaml
+            data = yaml.safe_load(cfg.read_text()) or {}
+            address = str((data.get("pool") or {}).get("payout_address") or "").strip()
+            if address:
+                return address
+    except Exception:
+        pass
+    return ""
+
+
 def rpc(method, params=None):
-    """Use the node RPC directly; wallet RPCs are deliberately not required."""
+    """Use node RPC directly; wallet RPCs are deliberately not required."""
     import requests
     from requests.auth import HTTPBasicAuth
 
@@ -42,7 +66,7 @@ def rpc(method, params=None):
 
 
 def cli(method, *params):
-    """Call fixedcoin-cli for RPCs where the HTTP RPC is not reliable."""
+    """Call fixedcoin-cli for block/chain RPCs."""
     cmd = [CLI, f"-datadir={DATADIR}", method]
     cmd.extend(str(x) for x in params)
     proc = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
@@ -73,20 +97,19 @@ def now():
     return datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
 
 
-def payout_matches(vout):
+def payout_matches(vout, payout_address):
     """Return true when a coinbase output pays our configured solo address."""
-    if not PAYOUT_ADDRESS:
+    if not payout_address:
         return False
     spk = vout.get("scriptPubKey") or {}
     addresses = spk.get("addresses") or []
-    if PAYOUT_ADDRESS in addresses:
+    if payout_address in addresses:
         return True
-    # Some Core versions expose a single address rather than addresses[].
-    return spk.get("address") == PAYOUT_ADDRESS
+    return spk.get("address") == payout_address
 
 
-def find_solo_block(height):
-    """Inspect the canonical block at height and recognize our coinbase payout.
+def find_solo_block(height, payout_address):
+    """Inspect the canonical block and recognize our coinbase payout.
 
     This intentionally does NOT use listtransactions/getwalletinfo. A solo pool
     can find a block even when the wallet RPC has no transaction history yet.
@@ -104,8 +127,11 @@ def find_solo_block(height):
     if not coinbase.get("vin") or not coinbase["vin"][0].get("coinbase"):
         return None
 
-    outputs = coinbase.get("vout") or []
-    reward = sum(float(v.get("value") or 0) for v in outputs if payout_matches(v))
+    reward = sum(
+        float(v.get("value") or 0)
+        for v in (coinbase.get("vout") or [])
+        if payout_matches(v, payout_address)
+    )
     if reward <= 0:
         return None
 
@@ -125,6 +151,10 @@ def sync():
     if not LEDGER.exists():
         save(rows)
 
+    payout_address = resolve_payout_address()
+    if not payout_address:
+        raise RuntimeError("payout address is not available yet")
+
     chain = cli("getblockchaininfo") or {}
     tip = int(chain.get("blocks") or 0)
     if tip <= 0:
@@ -136,11 +166,10 @@ def sync():
     }
 
     # Scan the newest blocks every cycle. This catches a newly submitted block
-    # without depending on wallet notifications and also survives a ledger
-    # process restart. The small overlap protects against a short reorg.
+    # without depending on wallet notifications and survives ledger restarts.
     start = max(0, tip - SCAN_BACK + 1)
     for height in range(start, tip + 1):
-        found = find_solo_block(height)
+        found = find_solo_block(height, payout_address)
         if not found:
             continue
         key = (found["blockhash"], found["height"])
@@ -170,14 +199,12 @@ def sync():
         row["maturity_remaining"] = remaining
         row["mature"] = confirmations >= MATURITY
 
-        # Re-check canonicality for every stored block. A stale/reorged block
-        # must never remain confirmed in the dashboard.
         canonical = ""
         if h:
             try:
                 canonical = str(cli("getblockhash", h) or "")
             except Exception:
-                canonical = ""
+                pass
 
         if bh and canonical and canonical != bh:
             row["orphaned"] = True
@@ -192,9 +219,14 @@ def sync():
 
 
 def main():
-    save(load()) if not LEDGER.exists() else None
-    if not PAYOUT_ADDRESS:
-        print("[block-ledger] WARNING: FIX_PAYOUT_ADDRESS is empty; solo block detection is disabled", flush=True)
+    if not LEDGER.exists():
+        save([])
+
+    address = resolve_payout_address()
+    if address:
+        print(f"[block-ledger] payout={address}", flush=True)
+    else:
+        print("[block-ledger] WARNING: payout address is not available yet", flush=True)
 
     while True:
         try:
