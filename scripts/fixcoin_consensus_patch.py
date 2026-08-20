@@ -6,15 +6,15 @@ import ast
 ROOT = Path(__file__).resolve().parent.parent
 FULL = ROOT / "stratum" / "server_full.py"
 
-# IMPORTANT: server.py is the generator. The actual pinned/adapted FreeCash
-# implementation lives in server_full.py and THAT is what must be patched.
 PATH = FULL
 text = PATH.read_text()
 
-new_version = 'fixedcoin-consensus-repair-2026-08-20-v17'
+new_version = 'fixedcoin-consensus-repair-2026-08-20-v18'
 old_versions = (
+    'fixedcoin-consensus-repair-2026-08-20-v17',
     'fixedcoin-consensus-repair-2026-08-20-v16',
     'fixedcoin-consensus-repair-2026-08-20-v14',
+    'fixedcoin-fch-dashboard-repair-2026-08-20-v13',
     'fixedcoin-fch-dashboard-repair-2026-08-20-v12',
 )
 
@@ -32,25 +32,39 @@ def replace_function(source, name, replacement):
     end = sum(map(len, lines[: target.end_lineno]))
     return source[:start] + replacement.rstrip() + "\n" + source[end:]
 
-# The generated file carries its own generator marker on line 1. Replace it
-# after generation so the entrypoint can tell exactly which patched adapter is
-# installed. Do not touch the generator's ADAPT_VERSION in server.py here.
 for version in old_versions:
     text = text.replace(f"# ADAPT_VERSION={version}", f"# ADAPT_VERSION={new_version}", 1)
 
 if f"# ADAPT_VERSION={new_version}" not in text:
     raise SystemExit("unexpected generated adapter version; refusing to patch")
 
-if 'def build_coinbase_parts(' not in text:
-    raise RuntimeError('build_coinbase_parts function missing from generated Stratum adapter')
+# FixedCoin uses the standard minimal positive CScriptNum encoding for BIP34.
+# 44343 == 0xAD37, so the sign bit in 0xAD requires an extra 00 byte:
+# scriptSig begins 03 37 AD 00. Without that byte the node returns bad-cb-height.
+bip34 = '''def bip34_height(height):
+    height = int(height)
+    if height < 0:
+        raise ValueError("negative coinbase height")
+    if height == 0:
+        return b"\\x00"
+    raw = bytearray()
+    n = height
+    while n:
+        raw.append(n & 0xFF)
+        n >>= 8
+    if raw[-1] & 0x80:
+        raw.append(0)
+    return bytes([len(raw)]) + bytes(raw)
+'''
+text = replace_function(text, 'bip34_height', bip34)
 
 # FixedCoin does not use the FreeCash governance/dev payout.
 text = text.replace('DEV_ADDRESS = "FTqiqAyXHnK7uDTXzMap3acvqADK4ZGzts"', 'DEV_ADDRESS = None', 1)
 
-dev_block = """        if self.dev_spk is None:
+dev_block = '''        if self.dev_spk is None:
             self.dev_spk = address_to_scriptpubkey(DEV_ADDRESS)
             emit("INFO", f"dev/governance scriptPubKey ready for {DEV_ADDRESS}")
-"""
+'''
 text = text.replace(dev_block, '        self.dev_spk = None\n', 1)
 text = text.replace('dev_sats = get_dev_reward_sats(height)', 'dev_sats = 0', 1)
 
@@ -81,16 +95,12 @@ coinbase = '''def build_coinbase_parts(height, miner_value_sats, miner_spk, dev_
 '''
 text = replace_function(text, 'build_coinbase_parts', coinbase)
 
-# Preserve the template witness commitment on the generated job.
 old = '"other_tx": other_tx, "created": time.time(),'
 if old in text:
     text = text.replace(old, old + '\n                "witness_commitment": tmpl.get("default_witness_commitment"),', 1)
 
-# FixedCoin has no governance/dev output.
 text = text.replace('"dev_value": dev_sats,', '"dev_value": 0,', 1)
 
-# Do not manufacture a second witness marker if the assembled coinbase already
-# contains one. Keep this helper compatible with the adapter's existing call.
 witness = '''def coinbase_add_witness(tx_nowitness, enabled):
     if not enabled or len(tx_nowitness) < 8 or tx_nowitness[4:6] == b"\\x00\\x01":
         return tx_nowitness
@@ -103,23 +113,26 @@ else:
         raise RuntimeError('assemble_coinbase anchor missing')
     text = text.replace('\ndef assemble_coinbase(', '\n' + witness + '\ndef assemble_coinbase(', 1)
 
-# Candidate blocks must use the same witness-enabled coinbase the miner hashed.
 text = text.replace(
     'block = header + encode_varint(tx_count) + coinbase_tx',
     'block = header + encode_varint(tx_count) + coinbase_add_witness(coinbase_tx, bool(job.get("witness_commitment")))',
     1,
 )
 
-# validateaddress is sufficient for the FixedCoin payout script; do not rely on
-# getaddressinfo accepting the upstream address shape.
 oldaddr = '''    info2 = rpc("getaddressinfo", [addr])
     if info2 and info2.get("scriptPubKey"):
         return binascii.unhexlify(info2["scriptPubKey"])
 '''
 text = text.replace(oldaddr, '', 1)
 
-# Validate the generated adapter before persisting it. This prevents a broken
-# patch from turning into a restart loop inside Docker.
+# Regression checks run on every container start. They are intentionally small
+# and deterministic so a malformed adapter cannot enter a restart loop.
 ast.parse(text)
+ns = {"__name__": "_fixedcoin_patch_test"}
+exec(compile(text, "<fixedcoin-patched-adapter>", "exec"), ns)
+assert ns["bip34_height"](32767) == b"\x02\xff\x7f"
+assert ns["bip34_height"](32768) == b"\x03\x00\x80\x00"
+assert ns["bip34_height"](44343) == b"\x03\x37\xad\x00"
+
 PATH.write_text(text)
 print(f"patched {PATH} -> {new_version}")
