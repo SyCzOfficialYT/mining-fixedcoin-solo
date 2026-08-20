@@ -9,11 +9,13 @@ FULL = ROOT / "stratum" / "server_full.py"
 PATH = FULL
 text = PATH.read_text()
 
-new_version = 'fixedcoin-consensus-repair-2026-08-20-v18'
+new_version = 'fixedcoin-consensus-repair-2026-08-20-v19'
 old_versions = (
+    'fixedcoin-consensus-repair-2026-08-20-v18',
     'fixedcoin-consensus-repair-2026-08-20-v17',
     'fixedcoin-consensus-repair-2026-08-20-v16',
     'fixedcoin-consensus-repair-2026-08-20-v14',
+    'fixedcoin-fch-dashboard-repair-2026-08-20-v14',
     'fixedcoin-fch-dashboard-repair-2026-08-20-v13',
     'fixedcoin-fch-dashboard-repair-2026-08-20-v12',
 )
@@ -104,7 +106,7 @@ text = text.replace('"dev_value": dev_sats,', '"dev_value": 0,', 1)
 witness = '''def coinbase_add_witness(tx_nowitness, enabled):
     if not enabled or len(tx_nowitness) < 8 or tx_nowitness[4:6] == b"\\x00\\x01":
         return tx_nowitness
-    return tx_nowitness[:4] + b"\\x00\\x01" + tx_nowitness[4:-4] + b"\\x01\\x20" + (b"\\x00" * 32) + tx_nowitness[-4:]
+    return tx_nowitness[:4] + b"\\x00\x01" + tx_nowitness[4:-4] + b"\\x01\x20" + (b"\x00" * 32) + tx_nowitness[-4:]
 '''
 if 'def coinbase_add_witness' in text:
     text = replace_function(text, 'coinbase_add_witness', witness)
