@@ -1,11 +1,8 @@
 #!/usr/bin/env python3
-"""Persist every wallet-generated solo block and track confirmations/maturity."""
+"""Persist solo-found coinbase blocks and track confirmations/maturity from the chain."""
 import json, os, subprocess, time
 from pathlib import Path
 from datetime import datetime, timezone
-from urllib.parse import quote
-import requests
-from requests.auth import HTTPBasicAuth
 
 DATADIR = Path(os.getenv("FIX_DATADIR", "/data/fixedcoin"))
 LEDGER = Path(os.getenv("BLOCK_LEDGER_PATH", str(DATADIR / "solo-blocks.json")))
@@ -13,31 +10,24 @@ USER = os.getenv("FIX_RPCUSER", "fixrpc")
 PASS = os.getenv("FIX_RPCPASS", "")
 PORT = int(os.getenv("FIX_RPCPORT", "24761"))
 WALLET = os.getenv("FIX_WALLET_NAME", "mining")
+PAYOUT_ADDRESS = os.getenv("FIX_PAYOUT_ADDRESS", "").strip()
 MATURITY = int(os.getenv("COINBASE_MATURITY", "100"))
 POLL = float(os.getenv("BLOCK_LEDGER_POLL", "2"))
+SCAN_BACK = max(1, int(os.getenv("BLOCK_LEDGER_SCAN_BACK", "12")))
 CLI = os.getenv("FIXCOIN_CLI", "fixedcoin-cli")
 
 
-def rpc(method, params=None, wallet=None):
-    """Call Core RPC. Wallet RPCs use fixedcoin-cli -rpcwallet for maximum compatibility."""
-    if wallet:
-        cmd = [CLI, f"-datadir={DATADIR}", f"-rpcwallet={WALLET}", method]
-        for value in (params or []):
-            cmd.append(json.dumps(value, separators=(",", ":")) if isinstance(value, (dict, list, bool)) else str(value))
-        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
-        if proc.returncode != 0:
-            raise RuntimeError(proc.stderr.strip() or proc.stdout.strip() or f"{method}: fixedcoin-cli exit {proc.returncode}")
-        try:
-            return json.loads(proc.stdout)
-        except ValueError as exc:
-            raise RuntimeError(f"{method}: invalid CLI JSON: {proc.stdout[:500]}") from exc
+def rpc(method, params=None):
+    """Use the node RPC directly; wallet RPCs are deliberately not required."""
+    import requests
+    from requests.auth import HTTPBasicAuth
 
     endpoint = f"http://127.0.0.1:{PORT}"
     response = requests.post(
         endpoint,
         json={"jsonrpc": "1.0", "id": "ledger", "method": method, "params": params or []},
         auth=HTTPBasicAuth(USER, PASS),
-        timeout=15,
+        timeout=20,
     )
     try:
         data = response.json()
@@ -51,6 +41,19 @@ def rpc(method, params=None, wallet=None):
     return data.get("result")
 
 
+def cli(method, *params):
+    """Call fixedcoin-cli for RPCs where the HTTP RPC is not reliable."""
+    cmd = [CLI, f"-datadir={DATADIR}", method]
+    cmd.extend(str(x) for x in params)
+    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+    if proc.returncode != 0:
+        raise RuntimeError(proc.stderr.strip() or proc.stdout.strip() or f"{method}: cli exit {proc.returncode}")
+    try:
+        return json.loads(proc.stdout)
+    except ValueError as exc:
+        raise RuntimeError(f"{method}: invalid CLI JSON: {proc.stdout[:500]}") from exc
+
+
 def load():
     try:
         data = json.loads(LEDGER.read_text())
@@ -62,7 +65,7 @@ def load():
 def save(rows):
     LEDGER.parent.mkdir(parents=True, exist_ok=True)
     tmp = LEDGER.with_suffix(".json.tmp")
-    tmp.write_text(json.dumps(rows, indent=2, ensure_ascii=False))
+    tmp.write_text(json.dumps(rows, indent=2, ensure_ascii=False) + "\n")
     os.replace(tmp, LEDGER)
 
 
@@ -70,75 +73,118 @@ def now():
     return datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
 
 
+def payout_matches(vout):
+    """Return true when a coinbase output pays our configured solo address."""
+    if not PAYOUT_ADDRESS:
+        return False
+    spk = vout.get("scriptPubKey") or {}
+    addresses = spk.get("addresses") or []
+    if PAYOUT_ADDRESS in addresses:
+        return True
+    # Some Core versions expose a single address rather than addresses[].
+    return spk.get("address") == PAYOUT_ADDRESS
+
+
+def find_solo_block(height):
+    """Inspect the canonical block at height and recognize our coinbase payout.
+
+    This intentionally does NOT use listtransactions/getwalletinfo. A solo pool
+    can find a block even when the wallet RPC has no transaction history yet.
+    """
+    try:
+        blockhash = cli("getblockhash", height)
+        block = cli("getblock", blockhash, 2)
+    except Exception:
+        return None
+
+    txs = block.get("tx") or []
+    if not txs:
+        return None
+    coinbase = txs[0]
+    if not coinbase.get("vin") or not coinbase["vin"][0].get("coinbase"):
+        return None
+
+    outputs = coinbase.get("vout") or []
+    reward = sum(float(v.get("value") or 0) for v in outputs if payout_matches(v))
+    if reward <= 0:
+        return None
+
+    return {
+        "txid": str(coinbase.get("txid") or ""),
+        "blockhash": str(blockhash),
+        "height": int(height),
+        "reward": reward,
+        "found_at": now(),
+        "maturity_height": int(height) + MATURITY,
+        "maturity": MATURITY,
+    }
+
+
 def sync():
     rows = load()
     if not LEDGER.exists():
         save(rows)
 
-    chain = rpc("getblockchaininfo") or {}
+    chain = cli("getblockchaininfo") or {}
     tip = int(chain.get("blocks") or 0)
+    if tip <= 0:
+        return len(rows), tip
 
-    # IMPORTANT: listtransactions is wallet-scoped. FixedCoin's wallet RPC
-    # endpoint is inconsistent in some builds, while the CLI's -rpcwallet
-    # selector is reliable and is also the documented wallet selection method.
-    txs = rpc("listtransactions", ["*", 1000, 0, True], wallet=WALLET) or []
+    by_key = {
+        (str(x.get("blockhash") or ""), int(x.get("height") or 0)): x
+        for x in rows
+    }
 
-    by_key = {(str(x.get("txid") or ""), int(x.get("height") or 0)): x for x in rows}
-    for tx in txs:
-        category = str(tx.get("category") or "").lower()
-        if category not in {"generate", "immature", "orphan"} and not tx.get("generated"):
+    # Scan the newest blocks every cycle. This catches a newly submitted block
+    # without depending on wallet notifications and also survives a ledger
+    # process restart. The small overlap protects against a short reorg.
+    start = max(0, tip - SCAN_BACK + 1)
+    for height in range(start, tip + 1):
+        found = find_solo_block(height)
+        if not found:
             continue
-
-        txid = str(tx.get("txid") or "")
-        blockhash = str(tx.get("blockhash") or "")
-        if not txid and not blockhash:
-            continue
-
-        height = int(tx.get("blockheight") or tx.get("height") or 0)
-        if not height and blockhash:
-            try:
-                height = int((rpc("getblock", [blockhash, 1]) or {}).get("height") or 0)
-            except Exception:
-                continue
-        if height <= 0:
-            continue
-
-        key = (txid, height)
-        row = by_key.get(key) or {
-            "txid": txid,
-            "blockhash": blockhash,
-            "height": height,
-            "reward": abs(float(tx.get("amount") or 0)),
-            "found_at": now(),
-            "maturity_height": height + MATURITY,
-            "maturity": MATURITY,
-        }
-        if blockhash:
-            row["blockhash"] = blockhash
-        row["reward"] = abs(float(tx.get("amount") or row.get("reward") or 0))
-        row["maturity_height"] = height + MATURITY
-        row["last_seen"] = now()
-        by_key[key] = row
+        key = (found["blockhash"], found["height"])
+        row = by_key.get(key)
+        if row is None:
+            found["last_seen"] = now()
+            by_key[key] = found
+            print(
+                f"[block-ledger] SOLO BLOCK height={found['height']} "
+                f"hash={found['blockhash']} txid={found['txid']} "
+                f"reward={found['reward']:.8f}",
+                flush=True,
+            )
+        else:
+            row["last_seen"] = now()
+            row["reward"] = found["reward"]
+            row["txid"] = found["txid"]
 
     rows = list(by_key.values())
     for row in rows:
         h = int(row.get("height") or 0)
         bh = str(row.get("blockhash") or "")
-        row["confirmations"] = max(0, tip - h + 1) if h else 0
-        row["maturity_remaining"] = max(0, h + MATURITY - tip) if h else MATURITY
-        row["mature"] = bool(row["confirmations"] >= MATURITY)
-        row["status"] = "ORPHANED" if row.get("orphaned") else ("MATURED" if row["mature"] else "IMMATURE")
+        confirmations = max(0, tip - h + 1) if h else 0
+        remaining = max(0, h + MATURITY - tip) if h else MATURITY
 
-        if bh:
+        row["confirmations"] = confirmations
+        row["maturity_remaining"] = remaining
+        row["mature"] = confirmations >= MATURITY
+
+        # Re-check canonicality for every stored block. A stale/reorged block
+        # must never remain confirmed in the dashboard.
+        canonical = ""
+        if h:
             try:
-                canonical = str(rpc("getblockhash", [h]) or "")
-                if canonical and canonical != bh:
-                    row["orphaned"] = True
-                    row["status"] = "ORPHANED"
-                elif row.get("orphaned") and canonical == bh:
-                    row["orphaned"] = False
+                canonical = str(cli("getblockhash", h) or "")
             except Exception:
-                pass
+                canonical = ""
+
+        if bh and canonical and canonical != bh:
+            row["orphaned"] = True
+            row["status"] = "ORPHANED"
+        else:
+            row["orphaned"] = False
+            row["status"] = "MATURED" if row["mature"] else "IMMATURE"
 
     rows.sort(key=lambda x: (int(x.get("height") or 0), str(x.get("found_at") or "")), reverse=True)
     save(rows)
@@ -146,8 +192,9 @@ def sync():
 
 
 def main():
-    if not LEDGER.exists():
-        save([])
+    save(load()) if not LEDGER.exists() else None
+    if not PAYOUT_ADDRESS:
+        print("[block-ledger] WARNING: FIX_PAYOUT_ADDRESS is empty; solo block detection is disabled", flush=True)
 
     while True:
         try:
