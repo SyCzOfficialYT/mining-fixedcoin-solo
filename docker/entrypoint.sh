@@ -41,8 +41,9 @@ fixedcoind -datadir="$DATADIR" -conf="$DATADIR/fixedcoin.conf" >>/app/data/node.
 NODE_PID=$!
 STRATUM_PID=0
 DASH_PID=0
+LEDGER_PID=0
 LOG_PID=0
-trap 'kill "$NODE_PID" 2>/dev/null || true; kill "$STRATUM_PID" 2>/dev/null || true; kill "$DASH_PID" 2>/dev/null || true; kill "$LOG_PID" 2>/dev/null || true' EXIT
+trap 'kill "$NODE_PID" 2>/dev/null || true; kill "$STRATUM_PID" 2>/dev/null || true; kill "$DASH_PID" 2>/dev/null || true; kill "$LEDGER_PID" 2>/dev/null || true; kill "$LOG_PID" 2>/dev/null || true' EXIT
 
 for i in $(seq 1 180); do
   if fixedcoin-cli -datadir="$DATADIR" -rpcuser="$RPCUSER" -rpcpassword="$RPCPASS" getblockchaininfo >/dev/null 2>&1; then break; fi
@@ -54,6 +55,11 @@ fixedcoin-cli -datadir="$DATADIR" -rpcuser="$RPCUSER" -rpcpassword="$RPCPASS" ge
 # The setup script reuses the persistent payout address/wallet before ever calling getnewaddress.
 python3 /app/scripts/setup_address.py
 
+# Persistent block ledger: every wallet-generated solo block is recorded
+# independently of stats.json and survives container rebuilds/restarts.
+python3 /app/scripts/block_ledger.py >>/app/data/block-ledger.log 2>&1 &
+LEDGER_PID=$!
+
 python3 /app/monitor/app.py >>/app/data/dashboard.log 2>&1 &
 DASH_PID=$!
 python3 /app/stratum/server.py >>/app/data/stratum.log 2>&1 &
@@ -61,7 +67,6 @@ STRATUM_PID=$!
 
 echo "FixedCoin Solo online: dashboard :${DASH_PORT}, stratum :3333, RPC :${RPCPORT}"
 
-# Keep the full Stratum stream visible in `docker logs -f` while retaining the file for the dashboard.
 tail -n 0 -F /app/data/stratum.log &
 LOG_PID=$!
 
