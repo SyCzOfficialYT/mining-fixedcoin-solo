@@ -66,6 +66,12 @@ LEDGER_PID=$!
 
 python3 /app/monitor/app.py >>/app/data/dashboard.log 2>&1 &
 DASH_PID=$!
+
+# The Stratum adapter is generated from a pinned upstream source. Apply the
+# FixedCoin-only consensus corrections before starting it so container rebuilds
+# cannot silently reintroduce the FreeCash governance coinbase.
+python3 /app/scripts/fixcoin_consensus_patch.py
+
 python3 /app/stratum/server.py >>/app/data/stratum.log 2>&1 &
 STRATUM_PID=$!
 
