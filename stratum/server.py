@@ -243,7 +243,7 @@ def generate_server():
     assert 'rpc("getblocktemplate", [{"rules": []}])' not in adapted
     assert 'def rpc(method, params=None):' in adapted
     assert 'def bip34_height(height):' in adapted
-    ns = {}
+    ns = {"__name__": "_fixedcoin_adapter_test"}
     exec(compile(adapted, "<fixedcoin-adapter-test>", "exec"), ns)
     assert ns["bip34_height"](44343) == b"\x03\x37\xad\x00", "BIP34 44343 encoding regression"
     FULL.write_text(f"# ADAPT_VERSION={ADAPT_VERSION}\n" + adapted)
