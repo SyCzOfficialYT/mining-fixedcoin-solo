@@ -41,6 +41,39 @@ def wallet_exists_on_disk():
     return wallet_dir.is_dir() or (WALLETS_DIR / f'{WALLET_NAME}.dat').exists()
 
 
+def ensure_wallet_loaded():
+    """The payout file can survive a restart, but wallet loading cannot be assumed.
+
+    Always verify/load the mining wallet before returning an existing payout address.
+    Otherwise the stratum server can mine normally while wallet-scoped RPCs such as
+    listtransactions/listreceivedbyaddress fail with RPC -18.
+    """
+    wallets, error = rpc('listwallets')
+    if error:
+        raise RuntimeError(f'listwallets failed: {error}')
+
+    if WALLET_NAME in (wallets or []):
+        return
+
+    if wallet_exists_on_disk():
+        _, error = rpc('loadwallet', [WALLET_NAME])
+        if error and 'already loaded' not in str(error).lower():
+            raise RuntimeError(f'loadwallet failed: {error}')
+        print('Existing mining wallet loaded.')
+        return
+
+    _, error = rpc('createwallet', [WALLET_NAME])
+    if error:
+        if 'already exists' in str(error).lower() or wallet_exists_on_disk():
+            _, load_error = rpc('loadwallet', [WALLET_NAME])
+            if load_error and 'already loaded' not in str(load_error).lower():
+                raise RuntimeError(f'createwallet failed: {error}; loadwallet failed: {load_error}')
+        else:
+            raise RuntimeError(f'createwallet failed: {error}')
+    else:
+        print('Mining wallet created.')
+
+
 def persist_payout(address):
     PAYOUT_FILE.write_text(address.strip() + '\n')
     os.chmod(PAYOUT_FILE, 0o600)
@@ -69,7 +102,6 @@ def existing_wallet_address():
             if valid_address(address):
                 return address
 
-    # FixedCoin/Bitcoin Core wallets may have receive addresses without the label.
     addresses, error = rpc('listreceivedbyaddress', [0, True, True], wallet=WALLET_NAME)
     if not error and isinstance(addresses, list):
         for entry in addresses:
@@ -92,10 +124,21 @@ def main():
 
     explicit = os.getenv('FIX_PAYOUT_ADDRESS', '').strip()
     if explicit:
+        ensure_wallet_loaded()
         persist_payout(explicit)
         set_config(cfg, explicit)
         print('Payout address configured from environment.')
         return 0
+
+    # CRITICAL: loading the wallet must happen before restoring the persistent
+    # payout address. The payout file survives container restarts; the loaded
+    # wallet state does not. Skipping this step leaves the miner operational but
+    # breaks every wallet-scoped RPC used by the persistent block ledger/balances.
+    try:
+        ensure_wallet_loaded()
+    except RuntimeError as exc:
+        print(f'ERROR: {exc}', file=sys.stderr)
+        return 1
 
     # Persistent datadir wins over the image/config. This survives container
     # recreation as long as /data/fixedcoin is backed by the Docker volume.
@@ -114,33 +157,6 @@ def main():
             set_config(cfg, current)
             print(f'Existing payout address retained: {current}')
             return 0
-
-    wallets, error = rpc('listwallets')
-    if error:
-        print(f'ERROR: listwallets failed: {error}', file=sys.stderr)
-        return 1
-
-    loaded = WALLET_NAME in (wallets or [])
-    if not loaded:
-        if wallet_exists_on_disk():
-            _, error = rpc('loadwallet', [WALLET_NAME])
-            if error and 'already loaded' not in str(error).lower():
-                print(f'ERROR: loadwallet failed: {error}', file=sys.stderr)
-                return 1
-            print('Existing mining wallet loaded.')
-        else:
-            _, error = rpc('createwallet', [WALLET_NAME])
-            if error:
-                if 'already exists' in str(error).lower() or wallet_exists_on_disk():
-                    _, load_error = rpc('loadwallet', [WALLET_NAME])
-                    if load_error and 'already loaded' not in str(load_error).lower():
-                        print(f'ERROR: createwallet failed: {error}; loadwallet failed: {load_error}', file=sys.stderr)
-                        return 1
-                else:
-                    print(f'ERROR: createwallet failed: {error}', file=sys.stderr)
-                    return 1
-            else:
-                print('Mining wallet created.')
 
     # Reuse an address already belonging to the persistent mining wallet.
     # Only generate a new one when the wallet truly has no usable receive address.
