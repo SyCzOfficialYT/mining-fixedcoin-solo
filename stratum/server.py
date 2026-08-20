@@ -11,7 +11,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 FULL = HERE / "server_full.py"
 URL = "https://raw.githubusercontent.com/SyCzOfficialYT/freecash-coin/a88d89675b3a41cc6774e1b975e57e050d4892cc/stratum/server.py"
-ADAPT_VERSION = "fixedcoin-fch-dashboard-repair-2026-08-20-v13"
+ADAPT_VERSION = "fixedcoin-fch-dashboard-repair-2026-08-20-v14"
 
 
 def replace_function(source, name, replacement):
@@ -103,11 +103,8 @@ def adapt(t):
 '''
     t = replace_function(t, 'rpc', rpc_replacement)
 
-    # FixedCoin/Bitcoin-style BIP34 uses minimally encoded positive CScriptNum.
-    # Once the most-significant height byte has bit 7 set, a 00 sign byte is
-    # mandatory. Height 44343 (0xAD37) therefore encodes as 03 37 AD 00, not
-    # 02 37 AD. The latter is exactly what causes bad-cb-height at this chain height.
     bip34 = '''def bip34_height(height):
+    """Return the minimally encoded positive CScriptNum for BIP34."""
     height = int(height)
     if height < 0:
         raise ValueError("negative coinbase height")
@@ -243,7 +240,10 @@ def generate_server():
     assert 'rpc("getblocktemplate", [{"rules": []}])' not in adapted
     assert 'def rpc(method, params=None):' in adapted
     assert 'def bip34_height(height):' in adapted
-    ns = {"__name__": "_fixedcoin_adapter_test"}
+    ns = {
+        "__name__": "_fixedcoin_adapter_test",
+        "__file__": str(FULL),
+    }
     exec(compile(adapted, "<fixedcoin-adapter-test>", "exec"), ns)
     assert ns["bip34_height"](44343) == b"\x03\x37\xad\x00", "BIP34 44343 encoding regression"
     FULL.write_text(f"# ADAPT_VERSION={ADAPT_VERSION}\n" + adapted)
