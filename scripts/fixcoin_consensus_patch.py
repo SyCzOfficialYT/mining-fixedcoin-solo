@@ -9,8 +9,9 @@ FULL = ROOT / "stratum" / "server_full.py"
 PATH = FULL
 text = PATH.read_text()
 
-new_version = 'fixedcoin-consensus-repair-2026-08-20-v20'
+new_version = 'fixedcoin-consensus-repair-2026-08-20-v21'
 old_versions = (
+    'fixedcoin-consensus-repair-2026-08-20-v20',
     'fixedcoin-consensus-repair-2026-08-20-v19',
     'fixedcoin-consensus-repair-2026-08-20-v18',
     'fixedcoin-consensus-repair-2026-08-20-v17',
@@ -129,10 +130,13 @@ oldaddr = '''    info2 = rpc("getaddressinfo", [addr])
 '''
 text = text.replace(oldaddr, '', 1)
 
-# Regression checks run on every container start. They are intentionally small
-# and deterministic so a malformed adapter cannot enter a restart loop.
+# Regression checks run on every container start. The generated adapter expects
+# __file__ during normal execution, so provide a synthetic path for the test.
 ast.parse(text)
-ns = {"__name__": "_fixedcoin_patch_test"}
+ns = {
+    "__name__": "_fixedcoin_patch_test",
+    "__file__": str(PATH),
+}
 exec(compile(text, "<fixedcoin-patched-adapter>", "exec"), ns)
 assert ns["bip34_height"](32767) == b"\x02\xff\x7f"
 assert ns["bip34_height"](32768) == b"\x03\x00\x80\x00"
