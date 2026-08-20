@@ -11,7 +11,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 FULL = HERE / "server_full.py"
 URL = "https://raw.githubusercontent.com/SyCzOfficialYT/freecash-coin/a88d89675b3a41cc6774e1b975e57e050d4892cc/stratum/server.py"
-ADAPT_VERSION = "fixedcoin-fch-dashboard-repair-2026-08-20-v12"
+ADAPT_VERSION = "fixedcoin-fch-dashboard-repair-2026-08-20-v13"
 
 
 def replace_function(source, name, replacement):
@@ -36,7 +36,6 @@ def adapt(t):
     t = t.replace('FreeCash', 'FixedCoin')
     t = t.replace('/FCH-Solo/', '/FIX-Solo/')
 
-    # FixedCoin requires a BIP145 template request with the mandatory segwit rule.
     gbt_pattern = re.compile(
         r'rpc\("getblocktemplate",\s*\[\{\s*"rules"\s*:\s*\[\]\s*\}\]\)\s*or\s*rpc\("getblocktemplate",\s*\[\]\)'
     )
@@ -49,10 +48,6 @@ def adapt(t):
     if 'rpc("getblocktemplate", [{"rules": []}])' in t:
         raise RuntimeError('old invalid GBT request remains')
 
-    # RPC credentials are generated in the persistent daemon datadir by the
-    # Docker entrypoint. Prefer the exported secret and fall back to Core's
-    # cookie when available. A failed RPC must never silently look like an
-    # empty job stream: log the exact failure and let job_loop retry.
     rpc_replacement = '''def rpc(method, params=None):
     import requests as _requests
     from requests.auth import HTTPBasicAuth as _HTTPBasicAuth
@@ -108,6 +103,27 @@ def adapt(t):
 '''
     t = replace_function(t, 'rpc', rpc_replacement)
 
+    # FixedCoin/Bitcoin-style BIP34 uses minimally encoded positive CScriptNum.
+    # Once the most-significant height byte has bit 7 set, a 00 sign byte is
+    # mandatory. Height 44343 (0xAD37) therefore encodes as 03 37 AD 00, not
+    # 02 37 AD. The latter is exactly what causes bad-cb-height at this chain height.
+    bip34 = '''def bip34_height(height):
+    height = int(height)
+    if height < 0:
+        raise ValueError("negative coinbase height")
+    if height == 0:
+        return b"\\x00"
+    raw = bytearray()
+    n = height
+    while n:
+        raw.append(n & 0xFF)
+        n >>= 8
+    if raw[-1] & 0x80:
+        raw.append(0)
+    return bytes([len(raw)]) + bytes(raw)
+'''
+    t = replace_function(t, 'bip34_height', bip34)
+
     marker = 'MAX_DIFF = int(cfg["pool"].get("vardiff_max", 50_000_000))'
     if marker not in t:
         raise RuntimeError('vardiff marker missing')
@@ -131,9 +147,6 @@ def adapt(t):
 '''
     t = replace_function(t, 'parse_fixed_diff', fixed_parser)
 
-    # FixedCoin consensus expects the miner + governance outputs. If SegWit is
-    # active, the witness commitment is an additional third output. The miner
-    # amount is the GBT coinbasevalue; the governance amount is separate.
     coinbase = '''def build_coinbase_parts(height, miner_value_sats, miner_spk, dev_spk=None, dev_value_sats=0, en1_size=4, en2_size=4, witness_commitment_hex=None, *args, **kwargs):
     tag = b"/FIX-Solo/"
     height_script = bip34_height(height)
@@ -163,13 +176,10 @@ def adapt(t):
 '''
     t = replace_function(t, 'build_coinbase_parts', coinbase)
 
-    # Carry the template's witness commitment and the governance reward into the job.
     old = '"other_tx": other_tx, "created": time.time(),'
     if old in t:
         t = t.replace(old, old + '\n                "witness_commitment": tmpl.get("default_witness_commitment"),', 1)
 
-    # The original FreeCash adapter only passed the governance script. FixedCoin
-    # needs the governance amount as well.
     t = t.replace(
         'len(self.en1), self.en2_size, job.get("witness_commitment"),',
         'job.get("dev_value", 0), len(self.en1), self.en2_size, job.get("witness_commitment"),',
@@ -179,9 +189,7 @@ def adapt(t):
         'job.get("dev_value", 0), len(self.en1), self.en2_size, job.get("witness_commitment"),\n        )',
     )
 
-    # Store the actual governance reward on every job.
-    old_job = '"dev_value": dev_sats,'
-    if old_job not in t:
+    if '"dev_value": dev_sats,' not in t:
         raise RuntimeError('dev_value job field missing')
 
     witness = '''def coinbase_add_witness(tx_nowitness, enabled):
@@ -194,46 +202,29 @@ def adapt(t):
     else:
         t = t.replace('\ndef assemble_coinbase(', '\n' + witness + '\ndef assemble_coinbase(', 1)
 
-    # Candidate blocks must contain the exact same witness-enabled coinbase that
-    # the miner hashed, followed by all GBT transactions.
     t = t.replace(
         'block = header + encode_varint(tx_count) + coinbase_tx',
         'block = header + encode_varint(tx_count) + coinbase_add_witness(coinbase_tx, bool(job.get("witness_commitment")))',
         1,
     )
 
-    # Do not depend on getaddressinfo for the fixed bech32 address when the node
-    # rejects that RPC shape. validateaddress already returns scriptPubKey.
     oldaddr = '''    info2 = rpc("getaddressinfo", [addr])
     if info2 and info2.get("scriptPubKey"):
         return binascii.unhexlify(info2["scriptPubKey"])
 '''
     t = t.replace(oldaddr, '')
 
-    # Emit useful job/notify diagnostics. This makes a broken RPC path or a
-    # disconnected ASIC immediately visible instead of looking like "no jobs".
-    t = t.replace(
-        'def broadcast_job(clean=True):\n    with _clients_lock:',
-        'def broadcast_job(clean=True):\n    with _clients_lock:',
-        1,
-    )
     t = t.replace(
         '        try:\n            c.push_job(clean=clean, force_refresh=False)\n        except Exception as e:\n            emit("WARN", f"push {c.worker}: {e}")',
         '        try:\n            c.push_job(clean=clean, force_refresh=False)\n            emit("INFO", f"notify worker={c.worker} job={store.current_id} height={store.last_height} clean={clean}")\n        except Exception as e:\n            emit("WARN", f"push {c.worker}: {e}")',
         1,
     )
 
-    # Log every successful template acquisition. This is intentionally INFO so
-    # the dashboard can distinguish an RPC problem from an ASIC connection.
     needle = '        height = tmpl["height"]\n        prevhash = tmpl["previousblockhash"]'
     replacement = '        height = tmpl["height"]\n        prevhash = tmpl["previousblockhash"]\n        emit("INFO", f"GBT height={height} prev={prevhash[:16]} bits={tmpl.get(\'bits\')} txs={len(tmpl.get(\'transactions\', []))}")'
     if needle in t:
         t = t.replace(needle, replacement, 1)
 
-    # If an ASIC authorizes while the first RPC attempt fails, retrying in the
-    # background is not enough for a client that is already connected. The
-    # existing job_loop will broadcast once the first valid job arrives; force
-    # a clean notify for all connected miners whenever a new height appears.
     t = t.replace(
         'if job is not None and clean:\n                broadcast_job(clean=True)',
         'if job is not None and clean:\n                emit("INFO", f"broadcast new job={job[\"id\"]} height={job[\"height\"]}")\n                broadcast_job(clean=True)',
@@ -251,6 +242,10 @@ def generate_server():
     assert 'rpc("getblocktemplate", [{"rules": ["segwit"]}])' in adapted
     assert 'rpc("getblocktemplate", [{"rules": []}])' not in adapted
     assert 'def rpc(method, params=None):' in adapted
+    assert 'def bip34_height(height):' in adapted
+    ns = {}
+    exec(compile(adapted, "<fixedcoin-adapter-test>", "exec"), ns)
+    assert ns["bip34_height"](44343) == b"\x03\x37\xad\x00", "BIP34 44343 encoding regression"
     FULL.write_text(f"# ADAPT_VERSION={ADAPT_VERSION}\n" + adapted)
     print("Wrote", FULL, FULL.stat().st_size, flush=True)
 
