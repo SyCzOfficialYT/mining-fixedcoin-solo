@@ -9,14 +9,16 @@ FULL = ROOT / "stratum" / "server_full.py"
 PATH = FULL
 text = PATH.read_text()
 
-new_version = 'fixedcoin-consensus-repair-2026-08-20-v21'
+new_version = 'fixedcoin-consensus-repair-2026-08-20-v22'
 old_versions = (
+    'fixedcoin-consensus-repair-2026-08-20-v21',
     'fixedcoin-consensus-repair-2026-08-20-v20',
     'fixedcoin-consensus-repair-2026-08-20-v19',
     'fixedcoin-consensus-repair-2026-08-20-v18',
     'fixedcoin-consensus-repair-2026-08-20-v17',
     'fixedcoin-consensus-repair-2026-08-20-v16',
     'fixedcoin-consensus-repair-2026-08-20-v14',
+    'fixedcoin-fch-dashboard-repair-2026-08-20-v15',
     'fixedcoin-fch-dashboard-repair-2026-08-20-v14',
     'fixedcoin-fch-dashboard-repair-2026-08-20-v13',
     'fixedcoin-fch-dashboard-repair-2026-08-20-v12',
@@ -43,8 +45,6 @@ if f"# ADAPT_VERSION={new_version}" not in text:
     raise SystemExit("unexpected generated adapter version; refusing to patch")
 
 # FixedCoin uses the standard minimal positive CScriptNum encoding for BIP34.
-# 44343 == 0xAD37, so the sign bit in 0xAD requires an extra 00 byte:
-# scriptSig begins 03 37 AD 00. Without that byte the node returns bad-cb-height.
 bip34 = '''def bip34_height(height):
     height = int(height)
     if height < 0:
@@ -71,6 +71,25 @@ dev_block = '''        if self.dev_spk is None:
 '''
 text = text.replace(dev_block, '        self.dev_spk = None\n', 1)
 text = text.replace('dev_sats = get_dev_reward_sats(height)', 'dev_sats = 0', 1)
+
+# The daemon's GBT coinbasevalue is the complete amount allowed in the coinbase.
+# Never subtract or add a separate governance reward. The complete GBT value goes
+# to the miner output; the only additional output allowed here is the zero-value
+# witness commitment required by the template.
+text = text.replace(
+    '''        new_value = int(tmpl["coinbasevalue"])
+        dev_sats = min(get_dev_reward_sats(height), new_value)
+        miner_value = new_value - dev_sats
+        if miner_value < 0 or miner_value + dev_sats != new_value:''',
+    '''        new_value = int(tmpl["coinbasevalue"])
+        dev_sats = 0
+        miner_value = new_value
+        if miner_value + dev_sats != new_value:''',
+    1,
+)
+text = text.replace('''        dev_sats = min(get_dev_reward_sats(height), new_value)
+        miner_value = new_value - dev_sats''', '''        dev_sats = 0
+        miner_value = new_value''', 1)
 
 coinbase = '''def build_coinbase_parts(height, miner_value_sats, miner_spk, dev_spk=None, dev_value_sats=0, en1_size=4, en2_size=4, witness_commitment_hex=None, *args, **kwargs):
     """Build a FixedCoin coinbase with miner output and optional witness commitment only."""
@@ -105,7 +124,6 @@ if old in text:
 
 text = text.replace('"dev_value": dev_sats,', '"dev_value": 0,', 1)
 
-# Keep escape sequences literal in the generated source. Do not embed NUL bytes in this patch script.
 witness = r'''def coinbase_add_witness(tx_nowitness, enabled):
     if not enabled or len(tx_nowitness) < 8 or tx_nowitness[4:6] == b"\x00\x01":
         return tx_nowitness
@@ -130,8 +148,7 @@ oldaddr = '''    info2 = rpc("getaddressinfo", [addr])
 '''
 text = text.replace(oldaddr, '', 1)
 
-# Regression checks run on every container start. The generated adapter expects
-# __file__ during normal execution, so provide a synthetic path for the test.
+# Regression checks run on every container build.
 ast.parse(text)
 ns = {
     "__name__": "_fixedcoin_patch_test",
@@ -141,6 +158,12 @@ exec(compile(text, "<fixedcoin-patched-adapter>", "exec"), ns)
 assert ns["bip34_height"](32767) == b"\x02\xff\x7f"
 assert ns["bip34_height"](32768) == b"\x03\x00\x80\x00"
 assert ns["bip34_height"](44343) == b"\x03\x37\xad\x00"
+
+# Hard regression: a 97,656-sat GBT must never produce a 2.5B-sat coinbase.
+assert ns.get("get_dev_reward_sats")(44445) > 0
+assert "dev_sats = 0" in text
+assert 'miner_value = new_value' in text
+assert 'miner_value = new_value - dev_sats' not in text
 
 PATH.write_text(text)
 print(f"patched {PATH} -> {new_version}")
