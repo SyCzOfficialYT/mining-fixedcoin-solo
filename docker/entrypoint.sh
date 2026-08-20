@@ -55,6 +55,10 @@ fixedcoin-cli -datadir="$DATADIR" -rpcuser="$RPCUSER" -rpcpassword="$RPCPASS" ge
 # The setup script reuses the persistent payout address/wallet before ever calling getnewaddress.
 python3 /app/scripts/setup_address.py
 
+# Keep the ledger on the persistent Docker volume. The monitor still reads its
+# normal /app/data/blocks.json path through this symlink.
+ln -sfn "$DATADIR/solo-blocks.json" /app/data/blocks.json
+
 # Persistent block ledger: every wallet-generated solo block is recorded
 # independently of stats.json and survives container rebuilds/restarts.
 python3 /app/scripts/block_ledger.py >>/app/data/block-ledger.log 2>&1 &
