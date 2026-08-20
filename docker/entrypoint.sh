@@ -8,7 +8,6 @@ P2PPORT="${FIX_P2PPORT:-24768}"
 DASH_PORT="${FIX_DASH_PORT:-5050}"
 mkdir -p "$DATADIR" "$DATADIR/wallets" /app/data /app/logs
 
-# Secrets live only in the persistent datadir. They survive container recreation.
 if [[ -z "$RPCPASS" ]]; then
   if [[ -s "$DATADIR/.rpcpassword" ]]; then
     RPCPASS="$(cat "$DATADIR/.rpcpassword")"
@@ -52,25 +51,21 @@ for i in $(seq 1 180); do
 done
 fixedcoin-cli -datadir="$DATADIR" -rpcuser="$RPCUSER" -rpcpassword="$RPCPASS" getblockchaininfo >/dev/null
 
-# The setup script reuses the persistent payout address/wallet before ever calling getnewaddress.
 python3 /app/scripts/setup_address.py
-
-# Keep the ledger on the persistent Docker volume. The monitor still reads its
-# normal /app/data/blocks.json path through this symlink.
 ln -sfn "$DATADIR/solo-blocks.json" /app/data/blocks.json
 
-# Persistent block ledger: every wallet-generated solo block is recorded
-# independently of stats.json and survives container rebuilds/restarts.
 python3 /app/scripts/block_ledger.py >>/app/data/block-ledger.log 2>&1 &
 LEDGER_PID=$!
 
 python3 /app/monitor/app.py >>/app/data/dashboard.log 2>&1 &
 DASH_PID=$!
 
-# The Stratum adapter is generated from a pinned upstream source. Apply the
-# FixedCoin-only consensus corrections before starting it so container rebuilds
-# cannot silently reintroduce the FreeCash governance coinbase.
+# Always generate the adapter first, then apply the FixedCoin-only consensus
+# patch. This ordering is critical: patching server_full.py before server.py
+# starts would otherwise let server.py regenerate the unpatched file.
+STRATUM_BUILD_ONLY=1 python3 /app/stratum/server.py
 python3 /app/scripts/fixcoin_consensus_patch.py
+python3 -m py_compile /app/stratum/server_full.py
 
 python3 /app/stratum/server.py >>/app/data/stratum.log 2>&1 &
 STRATUM_PID=$!
