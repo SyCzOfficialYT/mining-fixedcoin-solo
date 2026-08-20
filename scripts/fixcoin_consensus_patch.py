@@ -102,8 +102,6 @@ text = text.replace(old_coinbase, new_coinbase, 1)
 # Make the generated source self-check the exact BIP34 prefix before a block is
 # ever handed to the node. This turns a silent consensus mismatch into a precise
 # Stratum error and records the actual script bytes in the log.
-needle = '    t = t.replace(\n        \'block = header + encode_varint(tx_count) + coinbase_tx\','
-# Insert validation into handle_submit immediately after coinbase_tx creation.
 validation = r'''    # Consensus guard: FixedCoin BIP34 requires the first coinbase scriptSig
     # push to encode exactly the submitted job height. Never submit a candidate
     # with a stale/malformed height field.
@@ -113,7 +111,6 @@ validation = r'''    # Consensus guard: FixedCoin BIP34 requires the first coinb
         self.send({"id": mid, "result": False, "error": [23, "bad coinbase", None]})
         self.shares_bad += 1; _bump_worker(self.worker, False); _save_stats(); return
     try:
-        script_len = coinbase_tx[41]
         actual_height_script = coinbase_tx[42:42 + len(expected_height_script)]
     except Exception:
         actual_height_script = b""
