@@ -15,6 +15,13 @@ ADAPT_VERSION = "fixedcoin-consensus-repair-2026-08-21-v23"
 
 
 def replace_function(source, name, replacement):
+    # Replacement strings are Python source. Escapes such as \x00 are
+    # interpreted while building the triple-quoted Python string above,
+    # which would otherwise inject literal control bytes into the source.
+    replacement = "".join(
+        f"\\x{ord(ch):02x}" if ord(ch) < 0x20 and ch not in "\n\r\t" else ch
+        for ch in replacement
+    )
     tree = ast.parse(source)
     target = next((n for n in tree.body if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)) and n.name == name), None)
     if target is None:
