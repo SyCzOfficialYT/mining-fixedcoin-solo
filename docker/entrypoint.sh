@@ -57,10 +57,10 @@ python3 /app/monitor/app.py >>/app/data/dashboard.log 2>&1 &
 DASH_PID=$!
 
 # Always generate the adapter first, then apply the FixedCoin-only consensus
-# patch. This ordering is critical: patching server_full.py before server.py
-# starts would otherwise let server.py regenerate the unpatched file.
+# patch and the canonical network-difficulty correction.
 STRATUM_BUILD_ONLY=1 python3 /app/stratum/server.py
 python3 /app/scripts/fixcoin_consensus_patch.py
+python3 /app/scripts/fixcoin_network_difficulty_patch.py
 
 # Keep the startup guard synchronized with the single adapter version declared
 # by stratum/server.py. The consensus patch intentionally bumps this marker.
