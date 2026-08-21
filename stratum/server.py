@@ -11,7 +11,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 FULL = HERE / "server_full.py"
 URL = "https://raw.githubusercontent.com/SyCzOfficialYT/freecash-coin/a88d89675b3a41cc6774e1b975e57e050d4892cc/stratum/server.py"
-ADAPT_VERSION = "fixedcoin-consensus-repair-2026-08-21-v24"
+ADAPT_VERSION = "fixedcoin-consensus-repair-2026-08-21-v26"
 
 
 def sanitize_source(source):
@@ -205,8 +205,6 @@ def adapt(t):
 '''
     t = t.replace(oldaddr, '')
 
-    # Diagnostic logging: make every share rejection self-describing without
-    # changing the acceptance/rejection decision itself.
     t = t.replace(
         'self.send({"id": mid, "result": False, "error": [21, "stale job", None]})',
         'emit("WARN", f"REJECT reason=stale-job worker={self.worker} job={job_id} height={job.get(\'height\')} ntime={ntime_hex} nonce={nonce_hex}")\n            self.send({"id": mid, "result": False, "error": [21, "stale job", None]})',
