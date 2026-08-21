@@ -77,12 +77,136 @@ text = text.replace(
     1,
 )
 
-coinbase = '''def build_coinbase_parts(height, miner_value_sats, miner_spk, dev_spk=None, dev_value_sats=0, en1_size=4, en2_size=4, witness_commitment_hex=None, *args, **kwargs):'''
-text = replace_function(text, "build_coinbase_parts", coinbase + "\n    return build_coinbase_parts_original(height, miner_value_sats, miner_spk, dev_spk, dev_value_sats, en1_size, en2_size, witness_commitment_hex, *args, **kwargs)") if False else text
+coinbase = '''def build_coinbase_parts(height, miner_value_sats, miner_spk, dev_spk=None, dev_value_sats=0, en1_size=4, en2_size=4, witness_commitment_hex=None, *args, **kwargs):
+    """Build a FixedCoin coinbase with the miner output and optional witness commitment."""
+    tag = b"/FIX-Solo/"
+    height_script = bip34_height(height)
+    scriptsig_len = len(height_script) + en1_size + en2_size + len(tag)
+    part1 = struct.pack("<I", 2) + b"\\x01" + b"\\x00" * 32 + struct.pack("<I", 0xFFFFFFFF)
+    part1 += encode_varint(scriptsig_len) + height_script
+    witness = b""
+    if witness_commitment_hex:
+        try:
+            witness = binascii.unhexlify(witness_commitment_hex)
+        except Exception:
+            witness = b""
+    outputs = 1 + (1 if witness else 0)
+    part2 = tag + struct.pack("<I", 0xFFFFFFFF) + encode_varint(outputs)
+    part2 += struct.pack("<Q", int(miner_value_sats)) + encode_varint(len(miner_spk)) + miner_spk
+    if witness:
+        part2 += struct.pack("<Q", 0) + encode_varint(len(witness)) + witness
+    part2 += struct.pack("<I", 0)
+    return binascii.hexlify(part1).decode(), binascii.hexlify(part2).decode()
+'''
+text = replace_function(text, "build_coinbase_parts", coinbase)
 
-# Keep the existing v26 consensus transformations unchanged; v27 only
-# advances the generated-adapter marker so startup validation has one source
-# of truth with stratum/server.py.
+old = '"other_tx": other_tx, "created": time.time(),'
+if old in text:
+    text = text.replace(old, old + '\n                "witness_commitment": tmpl.get("default_witness_commitment"),', 1)
+text = text.replace('"dev_value": dev_sats,', '"dev_value": 0,', 1)
 
-def generate_server():
-    raise RuntimeError("fixcoin_consensus_patch.py is a runtime patcher; server.py must generate server_full.py first")
+witness = r'''def coinbase_add_witness(tx_nowitness, enabled):
+    if not enabled or len(tx_nowitness) < 8 or tx_nowitness[4:6] == b"\x00\x01":
+        return tx_nowitness
+    return tx_nowitness[:4] + b"\x00\x01" + tx_nowitness[4:-4] + b"\x01\x20" + (b"\x00" * 32) + tx_nowitness[-4:]
+'''
+if "def coinbase_add_witness" in text:
+    text = replace_function(text, "coinbase_add_witness", witness)
+elif "\ndef assemble_coinbase(" in text:
+    text = text.replace("\ndef assemble_coinbase(", "\n" + witness + "\ndef assemble_coinbase(", 1)
+else:
+    raise RuntimeError("assemble_coinbase anchor missing")
+
+text = text.replace(
+    "block = header + encode_varint(tx_count) + coinbase_tx",
+    "block = header + encode_varint(tx_count) + coinbase_add_witness(coinbase_tx, bool(job.get(\"witness_commitment\")))",
+    1,
+)
+
+oldaddr = '''    info2 = rpc("getaddressinfo", [addr])
+    if info2 and info2.get("scriptPubKey"):
+        return binascii.unhexlify(info2["scriptPubKey"])
+'''
+text = text.replace(oldaddr, "", 1)
+
+# Replace the fragile submitblock accounting snippet by locating the block
+# semantically. Upstream FreeCash changes whitespace/lines occasionally; the
+# old exact-string replacement was why the v25 build failed.
+submission_re = re.compile(
+    r'(?ms)^            res = rpc\("submitblock", \[binascii\.hexlify\(block\)\.decode\(\)\]\)\n'
+    r'            if res in \(None, ""\):\n'
+    r'.*?^                emit\("ERROR", f"submitblock rejected: \{res\}"\)'
+)
+submission_new = '''            res = rpc("submitblock", [binascii.hexlify(block).decode()])
+
+            # Some FixedCoin Core versions return "inconclusive" even though
+            # the candidate is already known/accepted. Never discard a solo
+            # block solely because submitblock returned a non-empty status.
+            candidate_seen = False
+            candidate_canonical = False
+            try:
+                active_hash = str(rpc("getblockhash", [job["height"]]) or "").lower()
+                candidate_seen = active_hash == hhex.lower()
+                if not candidate_seen:
+                    candidate = rpc("getblock", [hhex, 1])
+                    candidate_seen = bool(candidate and str(candidate.get("hash") or "").lower() == hhex.lower())
+                candidate_canonical = active_hash == hhex.lower()
+            except Exception:
+                candidate_seen = False
+
+            accepted = res in (None, "") or candidate_seen
+            if accepted:
+                state = "canonical" if candidate_canonical else "known"
+                emit("OK", f"*** BLOCK ACCEPTED *** height={job['height']} state={state} submit={res!r}")
+                with _stats_lock:
+                    _stats["blocks_found"] = _stats.get("blocks_found", 0) + 1
+                    _stats["block_rewards_total"] = _stats.get("block_rewards_total", 0) + job["value"] / 1e8
+                    blog = _stats.setdefault("blocks_log", [])
+                    blog.append({
+                        "ts": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
+                        "height": job["height"], "hash": hhex,
+                        "reward": job["value"] / 1e8, "address": PAYOUT_ADDRESS,
+                        "mature_at_height": job["height"] + int(os.getenv("COINBASE_MATURITY", "100")),
+                        "submit_result": res,
+                        "canonical": candidate_canonical,
+                    })
+                    _stats["blocks_log"] = blog[-200:]
+                _save_stats()
+            else:
+                emit("ERROR", f"submitblock rejected: {res}; candidate_not_found={not candidate_seen}")'''
+text, n = submission_re.subn(submission_new, text, count=1)
+if n != 1:
+    raise RuntimeError("submitblock accounting block marker missing")
+
+# Diagnostic rejection logging.
+text = text.replace(
+    'self.send({"id": mid, "result": False, "error": [21, "stale job", None]})',
+    'emit("WARN", f"REJECT reason=stale-job worker={self.worker} job={job_id}")\n            self.send({"id": mid, "result": False, "error": [21, "stale job", None]})',
+    1,
+)
+text = text.replace(
+    'self.send({"id": mid, "result": False, "error": [20, "bad hex", None]})',
+    'emit("WARN", f"REJECT reason=bad-hex worker={self.worker} job={job_id} en2={en2_hex} ntime={ntime_hex} nonce={nonce_hex}")\n            self.send({"id": mid, "result": False, "error": [20, "bad hex", None]})',
+    1,
+)
+text = text.replace(
+    'self.send({"id": mid, "result": False, "error": [23, "low difficulty", None]})',
+    'emit("WARN", f"REJECT reason=low-difficulty worker={self.worker} job={job_id} height={job[\'height\']} share_diff={share_work:.6f} required_diff={need:.6f} fixed_diff={self.diff:.6f} ntime={ntime_hex} nonce={nonce_hex} hash={hhex[:24]}")\n            self.send({"id": mid, "result": False, "error": [23, "low difficulty", None]})',
+    1,
+)
+
+# Build-time regression checks.
+ast.parse(text)
+ns = {"__name__": "_fixedcoin_patch_test", "__file__": str(PATH)}
+exec(compile(text, "<fixedcoin-patched-adapter>", "exec"), ns)
+assert ns["bip34_height"](32767) == b"\x02\xff\x7f"
+assert ns["bip34_height"](32768) == b"\x03\x00\x80\x00"
+assert ns["bip34_height"](44343) == b"\x03\x37\xad\x00"
+assert 'submitblock rejected: {res}; candidate_not_found=' in text
+assert 'candidate_seen = active_hash == hhex.lower()' in text
+assert "dev_sats = 0" in text
+assert "miner_value = new_value" in text
+assert 'miner_value = new_value - dev_sats' not in text
+assert "DEV_ADDRESS = None" in text
+PATH.write_text(text)
+print(f"patched {PATH} -> {new_version}")
