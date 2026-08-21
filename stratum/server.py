@@ -11,7 +11,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 FULL = HERE / "server_full.py"
 URL = "https://raw.githubusercontent.com/SyCzOfficialYT/freecash-coin/a88d89675b3a41cc6774e1b975e57e050d4892cc/stratum/server.py"
-ADAPT_VERSION = "fixedcoin-consensus-repair-2026-08-21-v26"
+ADAPT_VERSION = "fixedcoin-consensus-repair-2026-08-21-v27"
 
 
 def sanitize_source(source):
@@ -55,10 +55,20 @@ def adapt(t):
     rpc_replacement = '''def rpc(method, params=None):
     import requests as _requests
     from requests.auth import HTTPBasicAuth as _HTTPBasicAuth
+
     endpoint = f"http://{RPC_HOST}:{RPC_PORT}"
     payload = {"jsonrpc": "1.0", "id": "stratum", "method": method, "params": params or []}
     user = os.getenv("FIX_RPCUSER", RPC_USER) or RPC_USER
     password = os.getenv("FIX_RPCPASS", RPC_PASS) or RPC_PASS
+
+    # Keep the last valid GBT in memory. FixedCoin can temporarily return
+    # -10 while it is advancing/syncing. Existing Stratum jobs remain valid
+    # during that short window, so do not destroy a working job just because
+    # a refresh attempt failed.
+    global _FIX_GBT_CACHE
+    if "_FIX_GBT_CACHE" not in globals():
+        _FIX_GBT_CACHE = None
+
     attempts = []
     if password:
         attempts.append(("basic-env", _HTTPBasicAuth(user, password)))
@@ -73,6 +83,7 @@ def adapt(t):
             pass
     if not attempts:
         attempts.append(("basic-config", _HTTPBasicAuth(user, password)))
+
     last_error = None
     for auth_name, auth in attempts:
         try:
@@ -86,14 +97,27 @@ def adapt(t):
                 last_error = data.get("error")
                 if r.status_code in (401, 403):
                     continue
+                if method == "getblocktemplate" and isinstance(last_error, dict) and int(last_error.get("code", 0)) == -10:
+                    if _FIX_GBT_CACHE is not None:
+                        log.warning("getblocktemplate temporarily unavailable (-10); keeping last valid template/job")
+                        return _FIX_GBT_CACHE
+                    log.error("RPC %s via %s: %s", method, auth_name, last_error)
+                    return None
                 log.error("RPC %s via %s: %s", method, auth_name, last_error)
                 return None
             if r.status_code >= 400:
                 last_error = {"code": r.status_code, "message": r.text[:500]}
                 continue
-            return data.get("result")
+            result = data.get("result")
+            if method == "getblocktemplate" and result:
+                _FIX_GBT_CACHE = result
+            return result
         except Exception as exc:
             last_error = str(exc)
+
+    if method == "getblocktemplate" and _FIX_GBT_CACHE is not None:
+        log.warning("getblocktemplate refresh failed; keeping last valid template/job: %s", last_error)
+        return _FIX_GBT_CACHE
     log.error("RPC %s failed after %d auth attempt(s): %s", method, len(attempts), last_error)
     return None
 '''
@@ -235,6 +259,7 @@ def generate_server():
     assert 'def bip34_height(height):' in adapted
     assert 'REJECT reason=low-difficulty' in adapted
     assert 'REJECT reason=stale-job' in adapted
+    assert 'keeping last valid template/job' in adapted
     ns = {"__name__": "_fixedcoin_adapter_test", "__file__": str(FULL)}
     exec(compile(adapted, "<fixedcoin-adapter-test>", "exec"), ns)
     assert ns["bip34_height"](44343) == b"\x03\x37\xad\x00", "BIP34 44343 encoding regression"
