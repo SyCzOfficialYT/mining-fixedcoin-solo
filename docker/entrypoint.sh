@@ -65,6 +65,14 @@ DASH_PID=$!
 # starts would otherwise let server.py regenerate the unpatched file.
 STRATUM_BUILD_ONLY=1 python3 /app/stratum/server.py
 python3 /app/scripts/fixcoin_consensus_patch.py
+
+EXPECTED_ADAPT_VERSION="fixedcoin-consensus-repair-2026-08-21-v23"
+ACTUAL_ADAPT_VERSION="$(sed -n '1s/^# ADAPT_VERSION=//p' /app/stratum/server_full.py)"
+if [[ "$ACTUAL_ADAPT_VERSION" != "$EXPECTED_ADAPT_VERSION" ]]; then
+  echo "FATAL: generated Stratum adapter version mismatch: expected=$EXPECTED_ADAPT_VERSION actual=$ACTUAL_ADAPT_VERSION" >&2
+  exit 1
+fi
+
 python3 -m py_compile /app/stratum/server_full.py
 
 python3 /app/stratum/server.py >>/app/data/stratum.log 2>&1 &
