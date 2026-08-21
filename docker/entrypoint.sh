@@ -4,7 +4,7 @@ DATADIR="${FIX_DATADIR:-/data/fixedcoin}"
 RPCUSER="${FIX_RPCUSER:-fixrpc}"
 RPCPASS="${FIX_RPCPASS:-}"
 RPCPORT="${FIX_RPCPORT:-24761}"
-P2PPORT="${FIX_P2PPORT:-24768}"
+P2PPORT="${P2PPORT:-24768}"
 DASH_PORT="${FIX_DASH_PORT:-5050}"
 mkdir -p "$DATADIR" "$DATADIR/wallets" /app/data /app/logs
 
@@ -61,7 +61,6 @@ DASH_PID=$!
 # starts would otherwise let server.py regenerate the unpatched file.
 STRATUM_BUILD_ONLY=1 python3 /app/stratum/server.py
 python3 /app/scripts/fixcoin_consensus_patch.py
-python3 /app/scripts/fixcoin_log_precision_patch_v2.py
 
 # Keep the startup guard synchronized with the single adapter version declared
 # by stratum/server.py. The consensus patch intentionally bumps this marker.
