@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#01060a">
   <title>FixedCoin · Solo Mining</title>
   <link rel="stylesheet" href="/static/dashboard.css?v=2026-08-20-reference-2">
-  <script defer src="/static/dashboard.js?v=2026-08-20-reference-2"></script>
+  <script defer src="/static/dashboard.js?v=2026-08-21-blocks-1"></script>
 </head>
 <body>
 <div class="app">
@@ -138,10 +138,10 @@
         </section>
 
         <section class="card blocks-card" id="blocks">
-          <div class="section-head"><div><h2>SOLO BLOCKS</h2><p>Blocks credited to the mining wallet. Validity and maturity are shown per block.</p></div><span class="round-pill" id="blocksPill">0 FOUND</span></div>
-          <div class="block-table-head"><span>Height</span><span>Block Hash</span><span>Reward</span><span>Confirmations</span><span>Maturity</span><span>Status</span></div>
+          <div class="section-head"><div><h2>SOLO BLOCKS</h2><p>Persistent solo-found blocks. Validity rounds and maturity are shown per block.</p></div><span class="round-pill" id="blocksPill">0 FOUND</span></div>
+          <div class="block-table-head"><span>Height</span><span>Block Hash</span><span>Reward</span><span>Validity Rounds</span><span>Maturity</span><span>Status</span></div>
           <div id="blockList" class="block-list"><div class="empty">No solo blocks found yet.</div></div>
-          <div class="block-note"><b>ⓘ</b><span>Coinbase rewards require 100 confirmations before they are spendable.<br>Maturity is calculated from the block height.</span></div>
+          <div class="block-note"><b>ⓘ</b><span>Each confirmation counts as one validity round. Coinbase rewards require 100 confirmations before they are spendable.<br>History is persisted in the mining data volume and survives dashboard/container restarts.</span></div>
         </section>
 
         <section class="card events-card" id="events">
