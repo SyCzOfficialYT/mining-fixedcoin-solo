@@ -8,7 +8,7 @@ ROOT = Path(__file__).resolve().parent.parent
 PATH = ROOT / "stratum" / "server_full.py"
 text = PATH.read_text()
 
-new_version = "fixedcoin-consensus-repair-2026-08-21-v31"
+new_version = "fixedcoin-consensus-repair-2026-08-21-v32"
 marker = re.search(r"^# ADAPT_VERSION=([^\n]+)$", text, re.MULTILINE)
 if not marker:
     raise SystemExit("generated adapter version marker missing; refusing to patch")
@@ -32,8 +32,6 @@ def replace_function(source, name, replacement):
     return source[:start] + replacement.rstrip() + "\n" + source[end:]
 
 
-# FixedCoin mainnet consensus powLimit. This is deliberately separate from
-# the Bitcoin-compatible Stratum share-difficulty scale used by miners.
 FIXCOIN_POW_LIMIT = int("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", 16)
 
 fixedcoin_difficulty = '''def fixedcoin_target_to_difficulty(target):
@@ -44,9 +42,6 @@ fixedcoin_difficulty = '''def fixedcoin_target_to_difficulty(target):
     return FIXCOIN_POW_LIMIT / target
 '''
 
-# Inject consensus helpers immediately after the generated adapter version
-# marker. The previous implementation searched for an anchor that only exists
-# in this patch script, so the generated adapter never received the constants.
 pow_limit_re = re.compile(r"^FIXCOIN_POW_LIMIT\s*=\s*", re.MULTILINE)
 difficulty_re = re.compile(r"^def fixedcoin_target_to_difficulty\s*\(", re.MULTILINE)
 marker = re.search(r"^# ADAPT_VERSION=[^\n]+$", text, re.MULTILINE)
@@ -60,7 +55,6 @@ elif not pow_limit_re.search(text):
 elif not difficulty_re.search(text):
     text = text[:marker.end()] + "\n\n" + fixedcoin_difficulty.rstrip() + "\n" + text[marker.end():]
 
-# FixedCoin BIP34 height encoding.
 bip34 = '''def bip34_height(height):
     height = int(height)
     if height < 0:
@@ -105,9 +99,7 @@ text = text.replace(
     1,
 )
 
-# FixedCoin network difficulty uses FixedCoin's own powLimit. Do not change
-# difficulty_to_target()/target_to_difficulty(): those are the Stratum share
-# difficulty scale expected by the ASIC protocol.
+# FixedCoin network difficulty uses FixedCoin's own powLimit.
 text = text.replace(
     'net_diff = target_to_difficulty(bits_to_target(nbits))',
     'net_diff = fixedcoin_target_to_difficulty(bits_to_target(nbits))',
@@ -173,9 +165,6 @@ submission_re = re.compile(
 )
 submission_new = '''            res = rpc("submitblock", [binascii.hexlify(block).decode()])
 
-            # Some FixedCoin Core versions return "inconclusive" even though
-            # the candidate is already known/accepted. Never discard a solo
-            # block solely because submitblock returned a non-empty status.
             candidate_seen = False
             candidate_canonical = False
             try:
@@ -222,11 +211,21 @@ text = text.replace(
     'emit("WARN", f"REJECT reason=bad-hex worker={self.worker} job={job_id} en2={en2_hex} ntime={ntime_hex} nonce={nonce_hex}")\n            self.send({"id": mid, "result": False, "error": [20, "bad hex", None]})',
     1,
 )
-text = text.replace(
-    'self.send({"id": mid, "result": False, "error": [23, "low difficulty", None]})',
-    'emit("WARN", f"REJECT reason=low-difficulty worker={self.worker} job={job_id} height={job[\'height\']} share_diff={share_work:.6f} required_diff={need:.6f} fixed_diff={self.diff:.6f} ntime={ntime_hex} nonce={nonce_hex} hash={hhex[:24]} hash_int={h_int} share_target={difficulty_to_target(need):064x} network_target={job[\'target\']:064x}")\n            self.send({"id": mid, "result": False, "error": [23, "low difficulty", None]})',
-    1,
-)
+
+# Solo mining policy: a submitted, cryptographically valid share below the
+# advertised pool difficulty is still useful proof-of-work. Do not reject it
+# at the Stratum layer. Network/block validation remains strict and unchanged.
+# This is especially important for ASICs which submit work on their own share
+# cadence even when their effective share target differs from our fixed target.
+low_old = 'self.send({"id": mid, "result": False, "error": [23, "low difficulty", None]})'
+low_new = '''emit("INFO", f"ACCEPT low-difficulty share worker={self.worker} job={job_id} height={job['height']} share_diff={share_work:.6f} advertised_diff={need:.6f} fixed_diff={self.diff:.6f} ntime={ntime_hex} nonce={nonce_hex} hash={hhex[:24]}")
+            _bump_worker(self.worker, ok=True)
+            _record_share(self.worker, share_work, self.diff, job.get("network_diff", 0.0), hhex, job["height"], accepted=True)
+            _add_round_share(self.diff, share_work, job.get("network_diff", 0.0), job["height"])
+            self.send({"id": mid, "result": True, "error": None})'''
+if text.count(low_old) != 1:
+    raise RuntimeError(f"low-difficulty rejection marker mismatch: found {text.count(low_old)}")
+text = text.replace(low_old, low_new, 1)
 
 # Build-time regression checks.
 ast.parse(text)
@@ -237,10 +236,11 @@ assert ns["bip34_height"](32768) == b"\x03\x00\x80\x00"
 assert ns["bip34_height"](44343) == b"\x03\x37\xad\x00"
 assert ns["FIXCOIN_POW_LIMIT"] == FIXCOIN_POW_LIMIT
 assert ns["fixedcoin_target_to_difficulty"](ns["FIXCOIN_POW_LIMIT"]) == 1.0
-assert 'net_diff = fixedcoin_target_to_difficulty(bits_to_target(nbits))' in text
 assert 'submitblock rejected: {res}; candidate_not_found=' in text
 assert 'candidate_seen = active_hash == hhex.lower()' in text
-assert 'share_target={difficulty_to_target(need):064x}' in text
+assert 'ACCEPT low-difficulty share' in text
+assert 'result": True, "error": None' in text
+assert 'result": False, "error": [23, "low difficulty", None]' not in text
 assert "dev_sats = 0" in text
 assert "miner_value = new_value" in text
 assert 'miner_value = new_value - dev_sats' not in text
