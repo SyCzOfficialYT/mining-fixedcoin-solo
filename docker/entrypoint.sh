@@ -4,7 +4,7 @@ DATADIR="${FIX_DATADIR:-/data/fixedcoin}"
 RPCUSER="${FIX_RPCUSER:-fixrpc}"
 RPCPASS="${FIX_RPCPASS:-}"
 RPCPORT="${FIX_RPCPORT:-24761}"
-P2PPORT="${FIX_P2PPORT:-24768}"
+P2PPORT="${P2PPORT:-24768}"
 DASH_PORT="${FIX_DASH_PORT:-5050}"
 mkdir -p "$DATADIR" "$DATADIR/wallets" /app/data /app/logs
 
@@ -54,9 +54,6 @@ fixedcoin-cli -datadir="$DATADIR" -rpcuser="$RPCUSER" -rpcpassword="$RPCPASS" ge
 python3 /app/scripts/setup_address.py
 ln -sfn "$DATADIR/solo-blocks.json" /app/data/blocks.json
 
-python3 /app/scripts/block_ledger.py >>/app/data/block-ledger.log 2>&1 &
-LEDGER_PID=$!
-
 python3 /app/monitor/app.py >>/app/data/dashboard.log 2>&1 &
 DASH_PID=$!
 
@@ -77,6 +74,18 @@ python3 -m py_compile /app/stratum/server_full.py
 
 python3 /app/stratum/server.py >>/app/data/stratum.log 2>&1 &
 STRATUM_PID=$!
+
+# The persistent ledger must start only after the node RPC and Stratum process
+# are both initialized. It uses authenticated RPC directly and scans the chain
+# as the authoritative source, so container recreation cannot erase found blocks.
+python3 /app/scripts/block_ledger.py >>/app/data/block-ledger.log 2>&1 &
+LEDGER_PID=$!
+sleep 1
+if ! kill -0 "$LEDGER_PID" 2>/dev/null; then
+  echo "FATAL: persistent block ledger exited during startup" >&2
+  cat /app/data/block-ledger.log >&2 || true
+  exit 1
+fi
 
 echo "FixedCoin Solo online: dashboard :${DASH_PORT}, stratum :3333, RPC :${RPCPORT}"
 
