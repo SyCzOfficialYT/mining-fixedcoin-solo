@@ -59,9 +59,25 @@ DASH_PID=$!
 # Always generate the adapter first, then apply all FixedCoin-only patches.
 # The consensus patch intentionally owns the final adapter version marker.
 STRATUM_BUILD_ONLY=1 python3 /app/stratum/server.py
+python3 /app/scripts/fixcoin_stratum_job_patch.py
 python3 /app/scripts/fixcoin_consensus_patch.py
 python3 /app/scripts/fixcoin_network_difficulty_patch.py
 python3 /app/scripts/fixcoin_dashboard_difficulty_patch.py
+
+# Runtime regression guards: the job-refresh patch must be present in the
+# generated adapter after startup regeneration, not only in the Docker image.
+if ! grep -Fq 'same_value = int(job.get("value") or 0) == miner_value' /app/stratum/server_full.py; then
+  echo "FATAL: Stratum job-refresh patch missing from generated adapter" >&2
+  exit 1
+fi
+if grep -Fq 'same_value = int(job.get("value") or 0) == new_value' /app/stratum/server_full.py; then
+  echo "FATAL: Stratum adapter still compares gross GBT value with miner value" >&2
+  exit 1
+fi
+if ! grep -Fq 'job={job_id} height=? ntime={ntime_hex} nonce={nonce_hex}' /app/stratum/server_full.py; then
+  echo "FATAL: safe stale-job handling missing from generated adapter" >&2
+  exit 1
+fi
 
 # Keep the startup guard synchronized with the version produced by the
 # consensus patch itself. Do not compare against the unpatched generator
