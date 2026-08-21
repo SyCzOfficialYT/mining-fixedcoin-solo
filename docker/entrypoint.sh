@@ -63,7 +63,13 @@ DASH_PID=$!
 STRATUM_BUILD_ONLY=1 python3 /app/stratum/server.py
 python3 /app/scripts/fixcoin_consensus_patch.py
 
-EXPECTED_ADAPT_VERSION="fixedcoin-consensus-repair-2026-08-21-v23"
+# Keep the startup guard synchronized with the single adapter version declared
+# by stratum/server.py. The consensus patch intentionally bumps this marker.
+EXPECTED_ADAPT_VERSION="$(sed -n 's/^ADAPT_VERSION = [\"'"'"']\([^\"'"'"']*\)[\"'"'"']$/\1/p' /app/stratum/server.py | head -n 1)"
+if [[ -z "$EXPECTED_ADAPT_VERSION" ]]; then
+  echo "FATAL: could not determine expected Stratum adapter version" >&2
+  exit 1
+fi
 ACTUAL_ADAPT_VERSION="$(sed -n '1s/^# ADAPT_VERSION=//p' /app/stratum/server_full.py)"
 if [[ "$ACTUAL_ADAPT_VERSION" != "$EXPECTED_ADAPT_VERSION" ]]; then
   echo "FATAL: generated Stratum adapter version mismatch: expected=$EXPECTED_ADAPT_VERSION actual=$ACTUAL_ADAPT_VERSION" >&2
