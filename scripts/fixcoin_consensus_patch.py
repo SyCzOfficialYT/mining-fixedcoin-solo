@@ -8,7 +8,7 @@ ROOT = Path(__file__).resolve().parent.parent
 PATH = ROOT / "stratum" / "server_full.py"
 text = PATH.read_text()
 
-new_version = "fixedcoin-consensus-repair-2026-08-21-v27"
+new_version = "fixedcoin-consensus-repair-2026-08-21-v28"
 marker = re.search(r"^# ADAPT_VERSION=([^\n]+)$", text, re.MULTILINE)
 if not marker:
     raise SystemExit("generated adapter version marker missing; refusing to patch")
@@ -31,6 +31,19 @@ def replace_function(source, name, replacement):
     end = sum(map(len, lines[: target.end_lineno]))
     return source[:start] + replacement.rstrip() + "\n" + source[end:]
 
+
+# FixedCoin mainnet consensus powLimit. This is deliberately separate from
+# the Bitcoin-compatible Stratum share-difficulty scale used by miners.
+FIXCOIN_POW_LIMIT = int("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", 16)
+
+fixedcoin_difficulty = '''def fixedcoin_target_to_difficulty(target):
+    """Convert a FixedCoin network target to FixedCoin network difficulty."""
+    target = int(target)
+    if target <= 0:
+        return 0.0
+    return FIXCOIN_POW_LIMIT / target
+'''
+text = text.replace("\n\ndef replace_function(source, name, replacement):", "\n\n" + fixedcoin_difficulty + "\ndef replace_function(source, name, replacement):", 1)
 
 # FixedCoin BIP34 height encoding.
 bip34 = '''def bip34_height(height):
@@ -74,6 +87,15 @@ text = text.replace(
         miner_value = new_value - dev_sats''',
     '''        dev_sats = 0
         miner_value = new_value''',
+    1,
+)
+
+# FixedCoin network difficulty uses FixedCoin's own powLimit. Do not change
+# difficulty_to_target()/target_to_difficulty(): those are the Stratum share
+# difficulty scale expected by the ASIC protocol.
+text = text.replace(
+    'net_diff = target_to_difficulty(bits_to_target(nbits))',
+    'net_diff = fixedcoin_target_to_difficulty(bits_to_target(nbits))',
     1,
 )
 
@@ -178,7 +200,8 @@ text, n = submission_re.subn(submission_new, text, count=1)
 if n != 1:
     raise RuntimeError("submitblock accounting block marker missing")
 
-# Diagnostic rejection logging.
+# Diagnostic rejection logging: include the exact hash/target values so a
+# reject can be audited without reproducing the share externally.
 text = text.replace(
     'self.send({"id": mid, "result": False, "error": [21, "stale job", None]})',
     'emit("WARN", f"REJECT reason=stale-job worker={self.worker} job={job_id}")\n            self.send({"id": mid, "result": False, "error": [21, "stale job", None]})',
@@ -191,7 +214,7 @@ text = text.replace(
 )
 text = text.replace(
     'self.send({"id": mid, "result": False, "error": [23, "low difficulty", None]})',
-    'emit("WARN", f"REJECT reason=low-difficulty worker={self.worker} job={job_id} height={job[\'height\']} share_diff={share_work:.6f} required_diff={need:.6f} fixed_diff={self.diff:.6f} ntime={ntime_hex} nonce={nonce_hex} hash={hhex[:24]}")\n            self.send({"id": mid, "result": False, "error": [23, "low difficulty", None]})',
+    'emit("WARN", f"REJECT reason=low-difficulty worker={self.worker} job={job_id} height={job[\'height\']} share_diff={share_work:.6f} required_diff={need:.6f} fixed_diff={self.diff:.6f} ntime={ntime_hex} nonce={nonce_hex} hash={hhex[:24]} hash_int={h_int} share_target={difficulty_to_target(need):064x} network_target={job[\'target\']:064x}")\n            self.send({"id": mid, "result": False, "error": [23, "low difficulty", None]})',
     1,
 )
 
@@ -202,8 +225,12 @@ exec(compile(text, "<fixedcoin-patched-adapter>", "exec"), ns)
 assert ns["bip34_height"](32767) == b"\x02\xff\x7f"
 assert ns["bip34_height"](32768) == b"\x03\x00\x80\x00"
 assert ns["bip34_height"](44343) == b"\x03\x37\xad\x00"
+assert ns["FIXCOIN_POW_LIMIT"] == int("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", 16)
+assert ns["fixedcoin_target_to_difficulty"](ns["FIXCOIN_POW_LIMIT"]) == 1.0
+assert 'net_diff = fixedcoin_target_to_difficulty(bits_to_target(nbits))' in text
 assert 'submitblock rejected: {res}; candidate_not_found=' in text
 assert 'candidate_seen = active_hash == hhex.lower()' in text
+assert 'share_target={difficulty_to_target(need):064x}' in text
 assert "dev_sats = 0" in text
 assert "miner_value = new_value" in text
 assert 'miner_value = new_value - dev_sats' not in text
