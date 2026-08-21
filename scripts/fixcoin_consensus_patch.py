@@ -8,7 +8,7 @@ ROOT = Path(__file__).resolve().parent.parent
 PATH = ROOT / "stratum" / "server_full.py"
 text = PATH.read_text()
 
-new_version = "fixedcoin-consensus-repair-2026-08-21-v33"
+new_version = "fixedcoin-consensus-repair-2026-08-21-v34"
 marker = re.search(r"^# ADAPT_VERSION=([^\n]+)$", text, re.MULTILINE)
 if not marker:
     raise SystemExit("generated adapter version marker missing; refusing to patch")
@@ -80,6 +80,14 @@ dev_block = '''        if self.dev_spk is None:
 '''
 text = text.replace(dev_block, "        self.dev_spk = None\n", 1)
 text = text.replace("dev_sats = get_dev_reward_sats(height)", "dev_sats = 0", 1)
+
+# Remove stale FreeCash governance terminology from generated runtime logs.
+text = text.replace(
+    'emit("INFO", f"Dev/governance output → {DEV_ADDRESS} (2-out coinbase required by FixedCoin)")',
+    'emit("INFO", "Governance/dev output disabled; full coinbase reward goes to miner")',
+    1,
+)
+text = text.replace("(2-out coinbase)", "(miner-only coinbase)")
 
 # GBT coinbasevalue is the complete miner payout.
 accounting_old = '''        new_value = int(tmpl["coinbasevalue"])
@@ -233,5 +241,8 @@ assert "dev_sats = 0" in text
 assert "miner_value = new_value" in text
 assert 'miner_value = new_value - dev_sats' not in text
 assert "DEV_ADDRESS = None" in text
+assert 'Governance/dev output disabled; full coinbase reward goes to miner' in text
+assert '(2-out coinbase)' not in text
+assert '(2-out coinbase required by FixedCoin)' not in text
 PATH.write_text(text)
 print(f"patched {PATH} -> {new_version}")
