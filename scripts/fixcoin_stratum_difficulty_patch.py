@@ -23,45 +23,32 @@ replacement = '''            need = self.effective_min_diff()
                 return
 '''
 
-# fixcoin_consensus_patch.py intentionally converts the original low-
-# difficulty rejection into an accounting accept. Do not depend on exact
-# whitespace or on the presence of the original `need = ...` marker: the
-# generated adapter has changed shape several times during the repair work.
-accept_marker = 'ACCEPT low-difficulty share'
-accept_pos = text.find(accept_marker)
-if accept_pos < 0:
-    raise RuntimeError("low-difficulty acceptance marker not found")
+# fixcoin_consensus_patch.py intentionally changes the original low-
+# difficulty rejection into an accounting accept. Replace that whole
+# generated low-difficulty section again, but locate its boundaries by the
+# stable control-flow anchors instead of depending on exact generated text.
+start_marker = '            need = self.effective_min_diff()\n'
+end_marker = '            if share_work >= self.diff:\n'
 
-# Find the beginning of the generated low-difficulty section. Prefer the
-# effective difficulty assignment when present; otherwise walk backwards to
-# the nearest conditional/hash guard surrounding the acceptance marker.
-section_start = text.rfind('            need = self.effective_min_diff()\n', 0, accept_pos)
-if section_start < 0:
-    section_start = text.rfind('            if h_int > difficulty_to_target(need):', 0, accept_pos)
-if section_start < 0:
-    # Last-resort structural fallback: locate the line containing the
-    # acceptance emit and back up to the nearest four-space/12-space block
-    # boundary. This handles generated variants where the `need` assignment
-    # is folded into another helper.
-    line_start = text.rfind('\n', 0, accept_pos) + 1
-    block_marker = '            '
-    section_start = text.rfind('\n' + block_marker, 0, line_start)
-    section_start = section_start + 1 if section_start >= 0 else line_start
+start = text.find(start_marker)
+if start < 0:
+    raise RuntimeError("low-difficulty start marker not found")
 
-# The normal share accounting resumes at vardiff timing. Everything after
-# that point belongs to the valid-share path and must remain untouched.
-end_marker = '            self.vardiff_buf.append(time.time())\n'
-section_end = text.find(end_marker, accept_pos)
-if section_end < 0:
+end = text.find(end_marker, start)
+if end < 0:
     raise RuntimeError("low-difficulty block end marker not found")
 
-candidate = text[section_start:section_end]
+candidate = text[start:end]
+if 'h_int > difficulty_to_target(need)' not in candidate:
+    raise RuntimeError("low-difficulty guard not found")
 if 'ACCEPT low-difficulty share' not in candidate:
-    raise RuntimeError("low-difficulty block content mismatch")
+    raise RuntimeError("low-difficulty acceptance marker not found")
 if 'self.send({"id": mid, "result": True, "error": None})' not in candidate:
     raise RuntimeError("low-difficulty accept response missing")
+if 'self.shares_bad += 1' not in candidate:
+    raise RuntimeError("low-difficulty accounting tail not found")
 
-text = text[:section_start] + replacement + text[section_end:]
+text = text[:start] + replacement + text[end:]
 
 if text.count('share_target = difficulty_to_target(need)') != 1:
     raise RuntimeError("share target guard mismatch")
