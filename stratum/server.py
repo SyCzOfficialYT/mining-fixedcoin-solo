@@ -10,8 +10,8 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 FULL = HERE / "server_full.py"
-URL = "https://raw.githubusercontent.com/SyCzOfficialYT/freecash-coin/a88d89675b3a41cc6774e1b975e57e050d4892cc/stratum/server.py"
-ADAPT_VERSION = "fixedcoin-fch-dashboard-repair-2026-08-20-v15"
+URL = "https://raw.githubusercontent.com/Fixed-Blockchain/fixedcoin/releases/download/v29.1.3/fixedcoin-29.1.3-x86_64-linux-gnu.tar.gz"
+ADAPT_VERSION = "fixedcoin-consensus-repair-2026-08-21-v23"
 
 
 def replace_function(source, name, replacement):
@@ -184,7 +184,7 @@ def adapt(t):
     witness = '''def coinbase_add_witness(tx_nowitness, enabled):
     if not enabled or len(tx_nowitness) < 8 or tx_nowitness[4:6] == b"\\x00\\x01":
         return tx_nowitness
-    return tx_nowitness[:4] + b"\\x00\\x01" + tx_nowitness[4:-4] + b"\\x01\\x20" + (b"\\x00" * 32) + tx_nowitness[-4:]
+    return tx_nowitness[:4] + b"\x00\x01" + tx_nowitness[4:-4] + b"\x01\x20" + (b"\x00" * 32) + tx_nowitness[-4:]
 '''
     if 'def coinbase_add_witness' in t:
         t = replace_function(t, 'coinbase_add_witness', witness)
@@ -197,12 +197,6 @@ def adapt(t):
         return binascii.unhexlify(info2["scriptPubKey"])
 '''
     t = t.replace(oldaddr, '')
-    t = t.replace('        try:\n            c.push_job(clean=clean, force_refresh=False)\n        except Exception as e:\n            emit("WARN", f"push {c.worker}: {e}")', '        try:\n            c.push_job(clean=clean, force_refresh=False)\n            emit("INFO", f"notify worker={c.worker} job={store.current_id} height={store.last_height} clean={clean}")\n        except Exception as e:\n            emit("WARN", f"push {c.worker}: {e}")', 1)
-    needle = '        height = tmpl["height"]\n        prevhash = tmpl["previousblockhash"]'
-    replacement = '        height = tmpl["height"]\n        prevhash = tmpl["previousblockhash"]\n        emit("INFO", f"GBT height={height} prev={prevhash[:16]} bits={tmpl.get(\'bits\')} txs={len(tmpl.get(\'transactions\', []))}")'
-    if needle in t:
-        t = t.replace(needle, replacement, 1)
-    t = t.replace('if job is not None and clean:\n                broadcast_job(clean=True)', 'if job is not None and clean:\n                emit("INFO", f"broadcast new job={job[\"id\"]} height={job[\"height\"]}")\n                broadcast_job(clean=True)', 1)
     return t
 
 
