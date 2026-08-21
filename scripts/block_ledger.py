@@ -8,6 +8,7 @@ DATADIR = Path(os.getenv("FIX_DATADIR", "/data/fixedcoin"))
 LEDGER = Path(os.getenv("BLOCK_LEDGER_PATH", str(DATADIR / "solo-blocks.json")))
 PAYOUT_FILE = DATADIR / "payout_address"
 EVENTS_PATH = Path(os.getenv("STRATUM_EVENTS_PATH", "/app/data/events.jsonl"))
+STATS_PATH = Path(os.getenv("STRATUM_STATS_PATH", "/app/data/stats.json"))
 USER = os.getenv("FIX_RPCUSER", "fixrpc")
 PASS = os.getenv("FIX_RPCPASS", "")
 PORT = int(os.getenv("FIX_RPCPORT", "24761"))
@@ -127,20 +128,18 @@ def payout_matches(vout, payout_address, target_script_hex=""):
     return spk.get("address") == payout_address
 
 
-def accepted_heights_from_events():
-    """Recover exact block heights reported as accepted by Stratum.
+def accepted_heights_from_sources():
+    """Recover exact block heights from persistent/runtime Stratum records.
 
-    This is the important recovery path: a found block can be many heights
-    behind the current tip by the time the ledger process restarts. Looking only
-    at the newest N blocks therefore loses historical solo blocks. Stratum's
-    persistent events.jsonl already records successful submitblock results.
+    The chain scan below is the authoritative fallback. Events/stats simply make
+    recovery immediate even when the accepted block is older than SCAN_BACK.
     """
     heights = set()
+
     try:
         lines = EVENTS_PATH.read_text(errors="ignore").splitlines()[-EVENT_SCAN_LINES:]
     except OSError:
-        return heights
-
+        lines = []
     for line in lines:
         try:
             row = json.loads(line)
@@ -152,26 +151,56 @@ def accepted_heights_from_events():
         match = re.search(r"height=(\d+)", msg)
         if match:
             heights.add(int(match.group(1)))
+
+    try:
+        stats = json.loads(STATS_PATH.read_text())
+    except Exception:
+        stats = {}
+    for row in stats.get("blocks_log", []) if isinstance(stats, dict) else []:
+        if isinstance(row, dict):
+            try:
+                h = int(row.get("height") or 0)
+            except Exception:
+                h = 0
+            if h > 0:
+                heights.add(h)
+
     return heights
 
 
 def find_solo_block(height, payout_address, target_script_hex=""):
     """Inspect the canonical block and recognize our coinbase payout.
 
-    This intentionally does NOT use listtransactions/getwalletinfo. A solo pool
-    can find a block even when the wallet RPC has no transaction history yet.
+    Some FixedCoin builds expose getblock(..., 2) differently from Bitcoin Core.
+    Therefore we first use verbosity=1 to obtain the coinbase txid and then fetch
+    that transaction explicitly with getrawtransaction(..., 1, blockhash).
     """
     try:
-        blockhash = cli("getblockhash", height)
-        block = cli("getblock", blockhash, 2)
+        blockhash = str(cli("getblockhash", height) or "")
+        if not blockhash:
+            return None
+        block = cli("getblock", blockhash, 1) or {}
     except Exception:
         return None
 
-    txs = block.get("tx") or []
-    if not txs:
+    txids = block.get("tx") or []
+    if not txids:
         return None
-    coinbase = txs[0]
-    if not coinbase.get("vin") or not coinbase["vin"][0].get("coinbase"):
+
+    coinbase = None
+    first = txids[0]
+    if isinstance(first, dict):
+        coinbase = first
+    else:
+        try:
+            coinbase = cli("getrawtransaction", str(first), 1, blockhash) or {}
+        except Exception:
+            coinbase = None
+    if not isinstance(coinbase, dict):
+        return None
+
+    vin = coinbase.get("vin") or []
+    if not vin or not vin[0].get("coinbase"):
         return None
 
     reward = sum(
@@ -182,12 +211,14 @@ def find_solo_block(height, payout_address, target_script_hex=""):
     if reward <= 0:
         return None
 
+    block_time = int(block.get("time") or coinbase.get("blocktime") or 0)
+    found_at = datetime.fromtimestamp(block_time, timezone.utc).strftime("%Y-%m-%d %H:%M:%S") if block_time else now()
     return {
-        "txid": str(coinbase.get("txid") or ""),
-        "blockhash": str(blockhash),
+        "txid": str(coinbase.get("txid") or first or ""),
+        "blockhash": blockhash,
         "height": int(height),
         "reward": reward,
-        "found_at": now(),
+        "found_at": found_at,
         "maturity_height": int(height) + MATURITY,
         "maturity": MATURITY,
     }
@@ -211,14 +242,14 @@ def sync():
     by_key = {
         (str(x.get("blockhash") or ""), int(x.get("height") or 0)): x
         for x in rows
+        if isinstance(x, dict)
     }
 
     # Always inspect the recent chain window, plus every exact height that
-    # Stratum recorded as a successfully submitted block. The event-derived
-    # heights survive a ledger restart and can be hundreds/thousands of blocks
-    # behind the current tip.
+    # Stratum recorded as a successfully submitted block. This is persistent
+    # across dashboard/container restarts and avoids losing old solo blocks.
     heights = set(range(max(0, tip - SCAN_BACK + 1), tip + 1))
-    heights.update(h for h in accepted_heights_from_events() if 0 <= h <= tip)
+    heights.update(h for h in accepted_heights_from_sources() if 0 <= h <= tip)
 
     for height in sorted(heights):
         found = find_solo_block(height, payout_address, target_script_hex)
@@ -239,6 +270,7 @@ def sync():
             row["last_seen"] = now()
             row["reward"] = found["reward"]
             row["txid"] = found["txid"]
+            row["found_at"] = row.get("found_at") or found["found_at"]
 
     rows = list(by_key.values())
     for row in rows:
@@ -248,6 +280,8 @@ def sync():
         remaining = max(0, h + MATURITY - tip) if h else MATURITY
 
         row["confirmations"] = confirmations
+        row["validity_rounds"] = confirmations
+        row["validity_target"] = MATURITY
         row["maturity_remaining"] = remaining
         row["mature"] = confirmations >= MATURITY
 
