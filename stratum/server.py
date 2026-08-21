@@ -96,7 +96,7 @@ def adapt(t):
     if height < 0:
         raise ValueError("negative coinbase height")
     if height == 0:
-        return b"\\x00"
+        return b"\x00"
     raw = bytearray()
     n = height
     while n:
@@ -135,7 +135,7 @@ def adapt(t):
     tag = b"/FIX-Solo/"
     height_script = bip34_height(height)
     scriptsig_len = len(height_script) + en1_size + en2_size + len(tag)
-    part1 = struct.pack("<I", 2) + b"\\x01" + b"\\x00" * 32 + struct.pack("<I", 0xFFFFFFFF)
+    part1 = struct.pack("<I", 2) + b"\x01" + b"\x00" * 32 + struct.pack("<I", 0xFFFFFFFF)
     part1 += encode_varint(scriptsig_len) + height_script
     witness = b""
     if witness_commitment_hex:
@@ -182,7 +182,7 @@ def adapt(t):
         raise RuntimeError('dev_value job field missing')
 
     witness = '''def coinbase_add_witness(tx_nowitness, enabled):
-    if not enabled or len(tx_nowitness) < 8 or tx_nowitness[4:6] == b"\\x00\\x01":
+    if not enabled or len(tx_nowitness) < 8 or tx_nowitness[4:6] == b"\x00\x01":
         return tx_nowitness
     return tx_nowitness[:4] + b"\x00\x01" + tx_nowitness[4:-4] + b"\x01\x20" + (b"\x00" * 32) + tx_nowitness[-4:]
 '''
@@ -197,6 +197,12 @@ def adapt(t):
         return binascii.unhexlify(info2["scriptPubKey"])
 '''
     t = t.replace(oldaddr, '')
+    t = t.replace('        try:\n            c.push_job(clean=clean, force_refresh=False)\n        except Exception as e:\n            emit("WARN", f"push {c.worker}: {e}")', '        try:\n            c.push_job(clean=clean, force_refresh=False)\n            emit("INFO", f"notify worker={c.worker} job={store.current_id} height={store.last_height} clean={clean}")\n        except Exception as e:\n            emit("WARN", f"push {c.worker}: {e}")', 1)
+    needle = '        height = tmpl["height"]\n        prevhash = tmpl["previousblockhash"]'
+    replacement = '        height = tmpl["height"]\n        prevhash = tmpl["previousblockhash"]\n        emit("INFO", f"GBT height={height} prev={prevhash[:16]} bits={tmpl.get(\'bits\')} txs={len(tmpl.get(\'transactions\', []))}")'
+    if needle in t:
+        t = t.replace(needle, replacement, 1)
+    t = t.replace('if job is not None and clean:\n                broadcast_job(clean=True)', 'if job is not None and clean:\n                emit("INFO", f"broadcast new job={job[\"id\"]} height={job[\"height\"]}")\n                broadcast_job(clean=True)', 1)
     return t
 
 
