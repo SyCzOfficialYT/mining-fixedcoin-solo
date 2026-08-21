@@ -95,7 +95,10 @@ fi
 
 python3 -m py_compile /app/stratum/server_full.py
 
-python3 /app/stratum/server.py >>/app/data/stratum.log 2>&1 &
+# Run the already-generated, fully patched adapter directly. Do not invoke
+# server.py here: that generator intentionally carries the pre-patch v31
+# marker and would regenerate server_full.py back to the unpatched adapter.
+python3 /app/stratum/server_full.py >>/app/data/stratum.log 2>&1 &
 STRATUM_PID=$!
 
 # The persistent ledger must start only after the node RPC and Stratum process
