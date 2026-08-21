@@ -8,20 +8,26 @@ PATH = ROOT / "stratum" / "server_full.py"
 
 text = PATH.read_text()
 
-# The generated FreeCash adapter calls the share percentage `pct` and the
-# STATS round percentage `effort`.  The previous patch incorrectly searched
-# for a `share_work` formatted field, which does not exist in the pinned base.
-# Only change presentation precision; never change the underlying values.
-share_re = re.compile(r"(pct\s*:\s*)\.3f")
+# The generated FreeCash adapter formats these values inside f-string fields:
+#   ({pct:.3f}%)
+#   round={effort:.2f}%
+# The previous patch looked for ``pct: .3f`` outside the braces and therefore
+# never matched the generated source. Only presentation precision is changed;
+# the underlying share/network values remain untouched.
+share_re = re.compile(r"(\{\s*pct\s*:\s*)\.3f(?=\s*\})")
 text, share_count = share_re.subn(r"\1.6f", text, count=1)
 
-round_re = re.compile(r"(effort\s*:\s*)\.2f")
+round_re = re.compile(r"(\{\s*effort\s*:\s*)\.2f(?=\s*\})")
 text, round_count = round_re.subn(r"\1.4f", text, count=1)
 
 if share_count != 1:
-    raise RuntimeError(f"share percentage formatting marker mismatch: expected 1, found {share_count}")
+    raise RuntimeError(
+        f"share percentage formatting marker mismatch: expected 1, found {share_count}"
+    )
 if round_count != 1:
-    raise RuntimeError(f"round effort formatting marker mismatch: expected 1, found {round_count}")
+    raise RuntimeError(
+        f"round effort formatting marker mismatch: expected 1, found {round_count}"
+    )
 
 PATH.write_text(text)
 print(f"patched log precision: share_pct={share_count}, round_effort={round_count}")
