@@ -9,9 +9,9 @@ text = PATH.read_text()
 
 # fixcoin_consensus_patch.py intentionally changes the original low-
 # difficulty rejection into an accounting accept. Replace that generated
-# section again. Do not depend on exact whitespace/formatting emitted by the
-# pinned FreeCash adapter: locate the block by semantic anchors and preserve
-# the indentation of the generated method body.
+# section again. The generated adapter has an outer low-difficulty branch and
+# an ``else:`` containing the normal share-credit path. Keep that branch
+# structure intact; only replace the low-difficulty body.
 
 def last_line_start_before(source, pattern, before):
     matches = list(re.finditer(pattern, source[:before], re.MULTILINE))
@@ -28,8 +28,6 @@ guard_pos = text.find(guard)
 if guard_pos < 0:
     raise RuntimeError("low-difficulty guard not found")
 
-# Find the nearest preceding effective-min-difficulty assignment, allowing
-# arbitrary indentation/spacing.
 start = last_line_start_before(
     text,
     r'^[ \t]*need\s*=\s*self\.effective_min_diff\(\)\s*$',
@@ -38,7 +36,9 @@ start = last_line_start_before(
 if start < 0:
     raise RuntimeError("low-difficulty start marker not found")
 
-# The normal share-credit path begins at this stable semantic anchor.
+# The normal share-credit path begins at this stable semantic anchor. We
+# replace everything from ``need =`` up to that path, including the existing
+# outer ``else:``. The replacement restores the same else branch explicitly.
 end_match = re.search(
     r'^[ \t]*if\s+share_work\s*>=\s*self\.diff\s*:\s*$',
     text[guard_pos:],
@@ -74,8 +74,12 @@ if h_int > share_target:
     _bump_worker(self.worker, False)
     _save_stats()
     return
+else:
 '''
-replacement = "".join(indent + line if line.strip() else line for line in replacement_body.splitlines(True))
+replacement = "".join(
+    indent + line if line.strip() else line
+    for line in replacement_body.splitlines(True)
+)
 
 text = text[:start] + replacement + text[end:]
 
