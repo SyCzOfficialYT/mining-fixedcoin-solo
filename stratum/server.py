@@ -11,7 +11,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 FULL = HERE / "server_full.py"
 URL = "https://raw.githubusercontent.com/SyCzOfficialYT/freecash-coin/a88d89675b3a41cc6774e1b975e57e050d4892cc/stratum/server.py"
-ADAPT_VERSION = "fixedcoin-consensus-repair-2026-08-21-v23"
+ADAPT_VERSION = "fixedcoin-consensus-repair-2026-08-21-v24"
 
 
 def sanitize_source(source):
@@ -23,9 +23,6 @@ def sanitize_source(source):
 
 
 def replace_function(source, name, replacement):
-    # Replacement strings are Python source. Escapes such as \x00 are
-    # interpreted while building the triple-quoted Python string above,
-    # which would otherwise inject literal control bytes into the source.
     replacement = sanitize_source(replacement)
     tree = ast.parse(source)
     target = next((n for n in tree.body if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)) and n.name == name), None)
@@ -171,8 +168,6 @@ def adapt(t):
     if old in t:
         t = t.replace(old, old + '\n                "witness_commitment": tmpl.get("default_witness_commitment"),', 1)
 
-    # FIX: GBT coinbasevalue is the total subsidy available to the coinbase.
-    # Never add the governance reward on top of it.
     accounting_old = '''        dev_sats = get_dev_reward_sats(height)
         new_value = int(tmpl["coinbasevalue"])'''
     accounting_new = '''        new_value = int(tmpl["coinbasevalue"])
@@ -209,12 +204,24 @@ def adapt(t):
         return binascii.unhexlify(info2["scriptPubKey"])
 '''
     t = t.replace(oldaddr, '')
-    t = t.replace('        try:\n            c.push_job(clean=clean, force_refresh=False)\n        except Exception as e:\n            emit("WARN", f"push {c.worker}: {e}")', '        try:\n            c.push_job(clean=clean, force_refresh=False)\n            emit("INFO", f"notify worker={c.worker} job={store.current_id} height={store.last_height} clean={clean}")\n        except Exception as e:\n            emit("WARN", f"push {c.worker}: {e}")', 1)
-    needle = '        height = tmpl["height"]\n        prevhash = tmpl["previousblockhash"]'
-    replacement = '        height = tmpl["height"]\n        prevhash = tmpl["previousblockhash"]\n        emit("INFO", f"GBT height={height} prev={prevhash[:16]} bits={tmpl.get(\'bits\')} txs={len(tmpl.get(\'transactions\', []))}")'
-    if needle in t:
-        t = t.replace(needle, replacement, 1)
-    t = t.replace('if job is not None and clean:\n                broadcast_job(clean=True)', 'if job is not None and clean:\n                emit("INFO", f"broadcast new job={job[\"id\"]} height={job[\"height\"]}")\n                broadcast_job(clean=True)', 1)
+
+    # Diagnostic logging: make every share rejection self-describing without
+    # changing the acceptance/rejection decision itself.
+    t = t.replace(
+        'self.send({"id": mid, "result": False, "error": [21, "stale job", None]})',
+        'emit("WARN", f"REJECT reason=stale-job worker={self.worker} job={job_id} height={job.get(\'height\')} ntime={ntime_hex} nonce={nonce_hex}")\n            self.send({"id": mid, "result": False, "error": [21, "stale job", None]})',
+        1,
+    )
+    t = t.replace(
+        'self.send({"id": mid, "result": False, "error": [20, "bad hex", None]})',
+        'emit("WARN", f"REJECT reason=bad-hex worker={self.worker} job={job_id} en2={en2_hex} ntime={ntime_hex} nonce={nonce_hex}")\n            self.send({"id": mid, "result": False, "error": [20, "bad hex", None]})',
+        1,
+    )
+    t = t.replace(
+        'self.send({"id": mid, "result": False, "error": [23, "low difficulty", None]})',
+        'emit("WARN", f"REJECT reason=low-difficulty worker={self.worker} job={job_id} height={job[\'height\']} share_diff={share_work:.6f} required_diff={need:.6f} fixed_diff={self.diff:.6f} ntime={ntime_hex} nonce={nonce_hex} hash={hhex[:24]}")\n            self.send({"id": mid, "result": False, "error": [23, "low difficulty", None]})',
+        1,
+    )
     return t
 
 
@@ -222,15 +229,14 @@ def generate_server():
     print("Fetching pinned FreeCash stratum base…", flush=True)
     raw = urllib.request.urlopen(URL, timeout=60).read().decode()
     adapted = adapt(raw)
-    # Some legacy base/replacement snippets contain literal control bytes
-    # (notably from b"\x00" literals) after Python string interpolation.
-    # Normalize the complete generated source before feeding it to the AST.
     adapted = sanitize_source(adapted)
     ast.parse(adapted)
     assert 'rpc("getblocktemplate", [{"rules": ["segwit"]}])' in adapted
     assert 'rpc("getblocktemplate", [{"rules": []}])' not in adapted
     assert 'def rpc(method, params=None):' in adapted
     assert 'def bip34_height(height):' in adapted
+    assert 'REJECT reason=low-difficulty' in adapted
+    assert 'REJECT reason=stale-job' in adapted
     ns = {"__name__": "_fixedcoin_adapter_test", "__file__": str(FULL)}
     exec(compile(adapted, "<fixedcoin-adapter-test>", "exec"), ns)
     assert ns["bip34_height"](44343) == b"\x03\x37\xad\x00", "BIP34 44343 encoding regression"
