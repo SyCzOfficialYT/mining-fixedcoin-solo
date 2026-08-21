@@ -20,7 +20,7 @@ RUN STRATUM_BUILD_ONLY=1 python3 /app/stratum/server.py \
  && grep -Fq 'same_value = int(job.get("value") or 0) == miner_value' /app/stratum/server_full.py \
  && ! grep -Fq 'same_value = int(job.get("value") or 0) == new_value' /app/stratum/server_full.py \
  && grep -Fq 'job={job_id} height=? ntime={ntime_hex} nonce={nonce_hex}' /app/stratum/server_full.py \
- && grep -Fq 'share_target = difficulty_to_target(need)' /app/stratum/server_full.py \
+ && grep -Fq 'required_diff={need:.6f}' /app/stratum/server_full.py \
  && grep -Fq 'error": [23, "low difficulty", None]' /app/stratum/server_full.py \
  && ! grep -Fq 'ACCEPT low-difficulty share' /app/stratum/server_full.py \
  && python3 -m py_compile /app/monitor/app.py /app/stratum/server.py /app/stratum/server_full.py /app/scripts/fixcoin_stratum_job_patch.py /app/scripts/fixcoin_consensus_patch.py /app/scripts/fixcoin_stratum_difficulty_patch.py /app/scripts/fixcoin_network_difficulty_patch.py /app/scripts/fixcoin_dashboard_difficulty_patch.py \
