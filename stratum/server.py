@@ -10,7 +10,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 FULL = HERE / "server_full.py"
-URL = "https://raw.githubusercontent.com/Fixed-Blockchain/fixedcoin/releases/download/v29.1.3/fixedcoin-29.1.3-x86_64-linux-gnu.tar.gz"
+URL = "https://raw.githubusercontent.com/SyCzOfficialYT/freecash-coin/a88d89675b3a41cc6774e1b975e57e050d4892cc/stratum/server.py"
 ADAPT_VERSION = "fixedcoin-consensus-repair-2026-08-21-v23"
 
 
