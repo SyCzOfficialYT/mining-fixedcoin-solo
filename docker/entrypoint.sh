@@ -4,7 +4,7 @@ DATADIR="${FIX_DATADIR:-/data/fixedcoin}"
 RPCUSER="${FIX_RPCUSER:-fixrpc}"
 RPCPASS="${FIX_RPCPASS:-}"
 RPCPORT="${FIX_RPCPORT:-24761}"
-P2PPORT="${P2PPORT:-24768}"
+P2PPORT="${FIX_P2PPORT:-24768}"
 DASH_PORT="${FIX_DASH_PORT:-5050}"
 mkdir -p "$DATADIR" "$DATADIR/wallets" /app/data /app/logs
 
