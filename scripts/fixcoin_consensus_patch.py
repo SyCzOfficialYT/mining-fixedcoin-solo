@@ -8,7 +8,7 @@ ROOT = Path(__file__).resolve().parent.parent
 PATH = ROOT / "stratum" / "server_full.py"
 text = PATH.read_text()
 
-new_version = "fixedcoin-consensus-repair-2026-08-21-v32"
+new_version = "fixedcoin-consensus-repair-2026-08-21-v33"
 marker = re.search(r"^# ADAPT_VERSION=([^\n]+)$", text, re.MULTILINE)
 if not marker:
     raise SystemExit("generated adapter version marker missing; refusing to patch")
@@ -212,20 +212,8 @@ text = text.replace(
     1,
 )
 
-# Solo mining policy: a submitted, cryptographically valid share below the
-# advertised pool difficulty is still useful proof-of-work. Do not reject it
-# at the Stratum layer. Network/block validation remains strict and unchanged.
-# This is especially important for ASICs which submit work on their own share
-# cadence even when their effective share target differs from our fixed target.
-low_old = 'self.send({"id": mid, "result": False, "error": [23, "low difficulty", None]})'
-low_new = '''emit("INFO", f"ACCEPT low-difficulty share worker={self.worker} job={job_id} height={job['height']} share_diff={share_work:.6f} advertised_diff={need:.6f} fixed_diff={self.diff:.6f} ntime={ntime_hex} nonce={nonce_hex} hash={hhex[:24]}")
-            _bump_worker(self.worker, ok=True)
-            _record_share(self.worker, share_work, self.diff, job.get("network_diff", 0.0), hhex, job["height"], accepted=True)
-            _add_round_share(self.diff, share_work, job.get("network_diff", 0.0), job["height"])
-            self.send({"id": mid, "result": True, "error": None})'''
-if text.count(low_old) != 1:
-    raise RuntimeError(f"low-difficulty rejection marker mismatch: found {text.count(low_old)}")
-text = text.replace(low_old, low_new, 1)
+# FixedCoin Stratum policy: low-difficulty shares are rejected.
+# Do not convert a Stratum rejection into an accepted/credited share.
 
 # Build-time regression checks.
 ast.parse(text)
@@ -238,9 +226,9 @@ assert ns["FIXCOIN_POW_LIMIT"] == FIXCOIN_POW_LIMIT
 assert ns["fixedcoin_target_to_difficulty"](ns["FIXCOIN_POW_LIMIT"]) == 1.0
 assert 'submitblock rejected: {res}; candidate_not_found=' in text
 assert 'candidate_seen = active_hash == hhex.lower()' in text
-assert 'ACCEPT low-difficulty share' in text
-assert 'result": True, "error": None' in text
-assert 'result": False, "error": [23, "low difficulty", None]' not in text
+assert 'REJECT reason=low-difficulty' in text
+assert 'result": False, "error": [23, "low difficulty", None]' in text
+assert 'ACCEPT low-difficulty share' not in text
 assert "dev_sats = 0" in text
 assert "miner_value = new_value" in text
 assert 'miner_value = new_value - dev_sats' not in text
