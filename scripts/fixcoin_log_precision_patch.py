@@ -8,35 +8,14 @@ PATH = ROOT / "stratum" / "server_full.py"
 
 text = PATH.read_text()
 
-# The pinned FreeCash adapter has changed the exact f-string variable names
-# over time. Do not depend on a specific ``pct``/``effort`` name. Patch only
-# the generated ACCEPT log line and only the format fields that are actually
-# followed by percentage markers.
-lines = text.splitlines(keepends=True)
-accept_indexes = [
-    i for i, line in enumerate(lines)
-    if "ACCEPT" in line and "pool=" in line and "round=" in line
-]
+# Patch the exact ACCEPT formatting expression used by the pinned adapter.
+# The generated line is split across two adjacent source lines, so match the
+# complete f-string fragment rather than requiring an entire source line.
+share_re = re.compile(r"(f\"ACCEPT #\{self\.shares_ok\} work=\{share_work:\.0f\} \(\{pct:)\.3f(\}%\) ")
+text, share_count = share_re.subn(r"\g<1>.6f\2", text, count=1)
 
-if len(accept_indexes) != 1:
-    raise RuntimeError(
-        f"ACCEPT log line mismatch: expected 1, found {len(accept_indexes)}"
-    )
-
-idx = accept_indexes[0]
-line = lines[idx]
-
-# Share percentage: the field is inside parentheses, e.g. ({pct:.3f}%).
-share_re = re.compile(
-    r"(\([^\n]*?\{[^}\n]*:\s*)\.\d+f(?=\s*\}\s*%\))"
-)
-line, share_count = share_re.subn(r"\1.6f", line, count=1)
-
-# Round effort: e.g. round={effort:.2f}%.
-round_re = re.compile(
-    r"(round=[^\n]*?\{[^}\n]*:\s*)\.\d+f(?=\s*\}\s*%)"
-)
-line, round_count = round_re.subn(r"\1.4f", line, count=1)
+round_re = re.compile(r"(round=\{effort:)\.2f(% hash=\{hhex\[:16\]\}\")")
+text, round_count = round_re.subn(r"\g<1>.4f\2", text, count=1)
 
 if share_count != 1:
     raise RuntimeError(
@@ -47,6 +26,5 @@ if round_count != 1:
         f"round effort formatting marker mismatch: expected 1, found {round_count}"
     )
 
-lines[idx] = line
-PATH.write_text("".join(lines))
+PATH.write_text(text)
 print(f"patched log precision: share_pct={share_count}, round_effort={round_count}")
