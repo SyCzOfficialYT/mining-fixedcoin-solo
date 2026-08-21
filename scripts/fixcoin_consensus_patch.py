@@ -8,7 +8,7 @@ ROOT = Path(__file__).resolve().parent.parent
 PATH = ROOT / "stratum" / "server_full.py"
 text = PATH.read_text()
 
-new_version = "fixedcoin-consensus-repair-2026-08-21-v28"
+new_version = "fixedcoin-consensus-repair-2026-08-21-v29"
 marker = re.search(r"^# ADAPT_VERSION=([^\n]+)$", text, re.MULTILINE)
 if not marker:
     raise SystemExit("generated adapter version marker missing; refusing to patch")
@@ -36,6 +36,14 @@ def replace_function(source, name, replacement):
 # the Bitcoin-compatible Stratum share-difficulty scale used by miners.
 FIXCOIN_POW_LIMIT = int("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", 16)
 
+# Inject the consensus constant into the generated adapter. Keeping this in
+# server_full.py is required because the adapter is executed independently
+# after this patch script finishes.
+pow_limit_marker = "\n\nFIXCOIN_POW_LIMIT = "
+pow_limit_line = f"\n\nFIXCOIN_POW_LIMIT = {FIXCOIN_POW_LIMIT}\n"
+if "FIXCOIN_POW_LIMIT = " not in text:
+    text = text.replace("\n\ndef replace_function(source, name, replacement):", pow_limit_line + "\ndef replace_function(source, name, replacement):", 1)
+
 fixedcoin_difficulty = '''def fixedcoin_target_to_difficulty(target):
     """Convert a FixedCoin network target to FixedCoin network difficulty."""
     target = int(target)
@@ -43,7 +51,8 @@ fixedcoin_difficulty = '''def fixedcoin_target_to_difficulty(target):
         return 0.0
     return FIXCOIN_POW_LIMIT / target
 '''
-text = text.replace("\n\ndef replace_function(source, name, replacement):", "\n\n" + fixedcoin_difficulty + "\ndef replace_function(source, name, replacement):", 1)
+if "def fixedcoin_target_to_difficulty" not in text:
+    text = text.replace("\n\ndef replace_function(source, name, replacement):", "\n\n" + fixedcoin_difficulty + "\ndef replace_function(source, name, replacement):", 1)
 
 # FixedCoin BIP34 height encoding.
 bip34 = '''def bip34_height(height):
@@ -225,7 +234,7 @@ exec(compile(text, "<fixedcoin-patched-adapter>", "exec"), ns)
 assert ns["bip34_height"](32767) == b"\x02\xff\x7f"
 assert ns["bip34_height"](32768) == b"\x03\x00\x80\x00"
 assert ns["bip34_height"](44343) == b"\x03\x37\xad\x00"
-assert ns["FIXCOIN_POW_LIMIT"] == int("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", 16)
+assert ns["FIXCOIN_POW_LIMIT"] == FIXCOIN_POW_LIMIT
 assert ns["fixedcoin_target_to_difficulty"](ns["FIXCOIN_POW_LIMIT"]) == 1.0
 assert 'net_diff = fixedcoin_target_to_difficulty(bits_to_target(nbits))' in text
 assert 'submitblock rejected: {res}; candidate_not_found=' in text
