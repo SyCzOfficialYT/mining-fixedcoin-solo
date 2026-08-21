@@ -9,9 +9,9 @@ PATH = ROOT / "stratum" / "server_full.py"
 text = PATH.read_text()
 
 # The pinned FreeCash adapter has changed the exact f-string variable names
-# over time. Do not depend on a specific ``pct``/``effort`` expression.
-# Instead, patch only the generated ACCEPT log line, where the share and
-# round percentages are presentation-only values.
+# over time. Do not depend on a specific ``pct``/``effort`` name. Patch only
+# the generated ACCEPT log line and only the format fields that are actually
+# followed by percentage markers.
 lines = text.splitlines(keepends=True)
 accept_indexes = [
     i for i, line in enumerate(lines)
@@ -26,24 +26,17 @@ if len(accept_indexes) != 1:
 idx = accept_indexes[0]
 line = lines[idx]
 
-# Preserve every calculation and value; only increase display precision.
-share_line, share_count = re.subn(r"\.3f(?=\s*%?\)?|\s*%)", ".6f", line, count=1)
-round_line, round_count = re.subn(r"\.2f(?=\s*%)", ".4f", share_line, count=1)
+# Share percentage: the field is inside parentheses, e.g. ({pct:.3f}%).
+share_re = re.compile(
+    r"(\([^\n]*?\{[^}\n]*:\s*)\.\d+f(?=\s*\}\s*%\))"
+)
+line, share_count = share_re.subn(r"\1.6f", line, count=1)
 
-# Some generated revisions use a different precision already. In that case,
-# target the percentage fields by their surrounding text instead of silently
-# doing nothing.
-if share_count == 0:
-    round_match = re.search(r"(\([^\n%]*?)\.(\d+)f(\s*%\))", round_line)
-    if round_match:
-        round_line = round_line[:round_match.start(2)] + "6" + round_line[round_match.end(2):]
-        share_count = 1
-
-if round_count == 0:
-    effort_match = re.search(r"(round=.*?\.)\d+f(\s*%)", round_line)
-    if effort_match:
-        round_line = round_line[:effort_match.start()] + effort_match.group(1) + "4f" + round_line[effort_match.end():]
-        round_count = 1
+# Round effort: e.g. round={effort:.2f}%.
+round_re = re.compile(
+    r"(round=[^\n]*?\{[^}\n]*:\s*)\.\d+f(?=\s*\}\s*%)"
+)
+line, round_count = round_re.subn(r"\1.4f", line, count=1)
 
 if share_count != 1:
     raise RuntimeError(
@@ -54,6 +47,6 @@ if round_count != 1:
         f"round effort formatting marker mismatch: expected 1, found {round_count}"
     )
 
-lines[idx] = round_line
+lines[idx] = line
 PATH.write_text("".join(lines))
 print(f"patched log precision: share_pct={share_count}, round_effort={round_count}")
