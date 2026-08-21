@@ -8,7 +8,7 @@ ROOT = Path(__file__).resolve().parent.parent
 PATH = ROOT / "stratum" / "server_full.py"
 text = PATH.read_text()
 
-new_version = "fixedcoin-consensus-repair-2026-08-21-v30"
+new_version = "fixedcoin-consensus-repair-2026-08-21-v31"
 marker = re.search(r"^# ADAPT_VERSION=([^\n]+)$", text, re.MULTILINE)
 if not marker:
     raise SystemExit("generated adapter version marker missing; refusing to patch")
@@ -36,13 +36,6 @@ def replace_function(source, name, replacement):
 # the Bitcoin-compatible Stratum share-difficulty scale used by miners.
 FIXCOIN_POW_LIMIT = int("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", 16)
 
-# Inject the consensus constant into the generated adapter. Do not search for
-# the identifier alone: this patch script itself contains the identifier.
-pow_limit_re = re.compile(r"^FIXCOIN_POW_LIMIT\s*=\s*", re.MULTILINE)
-pow_limit_line = f"\n\nFIXCOIN_POW_LIMIT = {FIXCOIN_POW_LIMIT}\n"
-if not pow_limit_re.search(text):
-    text = text.replace("\n\ndef replace_function(source, name, replacement):", pow_limit_line + "\ndef replace_function(source, name, replacement):", 1)
-
 fixedcoin_difficulty = '''def fixedcoin_target_to_difficulty(target):
     """Convert a FixedCoin network target to FixedCoin network difficulty."""
     target = int(target)
@@ -50,8 +43,22 @@ fixedcoin_difficulty = '''def fixedcoin_target_to_difficulty(target):
         return 0.0
     return FIXCOIN_POW_LIMIT / target
 '''
-if not re.search(r"^def fixedcoin_target_to_difficulty\s*\(", text, re.MULTILINE):
-    text = text.replace("\n\ndef replace_function(source, name, replacement):", "\n\n" + fixedcoin_difficulty + "\ndef replace_function(source, name, replacement):", 1)
+
+# Inject consensus helpers immediately after the generated adapter version
+# marker. The previous implementation searched for an anchor that only exists
+# in this patch script, so the generated adapter never received the constants.
+pow_limit_re = re.compile(r"^FIXCOIN_POW_LIMIT\s*=\s*", re.MULTILINE)
+difficulty_re = re.compile(r"^def fixedcoin_target_to_difficulty\s*\(", re.MULTILINE)
+marker = re.search(r"^# ADAPT_VERSION=[^\n]+$", text, re.MULTILINE)
+if not marker:
+    raise SystemExit("adapter version marker disappeared before helper injection")
+injection = f"\n\nFIXCOIN_POW_LIMIT = {FIXCOIN_POW_LIMIT}\n\n{fixedcoin_difficulty.rstrip()}\n"
+if not pow_limit_re.search(text) and not difficulty_re.search(text):
+    text = text[:marker.end()] + injection + text[marker.end():]
+elif not pow_limit_re.search(text):
+    text = text[:marker.end()] + f"\n\nFIXCOIN_POW_LIMIT = {FIXCOIN_POW_LIMIT}\n" + text[marker.end():]
+elif not difficulty_re.search(text):
+    text = text[:marker.end()] + "\n\n" + fixedcoin_difficulty.rstrip() + "\n" + text[marker.end():]
 
 # FixedCoin BIP34 height encoding.
 bip34 = '''def bip34_height(height):
