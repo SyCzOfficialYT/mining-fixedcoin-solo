@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Enforce the configured FixedCoin Stratum share difficulty."""
 from pathlib import Path
+import re
 
 ROOT = Path(__file__).resolve().parent.parent
 PATH = ROOT / "stratum" / "server_full.py"
@@ -24,23 +25,40 @@ replacement = '''            need = self.effective_min_diff()
 '''
 
 # fixcoin_consensus_patch.py intentionally changes the original low-
-# difficulty rejection into an accounting accept. Replace that whole
-# generated low-difficulty section again, but locate its boundaries by the
-# stable control-flow anchors instead of depending on exact generated text.
-start_marker = '            need = self.effective_min_diff()\n'
-end_marker = '            if share_work >= self.diff:\n'
+# difficulty rejection into an accounting accept. Replace that generated
+# section again. Do not depend on the exact whitespace or formatting emitted
+# by the pinned FreeCash adapter: locate the block by its semantic anchors.
 
-start = text.find(start_marker)
+def last_line_start_before(source, pattern, before):
+    matches = list(re.finditer(pattern, source[:before], re.MULTILINE))
+    return matches[-1].start() if matches else -1
+
+# The generated adapter must contain the original low-difficulty guard before
+# the consensus patch replaces it with the solo accounting path.
+guard = 'if h_int > difficulty_to_target(need):'
+guard_pos = text.find(guard)
+if guard_pos < 0:
+    raise RuntimeError("low-difficulty guard not found")
+
+# Find the nearest preceding effective-min-difficulty assignment, allowing
+# arbitrary indentation/spacing.
+start = last_line_start_before(
+    text,
+    r'^[ \t]*need\s*=\s*self\.effective_min_diff\(\)\s*$',
+    guard_pos,
+)
 if start < 0:
     raise RuntimeError("low-difficulty start marker not found")
 
-end = text.find(end_marker, start)
-if end < 0:
+# The normal share-credit path begins at this stable semantic anchor.
+end_match = re.search(r'^[ \t]*if\s+share_work\s*>=\s*self\.diff\s*:\s*$', text[guard_pos:], re.MULTILINE)
+if not end_match:
     raise RuntimeError("low-difficulty block end marker not found")
+end = guard_pos + end_match.start()
 
 candidate = text[start:end]
-if 'h_int > difficulty_to_target(need)' not in candidate:
-    raise RuntimeError("low-difficulty guard not found")
+if guard not in candidate:
+    raise RuntimeError("low-difficulty guard not inside candidate block")
 if 'ACCEPT low-difficulty share' not in candidate:
     raise RuntimeError("low-difficulty acceptance marker not found")
 if 'self.send({"id": mid, "result": True, "error": None})' not in candidate:
