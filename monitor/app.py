@@ -154,7 +154,8 @@ def wallet_state(current_height):
     ledger_immature=sum(x["reward"] for x in blocks if x["state"]=="IMMATURE")
     if ledger_immature>0: immature=max(immature,ledger_immature)
     blocks.sort(key=lambda x:(x.get("height") or 0,x.get("time") or 0),reverse=True)
-    return {"confirmed":confirmed,"pending":rpc_pending,"immature":immature,"unconfirmed":rpc_pending+immature,"total":confirmed+rpc_pending+immature,"blocks":blocks,"wallet":walletinfo or {},"error":balances_error or walletinfo_error or tx_error}
+    # "total" intentionally means confirmed wallet balance only.
+    return {"confirmed":confirmed,"pending":rpc_pending,"immature":immature,"unconfirmed":rpc_pending+immature,"total":confirmed,"blocks":blocks,"wallet":walletinfo or {},"error":balances_error or walletinfo_error or tx_error}
 
 
 def status():
