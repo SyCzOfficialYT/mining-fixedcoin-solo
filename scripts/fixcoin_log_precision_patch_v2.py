@@ -14,10 +14,16 @@ round_new = "round={effort:.4f}%"
 
 share_count = text.count(share_old)
 round_count = text.count(round_old)
-if share_count != 1:
-    raise RuntimeError(f"share percentage formatting marker mismatch: expected 1, found {share_count}")
-if round_count != 1:
-    raise RuntimeError(f"round effort formatting marker mismatch: expected 1, found {round_count}")
 
-PATH.write_text(text.replace(share_old, share_new, 1).replace(round_old, round_new, 1))
+# The generated adapter can contain multiple round-effort log paths.
+# Patch every occurrence instead of assuming exactly one.
+if share_count < 1:
+    raise RuntimeError(f"share percentage formatting marker not found: {share_old!r}")
+if round_count < 1:
+    raise RuntimeError(f"round effort formatting marker not found: {round_old!r}")
+
+text = text.replace(share_old, share_new)
+text = text.replace(round_old, round_new)
+PATH.write_text(text)
+
 print(f"patched log precision: share_pct={share_count}, round_effort={round_count}")
