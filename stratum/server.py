@@ -14,14 +14,19 @@ URL = "https://raw.githubusercontent.com/SyCzOfficialYT/freecash-coin/a88d89675b
 ADAPT_VERSION = "fixedcoin-consensus-repair-2026-08-21-v23"
 
 
+def sanitize_source(source):
+    """Turn accidental literal control bytes into Python escape sequences."""
+    return "".join(
+        f"\\x{ord(ch):02x}" if ord(ch) < 0x20 and ch not in "\n\r\t" else ch
+        for ch in source
+    )
+
+
 def replace_function(source, name, replacement):
     # Replacement strings are Python source. Escapes such as \x00 are
     # interpreted while building the triple-quoted Python string above,
     # which would otherwise inject literal control bytes into the source.
-    replacement = "".join(
-        f"\\x{ord(ch):02x}" if ord(ch) < 0x20 and ch not in "\n\r\t" else ch
-        for ch in replacement
-    )
+    replacement = sanitize_source(replacement)
     tree = ast.parse(source)
     target = next((n for n in tree.body if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)) and n.name == name), None)
     if target is None:
@@ -217,6 +222,10 @@ def generate_server():
     print("Fetching pinned FreeCash stratum base…", flush=True)
     raw = urllib.request.urlopen(URL, timeout=60).read().decode()
     adapted = adapt(raw)
+    # Some legacy base/replacement snippets contain literal control bytes
+    # (notably from b"\x00" literals) after Python string interpolation.
+    # Normalize the complete generated source before feeding it to the AST.
+    adapted = sanitize_source(adapted)
     ast.parse(adapted)
     assert 'rpc("getblocktemplate", [{"rules": ["segwit"]}])' in adapted
     assert 'rpc("getblocktemplate", [{"rules": []}])' not in adapted
