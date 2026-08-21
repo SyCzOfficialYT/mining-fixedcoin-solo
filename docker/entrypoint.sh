@@ -28,7 +28,6 @@ rpcport=${RPCPORT}
 rpcuser=${RPCUSER}
 rpcpassword=${RPCPASS}
 rpcallowip=127.0.0.1
-txindex=1
 walletdir=${DATADIR}/wallets
 printtoconsole=1
 addnode=node1.fixedcoin.org
@@ -62,6 +61,7 @@ DASH_PID=$!
 # starts would otherwise let server.py regenerate the unpatched file.
 STRATUM_BUILD_ONLY=1 python3 /app/stratum/server.py
 python3 /app/scripts/fixcoin_consensus_patch.py
+python3 /app/scripts/fixcoin_log_precision_patch.py
 
 # Keep the startup guard synchronized with the single adapter version declared
 # by stratum/server.py. The consensus patch intentionally bumps this marker.
