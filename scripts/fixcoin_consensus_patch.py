@@ -8,7 +8,7 @@ ROOT = Path(__file__).resolve().parent.parent
 PATH = ROOT / "stratum" / "server_full.py"
 text = PATH.read_text()
 
-new_version = "fixedcoin-consensus-repair-2026-08-21-v29"
+new_version = "fixedcoin-consensus-repair-2026-08-21-v30"
 marker = re.search(r"^# ADAPT_VERSION=([^\n]+)$", text, re.MULTILINE)
 if not marker:
     raise SystemExit("generated adapter version marker missing; refusing to patch")
@@ -36,12 +36,11 @@ def replace_function(source, name, replacement):
 # the Bitcoin-compatible Stratum share-difficulty scale used by miners.
 FIXCOIN_POW_LIMIT = int("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", 16)
 
-# Inject the consensus constant into the generated adapter. Keeping this in
-# server_full.py is required because the adapter is executed independently
-# after this patch script finishes.
-pow_limit_marker = "\n\nFIXCOIN_POW_LIMIT = "
+# Inject the consensus constant into the generated adapter. Do not search for
+# the identifier alone: this patch script itself contains the identifier.
+pow_limit_re = re.compile(r"^FIXCOIN_POW_LIMIT\s*=\s*", re.MULTILINE)
 pow_limit_line = f"\n\nFIXCOIN_POW_LIMIT = {FIXCOIN_POW_LIMIT}\n"
-if "FIXCOIN_POW_LIMIT = " not in text:
+if not pow_limit_re.search(text):
     text = text.replace("\n\ndef replace_function(source, name, replacement):", pow_limit_line + "\ndef replace_function(source, name, replacement):", 1)
 
 fixedcoin_difficulty = '''def fixedcoin_target_to_difficulty(target):
@@ -51,7 +50,7 @@ fixedcoin_difficulty = '''def fixedcoin_target_to_difficulty(target):
         return 0.0
     return FIXCOIN_POW_LIMIT / target
 '''
-if "def fixedcoin_target_to_difficulty" not in text:
+if not re.search(r"^def fixedcoin_target_to_difficulty\s*\(", text, re.MULTILINE):
     text = text.replace("\n\ndef replace_function(source, name, replacement):", "\n\n" + fixedcoin_difficulty + "\ndef replace_function(source, name, replacement):", 1)
 
 # FixedCoin BIP34 height encoding.
@@ -160,9 +159,6 @@ oldaddr = '''    info2 = rpc("getaddressinfo", [addr])
 '''
 text = text.replace(oldaddr, "", 1)
 
-# Replace the fragile submitblock accounting snippet by locating the block
-# semantically. Upstream FreeCash changes whitespace/lines occasionally; the
-# old exact-string replacement was why the v25 build failed.
 submission_re = re.compile(
     r'(?ms)^            res = rpc\("submitblock", \[binascii\.hexlify\(block\)\.decode\(\)\]\)\n'
     r'            if res in \(None, ""\):\n'
@@ -209,8 +205,6 @@ text, n = submission_re.subn(submission_new, text, count=1)
 if n != 1:
     raise RuntimeError("submitblock accounting block marker missing")
 
-# Diagnostic rejection logging: include the exact hash/target values so a
-# reject can be audited without reproducing the share externally.
 text = text.replace(
     'self.send({"id": mid, "result": False, "error": [21, "stale job", None]})',
     'emit("WARN", f"REJECT reason=stale-job worker={self.worker} job={job_id}")\n            self.send({"id": mid, "result": False, "error": [21, "stale job", None]})',
