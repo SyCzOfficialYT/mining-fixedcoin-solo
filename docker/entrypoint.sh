@@ -56,17 +56,19 @@ ln -sfn "$DATADIR/solo-blocks.json" /app/data/blocks.json
 python3 /app/monitor/app.py >>/app/data/dashboard.log 2>&1 &
 DASH_PID=$!
 
-# Always generate the adapter first, then apply the FixedCoin-only consensus
-# patch and the canonical network-difficulty correction.
+# Always generate the adapter first, then apply all FixedCoin-only patches.
+# The consensus patch intentionally owns the final adapter version marker.
 STRATUM_BUILD_ONLY=1 python3 /app/stratum/server.py
 python3 /app/scripts/fixcoin_consensus_patch.py
 python3 /app/scripts/fixcoin_network_difficulty_patch.py
+python3 /app/scripts/fixcoin_dashboard_difficulty_patch.py
 
-# Keep the startup guard synchronized with the single adapter version declared
-# by stratum/server.py. The consensus patch intentionally bumps this marker.
-EXPECTED_ADAPT_VERSION="$(sed -n 's/^ADAPT_VERSION = [\"'"'"']\([^\"'"'"']*\)[\"'"'"']$/\1/p' /app/stratum/server.py | head -n 1)"
+# Keep the startup guard synchronized with the version produced by the
+# consensus patch itself. Do not compare against the unpatched generator
+# version: the consensus patch intentionally bumps that marker.
+EXPECTED_ADAPT_VERSION="$(sed -n 's/^new_version = [\"'"'"']\([^\"'"'"']*\)[\"'"'"']$/\1/p' /app/scripts/fixcoin_consensus_patch.py | head -n 1)"
 if [[ -z "$EXPECTED_ADAPT_VERSION" ]]; then
-  echo "FATAL: could not determine expected Stratum adapter version" >&2
+  echo "FATAL: could not determine expected patched Stratum adapter version" >&2
   exit 1
 fi
 ACTUAL_ADAPT_VERSION="$(sed -n '1s/^# ADAPT_VERSION=//p' /app/stratum/server_full.py)"
