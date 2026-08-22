@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
+"""Add the low-latency Stratum SSE endpoint used by dashboard v4."""
 from pathlib import Path
 
 APP = Path('/app/monitor/app.py')
-HTML = Path('/app/monitor/templates/dashboard_v3.html')
-MARKER = '@app.get("/")\n'
+text = APP.read_text()
+
 IMPORT_OLD = 'from flask import Flask, jsonify, render_template\n'
 IMPORT_NEW = 'from flask import Flask, Response, jsonify, render_template\n'
 
@@ -67,29 +68,19 @@ def api_stream():
 
 '''.lstrip('\\')
 
-text = APP.read_text()
 if 'def api_stream()' not in text:
     if IMPORT_OLD not in text:
         raise RuntimeError('Flask import line not found')
-    if MARKER not in text:
+    marker = '@app.get("/")\n'
+    if marker not in text:
         raise RuntimeError('dashboard route marker not found')
     text = text.replace(IMPORT_OLD, IMPORT_NEW, 1)
-    text = text.replace(MARKER, INSERT + MARKER, 1)
+    text = text.replace(marker, INSERT + marker, 1)
     APP.write_text(text)
     print('patched dashboard app: /api/stream SSE')
 else:
-    print('dashboard realtime stream already present')
+    print('dashboard SSE already present')
 
-# Bump the dashboard loader URL so browsers cannot keep an older cached effects loader.
-if HTML.exists():
-    html = HTML.read_text()
-    old = '/static/dashboard_effects.js?v=2026-08-23-miner-flow-1'
-    new = '/static/dashboard_effects.js?v=2026-08-23-miner-flow-2'
-    if old in html:
-        html = html.replace(old, new, 1)
-        HTML.write_text(html)
-        print('bumped dashboard effects cache version')
-    elif 'dashboard_effects.js?v=2026-08-23-miner-flow-2' in html:
-        print('dashboard effects cache version already current')
-    else:
-        raise RuntimeError('dashboard effects loader marker not found')
+# The active UI is dashboard v4. Older dashboard_effects.js cache markers are
+# deliberately not required anymore; v4 owns its effects in dashboard_v4.js.
+print('dashboard realtime patch: v4-compatible SSE mode')
