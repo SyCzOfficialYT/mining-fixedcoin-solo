@@ -79,9 +79,10 @@ if [[ "$ACTUAL_ADAPT_VERSION" != "$EXPECTED_ADAPT_VERSION" ]]; then
 fi
 
 # Hard runtime invariants: the container must never start Stratum unless the
-# FixedCoin powLimit helper and canonical network-difficulty scale are actually
-# present in the adapter that will be executed. This catches stale/partial
-# images instead of silently running the unpatched v31/v32 adapter.
+# FixedCoin powLimit helper, canonical network-difficulty scale, and strict
+# advertised Stratum share-difficulty rejection are actually present in the
+# adapter that will be executed. This catches stale/partial images instead of
+# silently running an older bypassing adapter.
 python3 - <<'PY'
 from pathlib import Path
 import sys
@@ -91,6 +92,7 @@ import stratum.server_full as s
 source = Path("/app/stratum/server_full.py").read_text()
 expected_pow_limit = int("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", 16)
 canonical_diff1 = 0x00000000FFFF0000000000000000000000000000000000000000000000000000
+low_reject = 'self.send({"id": mid, "result": False, "error": [23, "low difficulty", None]})'
 
 assert getattr(s, "FIXCOIN_POW_LIMIT", None) == expected_pow_limit, "FATAL: FixedCoin powLimit missing or wrong"
 assert callable(getattr(s, "fixedcoin_target_to_difficulty", None)), "FATAL: FixedCoin difficulty helper missing"
@@ -98,14 +100,16 @@ assert s.fixedcoin_target_to_difficulty(s.FIXCOIN_POW_LIMIT) == 1.0, "FATAL: Fix
 assert s.difficulty_to_target(1) == canonical_diff1, "FATAL: Stratum diff-1 target is not canonical Bitcoin/Core scale"
 assert "net_diff = target_to_difficulty(bits_to_target(nbits))" in source, "FATAL: canonical network difficulty formula missing"
 assert "net_diff = fixedcoin_target_to_difficulty(bits_to_target(nbits))" not in source, "FATAL: powLimit-based network difficulty is still active"
-print("Verified FixedCoin Stratum runtime invariants: powLimit + canonical network difficulty")
+assert source.count(low_reject) == 1, "FATAL: strict low-difficulty rejection is missing or duplicated"
+assert "ACCEPT low-difficulty" not in source, "FATAL: low-difficulty acceptance bypass is still present"
+print("Verified FixedCoin Stratum runtime invariants: powLimit + canonical network difficulty + strict share difficulty")
 PY
 
 python3 -m py_compile /app/stratum/server_full.py
 
 # IMPORTANT: server.py is the generator. Starting it in normal mode can
-# regenerate the unpatched v31 adapter because its generator marker predates
-# the consensus patch. The patched server_full.py above is the authoritative
+# regenerate the unpatched adapter because its generator marker predates the
+# consensus patch. The patched server_full.py above is the authoritative
 # runtime artifact, so execute it directly and never overwrite it after the
 # invariants have passed.
 python3 /app/stratum/server_full.py >>/app/data/stratum.log 2>&1 &
