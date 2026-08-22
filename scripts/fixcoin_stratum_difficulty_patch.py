@@ -67,6 +67,15 @@ if "same_txs = (len(other_tx)" in text:
 if same_height_new not in text:
     raise RuntimeError("same-height stable-job patch was not applied")
 
+# Keep reject telemetry explicit. `required_diff` is the effective threshold
+# used for this share, while `current_diff` is the worker's current assignment.
+# `previous_diff` and `grace_active` make VarDiff transitions unambiguous.
+old_telemetry = 'emit("WARN", f"REJECT reason=low-difficulty worker={self.worker} job={job_id} height={height} share_diff={share_diff:.6f} required_diff={required_diff:.6f} fixed_diff={self.diff:.6f} ntime={ntime:08x} nonce={nonce:08x} hash={hash_hex}")'
+new_telemetry = 'emit("WARN", f"REJECT reason=low-difficulty worker={self.worker} job={job_id} height={height} share_diff={share_diff:.6f} required_diff={required_diff:.6f} current_diff={self.diff:.6f} previous_diff={self.diff_prev:.6f} grace_active={int(time.time() - self.diff_changed_at < DIFF_GRACE_SEC)} ntime={ntime:08x} nonce={nonce:08x} hash={hash_hex}")'
+if old_telemetry not in text:
+    raise RuntimeError("generated Stratum reject telemetry line not found")
+text = text.replace(old_telemetry, new_telemetry, 1)
+
 compile(text, str(PATH), "exec")
 PATH.write_text(text)
-print(f"verified {PATH}: strict low-difficulty rejection and one stable Stratum job per block height")
+print(f"verified {PATH}: strict low-difficulty rejection, stable jobs, and explicit VarDiff reject telemetry")
