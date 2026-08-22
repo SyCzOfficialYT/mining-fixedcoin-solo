@@ -8,7 +8,7 @@ ROOT = Path(__file__).resolve().parent.parent
 PATH = ROOT / "stratum" / "server_full.py"
 text = PATH.read_text()
 
-new_version = "fixedcoin-consensus-repair-2026-08-21-v33"
+new_version = "fixedcoin-consensus-repair-2026-08-21-v34"
 marker = re.search(r"^# ADAPT_VERSION=([^\n]+)$", text, re.MULTILINE)
 if not marker:
     raise SystemExit("generated adapter version marker missing; refusing to patch")
@@ -105,7 +105,9 @@ text = text.replace(
     1,
 )
 
-# FixedCoin network difficulty uses FixedCoin's own powLimit.
+# FixedCoin network difficulty uses FixedCoin's own powLimit during the
+# consensus patch. The network-difficulty patch restores the explorer/Core
+# Bitcoin-compatible difficulty-1 scale afterwards.
 text = text.replace(
     'net_diff = target_to_difficulty(bits_to_target(nbits))',
     'net_diff = fixedcoin_target_to_difficulty(bits_to_target(nbits))',
@@ -218,18 +220,14 @@ text = text.replace(
     1,
 )
 
-# Solo mining policy: a submitted, cryptographically valid share below the
-# advertised pool difficulty is still useful proof-of-work. Do not reject it
-# at the Stratum layer. Network/block validation remains strict and unchanged.
+# Strict Stratum policy: a submitted share must satisfy the advertised pool
+# difficulty. A network-valid block candidate is checked independently by the
+# block-target path; it is never allowed to bypass normal share enforcement.
 low_old = 'self.send({"id": mid, "result": False, "error": [23, "low difficulty", None]})'
-low_new = '''emit("INFO", f"ACCEPT low-difficulty share worker={self.worker} job={job_id} height={job['height']} share_diff={share_work:.6f} advertised_diff={need:.6f} fixed_diff={self.diff:.6f} ntime={ntime_hex} nonce={nonce_hex} hash={hhex[:24]}")
-            _bump_worker(self.worker, ok=True)
-            _record_share(self.worker, share_work, self.diff, job.get("network_diff", 0.0), hhex, job["height"], accepted=True)
-            _add_round_share(self.diff, share_work, job.get("network_diff", 0.0), job["height"])
-            self.send({"id": mid, "result": True, "error": None})'''
 if text.count(low_old) != 1:
     raise RuntimeError(f"low-difficulty rejection marker mismatch: found {text.count(low_old)}")
-text = text.replace(low_old, low_new, 1)
+if "ACCEPT low-difficulty" in text:
+    raise RuntimeError("low-difficulty acceptance bypass remains in generated adapter")
 
 # Build-time regression checks.
 text = sanitize_source(text)
@@ -243,12 +241,11 @@ assert ns["FIXCOIN_POW_LIMIT"] == FIXCOIN_POW_LIMIT
 assert ns["fixedcoin_target_to_difficulty"](ns["FIXCOIN_POW_LIMIT"]) == 1.0
 assert 'submitblock rejected: {res}; candidate_not_found=' in text
 assert 'candidate_seen = active_hash == hhex.lower()' in text
-assert 'ACCEPT low-difficulty share' in text
-assert 'result": True, "error": None' in text
-assert 'result": False, "error": [23, "low difficulty", None]' not in text
+assert 'ACCEPT low-difficulty' not in text
+assert 'result": False, "error": [23, "low difficulty", None]' in text
 assert "dev_sats = 0" in text
 assert "miner_value = new_value" in text
 assert 'miner_value = new_value - dev_sats' not in text
 assert "DEV_ADDRESS = None" in text
 PATH.write_text(text)
-print(f"patched {PATH} -> {new_version}")
+print(f"patched {PATH} -> {new_version}; strict Stratum difficulty enforcement restored")
