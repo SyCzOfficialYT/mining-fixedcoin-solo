@@ -67,14 +67,17 @@ if "same_txs = (len(other_tx)" in text:
 if same_height_new not in text:
     raise RuntimeError("same-height stable-job patch was not applied")
 
-# Keep reject telemetry explicit. `required_diff` is the effective threshold
-# used for this share, while `current_diff` is the worker's current assignment.
-# `previous_diff` and `grace_active` make VarDiff transitions unambiguous.
-old_telemetry = 'emit("WARN", f"REJECT reason=low-difficulty worker={self.worker} job={job_id} height={height} share_diff={share_diff:.6f} required_diff={required_diff:.6f} fixed_diff={self.diff:.6f} ntime={ntime:08x} nonce={nonce:08x} hash={hash_hex}")'
-new_telemetry = 'emit("WARN", f"REJECT reason=low-difficulty worker={self.worker} job={job_id} height={height} share_diff={share_diff:.6f} required_diff={required_diff:.6f} current_diff={self.diff:.6f} previous_diff={self.diff_prev:.6f} grace_active={int(time.time() - self.diff_changed_at < DIFF_GRACE_SEC)} ntime={ntime:08x} nonce={nonce:08x} hash={hash_hex}")'
-if old_telemetry not in text:
+# Keep reject telemetry explicit. The generated adapter currently emits
+# `required_diff` as the effective threshold and `fixed_diff` as the current
+# assignment. Extend that line with the previous assignment and grace state so
+# VarDiff transitions are unambiguous in the logs. Accept both the historical
+# generated variable names and the current adapter format, but fail loudly if
+# the actual low-difficulty telemetry is missing.
+telemetry_old = 'emit("WARN", f"REJECT reason=low-difficulty worker={self.worker} job={job_id} height={job[\'height\']} share_diff={share_work:.6f} required_diff={need:.6f} fixed_diff={self.diff:.6f} ntime={ntime_hex} nonce={nonce_hex} hash={hhex[:24]}")'
+telemetry_new = 'emit("WARN", f"REJECT reason=low-difficulty worker={self.worker} job={job_id} height={job[\'height\']} share_diff={share_work:.6f} required_diff={need:.6f} current_diff={self.diff:.6f} previous_diff={self.diff_prev:.6f} grace_active={int(time.time() - self.diff_changed_at < DIFF_GRACE_SEC)} ntime={ntime_hex} nonce={nonce_hex} hash={hhex[:24]}")'
+if telemetry_old not in text:
     raise RuntimeError("generated Stratum reject telemetry line not found")
-text = text.replace(old_telemetry, new_telemetry, 1)
+text = text.replace(telemetry_old, telemetry_new, 1)
 
 compile(text, str(PATH), "exec")
 PATH.write_text(text)
