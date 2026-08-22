@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate strict FixedCoin Stratum share-difficulty enforcement."""
+"""Validate strict FixedCoin Stratum share-difficulty enforcement and job stability."""
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -29,6 +29,44 @@ low_diff_branch = text.split(low_diff_marker, 1)[1].split(accepted_share_marker,
 if 'result": True, "error": None' in low_diff_branch:
     raise RuntimeError("generated Stratum low-difficulty branch contains a success response")
 
+# FixedCoin must not create a second Stratum job merely because getblocktemplate
+# changes transaction selection or coinbase fees while the chain height is still
+# the same. That produces a clean mining.notify without a real new round and can
+# make ASICs submit against a freshly replaced job with hashes below the local
+# share target. Keep the current job stable for the complete block height.
+same_height_old = '''            if (self.current_id and self.last_height == height and self.last_prevhash == prevhash
+                    and self.current_id in self.jobs):
+                job = self.jobs[self.current_id]
+                same_txs = (len(other_tx) == len(job.get("other_tx") or [])
+                            and all(a == b for a, b in zip(other_tx, job.get("other_tx") or [])))
+                same_value = int(job.get("value") or 0) == new_value
+                if same_txs and same_value:
+                    job["ntime"] = tmpl["curtime"]
+                    job["template"] = tmpl
+                    job["net_diff"] = net_diff
+                    return job, False
+'''
+same_height_new = '''            if (self.current_id and self.last_height == height and self.last_prevhash == prevhash
+                    and self.current_id in self.jobs):
+                job = self.jobs[self.current_id]
+                # A transaction/fee refresh at the same height is not a new
+                # Stratum round. Keep the existing job id, coinbase and merkle
+                # data stable until the next block height arrives.
+                job["ntime"] = min(int(tmpl["curtime"]), int(job.get("ntime") or tmpl["curtime"]))
+                job["net_diff"] = net_diff
+                return job, False
+'''
+if same_height_old not in text:
+    raise RuntimeError("generated same-height JobStore refresh block not found")
+text = text.replace(same_height_old, same_height_new, 1)
+
+if "same_value = int(job.get(\"value\") or 0) == new_value" in text:
+    raise RuntimeError("same-height fee/template replacement logic remains")
+if "same_txs = (len(other_tx)" in text:
+    raise RuntimeError("same-height transaction comparison remains")
+if same_height_new not in text:
+    raise RuntimeError("same-height stable-job patch was not applied")
+
 compile(text, str(PATH), "exec")
 PATH.write_text(text)
-print(f"verified {PATH}: FixedCoin low-difficulty shares remain rejected")
+print(f"verified {PATH}: strict low-difficulty rejection and one stable Stratum job per block height")
