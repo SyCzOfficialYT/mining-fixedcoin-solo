@@ -103,7 +103,12 @@ PY
 
 python3 -m py_compile /app/stratum/server_full.py
 
-python3 /app/stratum/server.py >>/app/data/stratum.log 2>&1 &
+# IMPORTANT: server.py is the generator. Starting it in normal mode can
+# regenerate the unpatched v31 adapter because its generator marker predates
+# the consensus patch. The patched server_full.py above is the authoritative
+# runtime artifact, so execute it directly and never overwrite it after the
+# invariants have passed.
+python3 /app/stratum/server_full.py >>/app/data/stratum.log 2>&1 &
 STRATUM_PID=$!
 
 # The persistent ledger must start only after the node RPC and Stratum process
