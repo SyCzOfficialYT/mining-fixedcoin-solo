@@ -8,7 +8,7 @@ ROOT = Path(__file__).resolve().parent.parent
 PATH = ROOT / "stratum" / "server_full.py"
 text = PATH.read_text()
 
-new_version = "fixedcoin-consensus-repair-2026-08-21-v32"
+new_version = "fixedcoin-consensus-repair-2026-08-21-v33"
 marker = re.search(r"^# ADAPT_VERSION=([^\n]+)$", text, re.MULTILINE)
 if not marker:
     raise SystemExit("generated adapter version marker missing; refusing to patch")
@@ -111,7 +111,7 @@ coinbase = '''def build_coinbase_parts(height, miner_value_sats, miner_spk, dev_
     tag = b"/FIX-Solo/"
     height_script = bip34_height(height)
     scriptsig_len = len(height_script) + en1_size + en2_size + len(tag)
-    part1 = struct.pack("<I", 2) + b"\\x01" + b"\\x00" * 32 + struct.pack("<I", 0xFFFFFFFF)
+    part1 = struct.pack("<I", 2) + b"\x01" + b"\x00" * 32 + struct.pack("<I", 0xFFFFFFFF)
     part1 += encode_varint(scriptsig_len) + height_script
     witness = b""
     if witness_commitment_hex:
@@ -215,8 +215,6 @@ text = text.replace(
 # Solo mining policy: a submitted, cryptographically valid share below the
 # advertised pool difficulty is still useful proof-of-work. Do not reject it
 # at the Stratum layer. Network/block validation remains strict and unchanged.
-# This is especially important for ASICs which submit work on their own share
-# cadence even when their effective share target differs from our fixed target.
 low_old = 'self.send({"id": mid, "result": False, "error": [23, "low difficulty", None]})'
 low_new = '''emit("INFO", f"ACCEPT low-difficulty share worker={self.worker} job={job_id} height={job['height']} share_diff={share_work:.6f} advertised_diff={need:.6f} fixed_diff={self.diff:.6f} ntime={ntime_hex} nonce={nonce_hex} hash={hhex[:24]}")
             _bump_worker(self.worker, ok=True)
