@@ -78,6 +78,30 @@ if [[ "$ACTUAL_ADAPT_VERSION" != "$EXPECTED_ADAPT_VERSION" ]]; then
   exit 1
 fi
 
+# Hard runtime invariants: the container must never start Stratum unless the
+# FixedCoin powLimit helper and canonical network-difficulty scale are actually
+# present in the adapter that will be executed. This catches stale/partial
+# images instead of silently running the unpatched v31/v32 adapter.
+python3 - <<'PY'
+from pathlib import Path
+import sys
+sys.path.insert(0, "/app")
+import stratum.server_full as s
+
+source = Path("/app/stratum/server_full.py").read_text()
+expected_pow_limit = int("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", 16)
+canonical_diff1 = 0x00000000FFFF0000000000000000000000000000000000000000000000000000
+
+assert getattr(s, "FIXCOIN_POW_LIMIT", None) == expected_pow_limit, "FATAL: FixedCoin powLimit missing or wrong"
+assert callable(getattr(s, "fixedcoin_target_to_difficulty", None)), "FATAL: FixedCoin difficulty helper missing"
+assert s.fixedcoin_target_to_difficulty(s.FIXCOIN_POW_LIMIT) == 1.0, "FATAL: FixedCoin powLimit difficulty regression"
+assert s.difficulty_to_target(1) == canonical_diff1, "FATAL: Stratum diff-1 target is not canonical Bitcoin/Core scale"
+assert "net_diff = target_to_difficulty(bits_to_target(nbits))" in source, "FATAL: canonical network difficulty formula missing"
+assert "net_diff = fixedcoin_target_to_difficulty(bits_to_target(nbits))" not in source, "FATAL: powLimit-based network difficulty is still active"
+assert "error": False if False else True
+print("Verified FixedCoin Stratum runtime invariants: powLimit + canonical network difficulty")
+PY
+
 python3 -m py_compile /app/stratum/server_full.py
 
 python3 /app/stratum/server.py >>/app/data/stratum.log 2>&1 &
