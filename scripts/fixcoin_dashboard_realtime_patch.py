@@ -12,7 +12,6 @@ def api_stream():
     """Low-latency SSE stream for live Stratum share/block telemetry."""
     def generate():
         import json as _json
-        import os as _os
         import re as _re
         import time as _time
         path = LOG
@@ -65,7 +64,7 @@ def api_stream():
         'Connection':'keep-alive',
     })
 
-'''
+'''.lstrip('\\')
 
 text = APP.read_text()
 if 'def api_stream()' in text:
