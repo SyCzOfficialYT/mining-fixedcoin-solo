@@ -18,7 +18,13 @@ if not version.startswith(("fixedcoin-fch-dashboard-repair-", "fixedcoin-consens
 text = text[:marker.start()] + f"# ADAPT_VERSION={new_version}" + text[marker.end():]
 
 
+def sanitize_source(source):
+    """Replace raw control bytes that Python's parser rejects with escapes."""
+    return source.replace("\x00", "\\x00")
+
+
 def replace_function(source, name, replacement):
+    source = sanitize_source(source)
     tree = ast.parse(source)
     target = next(
         (n for n in tree.body if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)) and n.name == name),
@@ -60,7 +66,7 @@ bip34 = '''def bip34_height(height):
     if height < 0:
         raise ValueError("negative coinbase height")
     if height == 0:
-        return b"\\x00"
+        return b"\x00"
     raw = bytearray()
     n = height
     while n:
@@ -226,6 +232,7 @@ if text.count(low_old) != 1:
 text = text.replace(low_old, low_new, 1)
 
 # Build-time regression checks.
+text = sanitize_source(text)
 ast.parse(text)
 ns = {"__name__": "_fixedcoin_patch_test", "__file__": str(PATH)}
 exec(compile(text, "<fixedcoin-patched-adapter>", "exec"), ns)
