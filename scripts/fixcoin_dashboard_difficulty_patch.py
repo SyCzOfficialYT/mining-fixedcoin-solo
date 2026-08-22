@@ -26,10 +26,13 @@ if 'core_diff,_=rpc("getdifficulty")' not in text:
     replacement = f'{match.group("prefix")}core_diff,_=rpc("getdifficulty"); {match.group("tail")}'
     text = text[:match.start()] + replacement + text[match.end():]
 
+# IMPORTANT: consume the complete as_number(...) expression, including both
+# closing parentheses. The previous patch consumed only get(...), leaving an
+# extra ')' in generated app.py and breaking Docker's py_compile step.
 network_pattern = re.compile(
     r'network_diff=as_number\(stats\.get\("network_diff"\)\)\s*or\s*'
     r'as_number\(log_job\.get\("network_diff"\)\)\s*or\s*'
-    r'as_number\(mininginfo\.get\("difficulty"\)'
+    r'as_number\(mininginfo\.get\("difficulty"\)\)'
 )
 replacement = 'network_diff=as_number(core_diff) or as_number(mininginfo.get("difficulty")) or as_number(stats.get("network_diff")) or as_number(log_job.get("network_diff"))'
 if network_pattern.search(text):
@@ -49,7 +52,7 @@ if 'mode="fixed" if "mode=fixed"' not in text:
     text = text.replace(old, new, 1)
 
 vardiff_marker = 'm=re.search(r"NEW ROUND\\s+height=(\\d+)\\s+netdiff=([0-9.eE+-]+)",line,re.I)'
-if 'm=re.search(r"VARDIFF\\s+(\\S+)\\s+(\\d+(?:\\.\\d+)?)→' not in text:
+if 'm=re.search(r"VARDIFF\\s+(\\S+)\\s+([0-9.]+)→' not in text:
     insert = 'm=re.search(r"VARDIFF\\s+(\\S+)\\s+([0-9.]+)→([0-9.]+)",line,re.I)\n        if m:\n            name,prev_diff,new_diff=m.groups(); w=workers.setdefault(name,{"accepted":0,"rejected":0,"difficulty":float(new_diff),"mode":"vardiff"}); w["difficulty"]=float(new_diff); w["mode"]="vardiff"; w["last_seen"]=ts; current_worker=name\n        ' + vardiff_marker
     if vardiff_marker not in text:
         raise RuntimeError("dashboard round marker mismatch")
