@@ -18,8 +18,16 @@ if text.count(required_rejection) != 1:
 if "ACCEPT low-difficulty" in text:
     raise RuntimeError("generated Stratum low-difficulty acceptance bypass remains")
 
-if 'result": True, "error": None' in text and "low-difficulty" in text:
-    raise RuntimeError("generated Stratum contains a low-difficulty success response")
+# Do not search the entire generated adapter for a generic success response:
+# mining.extranonce.subscribe and the normal accepted-share path legitimately
+# return result=True. Validate only the actual low-difficulty branch.
+low_diff_marker = "if h_int > difficulty_to_target(need):"
+accepted_share_marker = "if share_work >= self.diff:"
+if low_diff_marker not in text or accepted_share_marker not in text:
+    raise RuntimeError("generated Stratum low-difficulty branch markers are missing")
+low_diff_branch = text.split(low_diff_marker, 1)[1].split(accepted_share_marker, 1)[0]
+if 'result": True, "error": None' in low_diff_branch:
+    raise RuntimeError("generated Stratum low-difficulty branch contains a success response")
 
 compile(text, str(PATH), "exec")
 PATH.write_text(text)
