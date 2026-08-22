@@ -57,10 +57,11 @@ python3 /app/monitor/app.py >>/app/data/dashboard.log 2>&1 &
 DASH_PID=$!
 
 # Always generate the adapter first, then apply all FixedCoin-only patches.
-# The consensus patch intentionally owns the final adapter version marker.
+# The consensus patch owns the final adapter version marker.
 STRATUM_BUILD_ONLY=1 python3 /app/stratum/server.py
 python3 /app/scripts/fixcoin_consensus_patch.py
 python3 /app/scripts/fixcoin_network_difficulty_patch.py
+python3 /app/scripts/fixcoin_stratum_difficulty_patch.py
 python3 /app/scripts/fixcoin_dashboard_difficulty_patch.py
 
 # Keep the startup guard synchronized with the version produced by the
