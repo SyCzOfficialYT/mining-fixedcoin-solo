@@ -18,7 +18,7 @@ if text.count(required_rejection) != 1:
 if "ACCEPT low-difficulty" in text:
     raise RuntimeError("generated Stratum low-difficulty acceptance bypass remains")
 
-if "result": True, "error": None" in text and "low-difficulty" in text:
+if 'result": True, "error": None' in text and "low-difficulty" in text:
     raise RuntimeError("generated Stratum contains a low-difficulty success response")
 
 compile(text, str(PATH), "exec")
