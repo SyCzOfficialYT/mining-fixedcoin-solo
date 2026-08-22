@@ -7,6 +7,7 @@
   <title>FixedCoin · Solo Mining</title>
   <link rel="stylesheet" href="/static/dashboard.css?v=2026-08-20-reference-2">
   <script defer src="/static/dashboard.js?v=2026-08-21-blocks-1"></script>
+  <script defer src="/static/dashboard_effects.js?v=2026-08-23-miner-flow-1"></script>
 </head>
 <body>
 <div class="app">
@@ -30,7 +31,6 @@
       <div class="side-meta">Uptime<br><b id="sideUptime">—</b></div>
     </div>
   </aside>
-
   <main class="main">
     <header class="topbar">
       <div class="top-item"><span>NODE</span><b class="status-chip green" id="topNode">ONLINE</b></div>
@@ -39,13 +39,11 @@
       <div class="top-item"><span>SYNC</span><strong id="topSync">—</strong></div>
       <div class="top-update"><span>LAST UPDATE</span><strong id="topUpdate">—</strong><i class="update-dot"></i></div>
     </header>
-
     <section class="content" id="overview">
       <div class="page-title">
         <div><h1>Solo Mining Control</h1><p>Block target, share quality, miners and node health — without the noise.</p></div>
         <div class="payout"><span>Persistent payout address</span><code>{{ payout }}</code></div>
       </div>
-
       <div class="metric-grid">
         <div class="card metric"><span class="metric-dot cyan-dot"></span><div class="eyebrow">Network Difficulty</div><div class="metric-value blue" id="difficulty">—</div><div class="metric-sub" id="difficultyTrend">block target · network</div><svg class="mini-spark" viewBox="0 0 180 32" preserveAspectRatio="none"><polyline id="sparkDiffLine" points="0,24 30,18 60,21 90,10 120,16 150,8 180,12"/></svg></div>
         <div class="card metric"><span class="metric-dot cyan-dot"></span><div class="eyebrow">Share Difficulty</div><div class="metric-value cyan" id="shareDiff">—</div><div class="metric-sub">fixed Stratum target</div><span class="fixed-pill">Fixed</span></div>
@@ -53,7 +51,6 @@
         <div class="card metric"><span class="metric-dot cyan-dot"></span><div class="eyebrow">1H Hashrate</div><div class="metric-value cyan" id="hashrate1h">—</div><div class="metric-sub">long-window estimate</div><svg class="mini-spark" viewBox="0 0 180 32" preserveAspectRatio="none"><polyline id="sparkHash1Line" points="0,24 30,15 60,20 90,11 120,18 150,9 180,14"/></svg></div>
         <div class="card metric"><span class="metric-dot green-dot"></span><div class="eyebrow">Best Share</div><div class="metric-value green" id="bestMetric">—</div><div class="metric-sub" id="bestMetricPct">—% of target</div></div>
       </div>
-
       <div class="main-grid">
         <section class="card target-card" id="mining">
           <div class="section-head"><div><h2>BEST SHARE <b>→</b> NETWORK BLOCK TARGET</h2><p>Your best submitted share versus the actual network difficulty.</p></div><span class="round-pill" id="roundPill">ROUND —</span></div>
@@ -63,92 +60,24 @@
           <div class="round-box"><div><span class="tiny-label">CURRENT ROUND</span><strong class="round-number" id="roundNumber">#—</strong></div><div class="round-time-wrap"><span class="tiny-label">BLOCK TIME TARGET</span><strong class="block-time">10:00</strong><div class="round-track"><i id="roundTrack"></i></div><strong class="remaining-time" id="roundTimerValue">—:—</strong><span class="remaining-label">REMAINING</span></div><span class="round-state" id="roundTimerState">ROUND ACTIVE</span></div>
           <p class="timer-note">The timer shows the expected 10 minute block time. Jobs are only invalidated when a new block is found.</p>
         </section>
-
         <section class="card node-card" id="network">
           <div class="section-head"><h2>NODE / NETWORK STATUS</h2></div>
           <div class="node-content">
             <div class="node-kv"><span>Chain</span><b id="chain">main</b></div><div class="node-kv"><span>Core RPC</span><b class="green" id="core">ONLINE</b></div><div class="node-kv"><span>Stratum</span><b class="cyan">:3333 ONLINE</b></div>
             <div class="node-kv"><span>Sync</span><b id="sync">—</b></div><div class="node-kv"><span>Verification</span><b id="verify">—</b></div><div class="node-kv"><span>Uptime</span><b id="uptime">—</b></div>
             <div class="node-kv"><span>Height</span><b id="nodeHeight">—</b></div><div class="node-kv"><span>Peers</span><b id="peers">—</b></div><div class="node-kv"><span>Version</span><b>v1.0.0</b></div>
-          </div>
-          <div class="network-orbit"><i></i><i></i><i></i><i></i><span></span></div>
+          </div><div class="network-orbit"><i></i><i></i><i></i><i></i><span></span></div>
         </section>
-
-        <section class="card telemetry-card">
-          <div class="section-head"><div><h2>ROUND TELEMETRY</h2></div><span class="round-pill good" id="telemetryPill">MINING</span></div>
-          <div class="telemetry-grid">
-            <div><span>ROUND HEIGHT</span><strong id="teleRoundHeight">—</strong></div>
-            <div><span>ACCEPTED</span><strong class="green" id="teleAccepted">0</strong></div>
-            <div><span>ROUND WORK</span><strong id="teleWork">0</strong></div>
-            <div><span>ROUND EFFORT</span><strong id="teleEffort">0.000%</strong></div>
-          </div>
-          <p class="tele-note" id="teleStarted">Started — · 0 accepted shares this round</p>
-        </section>
-
-        <section class="card health-card">
-          <div class="section-head"><div><h2>MINING HEALTH</h2></div><span class="round-pill good" id="healthPill">HEALTHY</span></div>
-          <div class="health-grid">
-            <div><span>ACCEPTED</span><strong class="green" id="healthAccepted">0</strong></div>
-            <div><span>REJECTED</span><strong class="red" id="healthRejected">0</strong></div>
-            <div><span>REJECT RATE</span><strong id="healthRejectRate">0.00%</strong></div>
-            <div><span>1H HASHRATE</span><strong id="healthHash1h">—</strong></div>
-          </div>
-        </section>
-
-        <section class="card proof-card">
-          <div class="section-head"><div><h2>NETWORK PROOF OF WORK</h2></div></div>
-          <div class="proof-target"><span>CURRENT TARGET</span><code id="target">—</code></div>
-          <div class="proof-grid"><div><span>NETWORK HASHRATE</span><strong id="proofHash">—</strong></div><div><span>nBits</span><strong class="mono" id="bits">—</strong></div><div><span>PEERS</span><strong id="proofPeers">—</strong></div></div>
-        </section>
-
-        <section class="card proof-node-card">
-          <div class="section-head"><h2>NODE NETWORK STATUS</h2></div>
-          <div class="proof-node-grid">
-            <div><span>CORE RPC</span><strong class="green" id="proofCore">ONLINE</strong></div><div><span>SYNC</span><strong id="proofSync">SYNCED</strong></div><div><span>STRATUM</span><strong class="cyan">:3333 ONLINE</strong></div>
-            <div><span>CHAIN</span><strong id="proofChain">main</strong></div><div><span>HEIGHT</span><strong id="proofHeight">—</strong></div><div><span>VERSION</span><strong>v1.0.0</strong></div>
-          </div>
-        </section>
-
-        <section class="card miners-card" id="workers">
-          <div class="section-head"><div><h2>CONNECTED MINERS</h2><p>Live authorized workers. No share-history list — only who is mining.</p></div><span class="round-pill good" id="workerPill">0 ONLINE</span></div>
-          <div class="miner-table-head"><span>Miner</span><span>Diff</span><span>Accepted</span><span>Rejected</span><span>Last Share</span><span>Status</span></div>
-          <div id="workerList" class="miner-list"><div class="empty">Waiting for miners…</div></div>
-        </section>
-
-        <section class="card chart-card">
-          <div class="section-head"><h2>DIFFICULTY HISTORY</h2><span class="round-pill">24H</span></div>
-          <div class="chart-wrap"><div class="chart-y"><span>24 M</span><span>20 M</span><span>16 M</span><span>12 M</span><span>8 M</span></div><svg class="difficulty-chart" viewBox="0 0 800 190" preserveAspectRatio="none"><defs><linearGradient id="area" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#18e8ff" stop-opacity=".30"/><stop offset="1" stop-color="#18e8ff" stop-opacity="0"/></linearGradient></defs><path id="diffArea" d="" fill="url(#area)"/><line x1="0" y1="25" x2="800" y2="25"/><line x1="0" y1="65" x2="800" y2="65"/><line x1="0" y1="105" x2="800" y2="105"/><line x1="0" y1="145" x2="800" y2="145"/><polyline id="diffLine" points="0,150 800,150"/></svg></div>
-          <div class="chart-x"><span>23:00</span><span>03:00</span><span>07:00</span><span>11:00</span><span>15:00</span><span>19:00</span></div>
-        </section>
-
-        <section class="stat-strip">
-          <div class="card mini-stat"><span>ACCEPTED SHARES</span><strong class="green" id="accepted">0</strong><small id="acceptedTrend">▲ 0.0%</small><em>This Round</em></div>
-          <div class="card mini-stat"><span>REJECTED SHARES</span><strong class="red" id="rejected">0</strong><small id="rejectedTrend">0.00%</small><em>This Round</em></div>
-          <div class="card mini-stat"><span>REJECT RATE</span><strong id="rejectRate">0.00%</strong><em>This Round</em></div>
-          <div class="card mini-stat"><span>TOTAL SHARES</span><strong id="totalShares">0</strong><em>All Time</em></div>
-          <div class="card mini-stat"><span>EST. TIME TO FIND BLOCK</span><strong id="eta">—</strong><em>Based on 5m hashrate</em></div>
-          <div class="card mini-stat"><span>LUCK</span><strong id="luck">—</strong><em>This Round</em></div>
-        </section>
-
-        <section class="card wallet-card" id="walletPanel">
-          <div class="section-head"><h2>WALLET BALANCE</h2><span class="round-pill good">MINING WALLET</span></div>
-          <div class="balances"><div class="balance"><span>CONFIRMED</span><strong class="green" id="walletConfirmed">0.00000000</strong><em>FIX</em></div><div class="balance"><span>UNCONFIRMED</span><strong class="amber" id="walletPending">0.00000000</strong><em>FIX</em></div><div class="balance"><span>IMMATURE</span><strong class="cyan" id="walletImmature">0.00000000</strong><em>FIX</em></div></div>
-          <div class="wallet-total"><span>TOTAL BALANCE</span><strong id="walletTotal">0.00000000 FIX</strong><small>Includes immature rewards</small></div>
-          <div class="wallet-maturity"><span>COINBASE MATURITY</span><strong id="maturityValue">100 / 100</strong></div>
-        </section>
-
-        <section class="card blocks-card" id="blocks">
-          <div class="section-head"><div><h2>SOLO BLOCKS</h2><p>Persistent solo-found blocks. Validity rounds and maturity are shown per block.</p></div><span class="round-pill" id="blocksPill">0 FOUND</span></div>
-          <div class="block-table-head"><span>Height</span><span>Block Hash</span><span>Reward</span><span>Validity Rounds</span><span>Maturity</span><span>Status</span></div>
-          <div id="blockList" class="block-list"><div class="empty">No solo blocks found yet.</div></div>
-          <div class="block-note"><b>ⓘ</b><span>Each confirmation counts as one validity round. Coinbase rewards require 100 confirmations before they are spendable.<br>History is persisted in the mining data volume and survives dashboard/container restarts.</span></div>
-        </section>
-
-        <section class="card events-card" id="events">
-          <div class="section-head"><h2>LIVE STRATUM EVENTS</h2><div class="filters"><button class="filter active" data-filter="all">ALL</button><button class="filter" data-filter="share">SHARES</button><button class="filter" data-filter="job">JOBS</button><button class="filter" data-filter="block">BLOCKS</button><button class="filter" data-filter="error">ERRORS</button></div></div>
-          <div class="event-table-head"><span>TIME</span><span>EVENT</span><span>WORKER</span><span>WORK</span><span>DIFF</span><span>EFFORT</span><span>HASH</span></div>
-          <div id="eventsList" class="event-list"><div class="empty">Waiting for events…</div></div>
-        </section>
+        <section class="card telemetry-card"><div class="section-head"><div><h2>ROUND TELEMETRY</h2></div><span class="round-pill good" id="telemetryPill">MINING</span></div><div class="telemetry-grid"><div><span>ROUND HEIGHT</span><strong id="teleRoundHeight">—</strong></div><div><span>ACCEPTED</span><strong class="green" id="teleAccepted">0</strong></div><div><span>ROUND WORK</span><strong id="teleWork">0</strong></div><div><span>ROUND EFFORT</span><strong id="teleEffort">0.000%</strong></div></div><p class="tele-note" id="teleStarted">Started — · 0 accepted shares this round</p></section>
+        <section class="card health-card"><div class="section-head"><div><h2>MINING HEALTH</h2></div><span class="round-pill good" id="healthPill">HEALTHY</span></div><div class="health-grid"><div><span>ACCEPTED</span><strong class="green" id="healthAccepted">0</strong></div><div><span>REJECTED</span><strong class="red" id="healthRejected">0</strong></div><div><span>REJECT RATE</span><strong id="healthRejectRate">0.00%</strong></div><div><span>1H HASHRATE</span><strong id="healthHash1h">—</strong></div></div></section>
+        <section class="card proof-card"><div class="section-head"><div><h2>NETWORK PROOF OF WORK</h2></div></div><div class="proof-target"><span>CURRENT TARGET</span><code id="target">—</code></div><div class="proof-grid"><div><span>NETWORK HASHRATE</span><strong id="proofHash">—</strong></div><div><span>nBits</span><strong class="mono" id="bits">—</strong></div><div><span>PEERS</span><strong id="proofPeers">—</strong></div></div></section>
+        <section class="card proof-node-card"><div class="section-head"><h2>NODE NETWORK STATUS</h2></div><div class="proof-node-grid"><div><span>CORE RPC</span><strong class="green" id="proofCore">ONLINE</strong></div><div><span>SYNC</span><strong id="proofSync">SYNCED</strong></div><div><span>STRATUM</span><strong class="cyan">:3333 ONLINE</strong></div><div><span>CHAIN</span><strong id="proofChain">main</strong></div><div><span>HEIGHT</span><strong id="proofHeight">—</strong></div><div><span>VERSION</span><strong>v1.0.0</strong></div></div></section>
+        <section class="card miners-card" id="workers"><div class="section-head"><div><h2>CONNECTED MINERS</h2><p>Live authorized workers. No share-history list — only who is mining.</p></div><span class="round-pill good" id="workerPill">0 ONLINE</span></div><div class="miner-table-head"><span>Miner</span><span>Diff</span><span>Accepted</span><span>Rejected</span><span>Last Share</span><span>Status</span></div><div id="workerList" class="miner-list"><div class="empty">Waiting for miners…</div></div></section>
+        <section class="card chart-card"><div class="section-head"><h2>DIFFICULTY HISTORY</h2><span class="round-pill">24H</span></div><div class="chart-wrap"><div class="chart-y"><span>24 M</span><span>20 M</span><span>16 M</span><span>12 M</span><span>8 M</span></div><svg class="difficulty-chart" viewBox="0 0 800 190" preserveAspectRatio="none"><defs><linearGradient id="area" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#18e8ff" stop-opacity=".30"/><stop offset="1" stop-color="#18e8ff" stop-opacity="0"/></linearGradient></defs><path id="diffArea" d="" fill="url(#area)"/><line x1="0" y1="25" x2="800" y2="25"/><line x1="0" y1="65" x2="800" y2="65"/><line x1="0" y1="105" x2="800" y2="105"/><line x1="0" y1="145" x2="800" y2="145"/><polyline id="diffLine" points="0,150 800,150"/></svg></div><div class="chart-x"><span>23:00</span><span>03:00</span><span>07:00</span><span>11:00</span><span>15:00</span><span>19:00</span></div></section>
+        <section class="stat-strip"><div class="card mini-stat"><span>ACCEPTED SHARES</span><strong class="green" id="accepted">0</strong><small id="acceptedTrend">▲ 0.0%</small><em>This Round</em></div><div class="card mini-stat"><span>REJECTED SHARES</span><strong class="red" id="rejected">0</strong><small id="rejectedTrend">0.00%</small><em>This Round</em></div><div class="card mini-stat"><span>REJECT RATE</span><strong id="rejectRate">0.00%</strong><em>This Round</em></div><div class="card mini-stat"><span>TOTAL SHARES</span><strong id="totalShares">0</strong><em>All Time</em></div><div class="card mini-stat"><span>EST. TIME TO FIND BLOCK</span><strong id="eta">—</strong><em>Based on 5m hashrate</em></div><div class="card mini-stat"><span>LUCK</span><strong id="luck">—</strong><em>This Round</em></div></section>
+        <section class="card wallet-card" id="walletPanel"><div class="section-head"><h2>WALLET BALANCE</h2><span class="round-pill good">MINING WALLET</span></div><div class="balances"><div class="balance"><span>CONFIRMED</span><strong class="green" id="walletConfirmed">0.00000000</strong><em>FIX</em></div><div class="balance"><span>UNCONFIRMED</span><strong class="amber" id="walletPending">0.00000000</strong><em>FIX</em></div><div class="balance"><span>IMMATURE</span><strong class="cyan" id="walletImmature">0.00000000</strong><em>FIX</em></div></div><div class="wallet-total"><span>TOTAL BALANCE</span><strong id="walletTotal">0.00000000 FIX</strong><small>Includes immature rewards</small></div><div class="wallet-maturity"><span>COINBASE MATURITY</span><strong id="maturityValue">100 / 100</strong></div></section>
+        <section class="card blocks-card" id="blocks"><div class="section-head"><div><h2>SOLO BLOCKS</h2><p>Persistent solo-found blocks. Validity rounds and maturity are shown per block.</p></div><span class="round-pill" id="blocksPill">0 FOUND</span></div><div class="block-table-head"><span>Height</span><span>Block Hash</span><span>Reward</span><span>Validity Rounds</span><span>Maturity</span><span>Status</span></div><div id="blockList" class="block-list"><div class="empty">No solo blocks found yet.</div></div><div class="block-note"><b>ⓘ</b><span>Each confirmation counts as one validity round. Coinbase rewards require 100 confirmations before they are spendable.<br>History is persisted in the mining data volume and survives dashboard/container restarts.</span></div></section>
+        <section class="card events-card" id="events"><div class="section-head"><h2>LIVE STRATUM EVENTS</h2><div class="filters"><button class="filter active" data-filter="all">ALL</button><button class="filter" data-filter="share">SHARES</button><button class="filter" data-filter="job">JOBS</button><button class="filter" data-filter="block">BLOCKS</button><button class="filter" data-filter="error">ERRORS</button></div></div><div class="event-table-head"><span>TIME</span><span>EVENT</span><span>WORKER</span><span>WORK</span><span>DIFF</span><span>EFFORT</span><span>HASH</span></div><div id="eventsList" class="event-list"><div class="empty">Waiting for events…</div></div></section>
       </div>
       <footer class="footer">FIXEDCOIN SOLO · LIVE TELEMETRY · BLOCK TARGET IS NOT CUMULATIVE PROGRESS</footer>
     </section>
