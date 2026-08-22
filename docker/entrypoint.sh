@@ -98,7 +98,6 @@ assert s.fixedcoin_target_to_difficulty(s.FIXCOIN_POW_LIMIT) == 1.0, "FATAL: Fix
 assert s.difficulty_to_target(1) == canonical_diff1, "FATAL: Stratum diff-1 target is not canonical Bitcoin/Core scale"
 assert "net_diff = target_to_difficulty(bits_to_target(nbits))" in source, "FATAL: canonical network difficulty formula missing"
 assert "net_diff = fixedcoin_target_to_difficulty(bits_to_target(nbits))" not in source, "FATAL: powLimit-based network difficulty is still active"
-assert "error": False if False else True
 print("Verified FixedCoin Stratum runtime invariants: powLimit + canonical network difficulty")
 PY
 
