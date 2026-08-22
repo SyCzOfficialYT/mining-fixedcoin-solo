@@ -7,11 +7,10 @@ ROOT = Path(__file__).resolve().parent.parent
 APP = ROOT / "monitor" / "app.py"
 HTML = ROOT / "monitor" / "templates" / "dashboard_v3.html"
 JS = ROOT / "monitor" / "static" / "dashboard.js"
+CSS = ROOT / "monitor" / "static" / "dashboard.css"
 
 text = APP.read_text()
 
-# The dashboard source is intentionally kept compact. Match the RPC assignment
-# semantically instead of depending on one exact whitespace/formatting layout.
 rpc_pattern = re.compile(
     r'(?P<prefix>info,info_error=rpc\("getblockchaininfo"\);\s*'
     r'net,_=rpc\("getnetworkinfo"\);\s*'
@@ -26,9 +25,6 @@ if 'core_diff,_=rpc("getdifficulty")' not in text:
     replacement = f'{match.group("prefix")}core_diff,_=rpc("getdifficulty"); {match.group("tail")}'
     text = text[:match.start()] + replacement + text[match.end():]
 
-# IMPORTANT: consume the complete as_number(...) expression, including both
-# closing parentheses. The previous patch consumed only get(...), leaving an
-# extra ')' in generated app.py and breaking Docker's py_compile step.
 network_pattern = re.compile(
     r'network_diff=as_number\(stats\.get\("network_diff"\)\)\s*or\s*'
     r'as_number\(log_job\.get\("network_diff"\)\)\s*or\s*'
@@ -40,9 +36,6 @@ if network_pattern.search(text):
 elif 'network_diff=as_number(core_diff)' not in text:
     raise RuntimeError("dashboard difficulty marker mismatch: could not locate network_diff assignment")
 
-# Track the actual live Stratum state from authorize/VARDIFF log events. This
-# deliberately does not derive the UI from the configured fixed_difficulty: in
-# VarDiff mode the current pool difficulty changes at runtime.
 worker_anchor = 'm=re.search(r"authorize\\s+(\\S+).*?(?:diff|share_diff)\\s*[=:]\\s*([0-9.]+)",line,re.I)'
 if 'mode="fixed" if "mode=fixed"' not in text:
     old = worker_anchor
@@ -58,7 +51,6 @@ if 'm=re.search(r"VARDIFF\\s+(\\S+)\\s+([0-9.]+)→' not in text:
         raise RuntimeError("dashboard round marker mismatch")
     text = text.replace(vardiff_marker, insert, 1)
 
-# Ensure workers returned by status carry mode and current live difficulty.
 old_worker = 'workers[name]={"accepted":int(pv.get("ok") or pv.get("accepted") or pv.get("shares") or lv.get("accepted") or 0),"rejected":int(pv.get("bad") or pv.get("rejected") or lv.get("rejected") or 0),"difficulty":as_number(pv.get("difficulty") or lv.get("difficulty") or fixed_diff,fixed_diff),"active":True}'
 new_worker = 'workers[name]={"accepted":int(pv.get("ok") or pv.get("accepted") or pv.get("shares") or lv.get("accepted") or 0),"rejected":int(pv.get("bad") or pv.get("rejected") or lv.get("rejected") or 0),"difficulty":as_number(lv.get("difficulty") or pv.get("difficulty") or fixed_diff,fixed_diff),"mode":str(lv.get("mode") or pv.get("mode") or ("fixed" if as_number(pv.get("difficulty") or lv.get("difficulty") or fixed_diff,fixed_diff)==fixed_diff else "vardiff")),"active":True}'
 if old_worker in text:
@@ -66,7 +58,6 @@ if old_worker in text:
 elif '"mode":str(lv.get("mode")' not in text:
     raise RuntimeError("dashboard worker output marker mismatch")
 
-# Add a compact mining-level representation used by the dashboard card.
 old_mining = '"fixed_difficulty":fixed_diff,"best_share":round_best'
 new_mining = '"fixed_difficulty":fixed_diff,"stratum_difficulty":next((as_number(w.get("difficulty")) for w in workers.values() if w.get("active")),fixed_diff),"stratum_mode":next((str(w.get("mode") or "fixed") for w in workers.values() if w.get("active")),"fixed"),"best_share":round_best'
 if old_mining in text and '"stratum_difficulty":next(' not in text:
@@ -74,9 +65,25 @@ if old_mining in text and '"stratum_difficulty":next(' not in text:
 elif '"stratum_difficulty":next(' not in text:
     raise RuntimeError("dashboard mining output marker mismatch")
 
+# Report uptime from the actual fixedcoind process. This avoids negative or
+# fake values caused by mixing wall-clock timestamps with monotonic/container
+# start times. /proc/<pid>/stat field 22 is process start time in clock ticks.
+uptime_helper = '''\n\ndef node_uptime_seconds():\n    try:\n        pids = [p for p in Path("/proc").iterdir() if p.name.isdigit()]\n        hz = os.sysconf(os.sysconf_names["SC_CLK_TCK"])\n        now_ticks = time.clock_gettime(time.CLOCK_MONOTONIC) * hz\n        for pid in pids:\n            try:\n                comm = (Path(pid / "comm").read_text(errors="ignore")).strip()\n                if comm != "fixedcoind":\n                    continue\n                fields = (pid / "stat").read_text().split()\n                start_ticks = float(fields[21])\n                return max(0.0, (now_ticks - start_ticks) / hz)\n            except (OSError, ValueError, IndexError):\n                continue\n    except (OSError, ValueError, KeyError):\n        pass\n    return 0.0\n'''
+if 'def node_uptime_seconds()' not in text:
+    marker = '\n\ndef status():'
+    if marker not in text:
+        raise RuntimeError("dashboard status marker mismatch")
+    text = text.replace(marker, uptime_helper + marker, 1)
+
+old_return = '"history_diff":DIFF_HISTORY,"payout":pool.get("payout_address","")'
+new_return = '"history_diff":DIFF_HISTORY,"uptime_seconds":node_uptime_seconds(),"payout":pool.get("payout_address","")'
+if old_return in text:
+    text = text.replace(old_return, new_return, 1)
+elif '"uptime_seconds":node_uptime_seconds()' not in text:
+    raise RuntimeError("dashboard uptime output marker mismatch")
+
 APP.write_text(text)
 
-# Dashboard card: always show the live Stratum difficulty and its actual mode.
 html = HTML.read_text()
 old_card = '<div class="card metric"><span class="metric-dot cyan-dot"></span><div class="eyebrow">Share Difficulty</div><div class="metric-value cyan" id="shareDiff">—</div><div class="metric-sub">fixed Stratum target</div><span class="fixed-pill">Fixed</span></div>'
 new_card = '<div class="card metric"><span class="metric-dot cyan-dot"></span><div class="eyebrow">Share Difficulty</div><div class="metric-value cyan" id="shareDiff">—</div><div class="metric-sub" id="shareDiffSub">Fixed Stratum target</div><span class="fixed-pill" id="shareDiffMode">Fixed</span></div>'
@@ -95,16 +102,28 @@ elif 'const stratumDiff=n(m.stratum_difficulty||m.fixed_difficulty);' not in js:
     raise RuntimeError("dashboard Share Difficulty JS marker mismatch")
 JS.write_text(js)
 
-# Self-checks so Docker fails at build time instead of shipping a stale UI.
+# Make SOLO BLOCKS a fixed-height scroll region so persistent history does not
+# expand the entire dashboard indefinitely. Keep this in the build patch so
+# generated/updated CSS always carries the behavior.
+css = CSS.read_text()
+scroll_css = '.blocks-card .block-list{max-height:360px;overflow-y:auto;overflow-x:hidden;padding-right:4px;scrollbar-width:thin;scrollbar-color:#18515f transparent}.blocks-card .block-list::-webkit-scrollbar{width:7px}.blocks-card .block-list::-webkit-scrollbar-track{background:transparent}.blocks-card .block-list::-webkit-scrollbar-thumb{background:#18515f;border-radius:999px}.blocks-card .block-list::-webkit-scrollbar-thumb:hover{background:#18e8ff88}'
+if '.blocks-card .block-list{max-height:360px' not in css:
+    css += '\n' + scroll_css + '\n'
+CSS.write_text(css)
+
 if 'core_diff,_=rpc("getdifficulty")' not in text:
     raise RuntimeError("getdifficulty RPC missing")
 if 'network_diff=as_number(core_diff)' not in text:
     raise RuntimeError("Core difficulty is not authoritative")
 if '"stratum_difficulty":next(' not in text or '"stratum_mode":next(' not in text:
     raise RuntimeError("live Stratum state is not exposed")
+if 'def node_uptime_seconds()' not in text or '"uptime_seconds":node_uptime_seconds()' not in text:
+    raise RuntimeError("node uptime is not exposed")
 if 'id="shareDiffMode"' not in html or 'id="shareDiffSub"' not in html:
     raise RuntimeError("Share Difficulty mode UI missing")
 if 'const stratumDiff=n(m.stratum_difficulty||m.fixed_difficulty);' not in js:
     raise RuntimeError("Share Difficulty rendering missing")
+if '.blocks-card .block-list{max-height:360px' not in css:
+    raise RuntimeError("solo block scroll styling missing")
 
-print("patched dashboard: Core network difficulty authoritative; live Stratum Fixed/VarDiff state exposed")
+print("patched dashboard: Core network difficulty authoritative; live Stratum Fixed/VarDiff state, node uptime and scrollable solo blocks exposed")
