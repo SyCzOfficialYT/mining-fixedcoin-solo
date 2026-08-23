@@ -1,0 +1,130 @@
+/* Forge side metrics: EXACT visual family of Accepted / Rejected cards.
+ * Content differs (telemetry + graph), shell does not.
+ */
+.forge-stage .hashrate-card,
+.forge-stage .forge-shares-min{
+  right:auto!important;
+  left:58px!important;
+  width:356px!important;
+  height:194px!important;
+  min-height:194px!important;
+  padding:22px 24px 18px!important;
+  box-sizing:border-box!important;
+  overflow:visible!important;
+  border:1px solid rgba(24,75,86,.96)!important;
+  border-radius:14px!important;
+  background:linear-gradient(145deg,rgba(2,11,15,.94),rgba(1,7,10,.82))!important;
+  box-shadow:inset 0 0 0 1px rgba(25,228,255,.035),0 18px 40px rgba(0,0,0,.38)!important;
+  transform-style:preserve-3d!important;
+  transform-origin:center center!important;
+  text-align:left!important;
+}
+
+/* Mirror the right-side perspective so the two sides form one instrument family. */
+.forge-stage .hashrate-card{
+  top:52px!important;
+  transform:perspective(900px) rotateY(8deg) rotateX(1.5deg)!important;
+}
+.forge-stage .forge-shares-min{
+  top:300px!important;
+  transform:perspective(900px) rotateY(8deg) rotateX(1deg)!important;
+}
+
+/* Same secondary depth plate used by Accepted / Rejected. */
+.forge-stage .hashrate-card:before,
+.forge-stage .forge-shares-min:before{
+  content:""!important;
+  position:absolute!important;
+  inset:0!important;
+  border:1px solid rgba(25,217,255,.06)!important;
+  border-radius:14px!important;
+  transform:translate3d(10px,8px,-20px)!important;
+  pointer-events:none!important;
+}
+
+/* Same typography hierarchy as the right cards. */
+.forge-stage .hashrate-card>span,
+.forge-stage .forge-shares-min>span{
+  font-size:11px!important;
+  letter-spacing:.16em!important;
+  color:#8ca4aa!important;
+  margin:0 0 8px!important;
+}
+.forge-stage .hashrate-card>strong,
+.forge-stage .forge-shares-min>strong{
+  font-size:42px!important;
+  line-height:.95!important;
+  color:#dbe8eb!important;
+  text-shadow:none!important;
+}
+.forge-stage .hashrate-card>small,
+.forge-stage .forge-shares-min>small{
+  font-size:10px!important;
+  letter-spacing:.11em!important;
+  color:#627b82!important;
+  margin-top:7px!important;
+}
+
+/* Keep the graphs, but treat them as the card's lower telemetry strip. */
+.forge-stage .hashrate-card>svg,
+.forge-stage .forge-shares-min>svg{
+  display:block!important;
+  width:100%!important;
+  height:44px!important;
+  min-height:44px!important;
+  margin-top:10px!important;
+  opacity:.92!important;
+}
+.forge-stage .hashrate-card polyline,
+.forge-stage .forge-shares-min polyline{
+  stroke:#58ef6d!important;
+  stroke-width:2.2!important;
+  filter:drop-shadow(0 0 5px rgba(84,239,108,.30))!important;
+}
+
+/* Quiet idle state: exactly like Accepted / Rejected. */
+.forge-stage .hashrate-card:hover,
+.forge-stage .forge-shares-min:hover{
+  box-shadow:inset 0 0 0 1px rgba(25,228,255,.035),0 18px 40px rgba(0,0,0,.38)!important;
+}
+
+@media(min-width:1450px){
+  .forge-stage .hashrate-card,
+  .forge-stage .forge-shares-min{
+    left:64px!important;
+    width:366px!important;
+  }
+  .forge-stage .hashrate-card{top:54px!important}
+  .forge-stage .forge-shares-min{top:298px!important}
+}
+
+@media(max-width:1100px){
+  .forge-stage .hashrate-card,
+  .forge-stage .forge-shares-min{
+    left:30px!important;
+    width:270px!important;
+    height:162px!important;
+    min-height:162px!important;
+  }
+  .forge-stage .hashrate-card{top:34px!important}
+  .forge-stage .forge-shares-min{top:230px!important}
+  .forge-stage .hashrate-card>strong,
+  .forge-stage .forge-shares-min>strong{font-size:34px!important}
+}
+
+@media(max-width:780px){
+  .forge-stage .hashrate-card,
+  .forge-stage .forge-shares-min{
+    left:18px!important;
+    width:210px!important;
+    height:140px!important;
+    min-height:140px!important;
+    padding:15px 14px!important;
+  }
+  .forge-stage .hashrate-card{top:18px!important}
+  .forge-stage .forge-shares-min{top:176px!important}
+  .forge-stage .hashrate-card>strong,
+  .forge-stage .forge-shares-min>strong{font-size:30px!important}
+  .forge-stage .hashrate-card>svg,
+  .forge-stage .forge-shares-min>svg{height:30px!important;min-height:30px!important;margin-top:6px!important}
+}
