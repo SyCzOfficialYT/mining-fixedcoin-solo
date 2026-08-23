@@ -41,7 +41,7 @@
   left: auto !important;
   top: 34px !important;
   bottom: auto !important;
-  transform: perspective(900px) rotateY(calc(-11deg + var(--px, 0deg))) rotateX(calc(2deg + var(--py, 0deg))) !important;
+  transform: perspective(700px) rotateY(calc(-18deg + var(--px, 0deg))) rotateX(calc(4deg + var(--py, 0deg))) !important;
   border: 2px solid var(--share3d-green) !important;
   box-shadow:
     inset 0 0 0 1px rgba(57, 255, 138, 0.2),
@@ -57,7 +57,7 @@
   left: auto !important;
   top: 128px !important;
   bottom: auto !important;
-  transform: perspective(900px) rotateY(calc(-11deg + var(--px, 0deg))) rotateX(calc(1.5deg + var(--py, 0deg))) !important;
+  transform: perspective(700px) rotateY(calc(-18deg + var(--px, 0deg))) rotateX(calc(3deg + var(--py, 0deg))) !important;
   border: 2px solid var(--share3d-red) !important;
   box-shadow:
     inset 0 0 0 1px rgba(255, 68, 85, 0.2),
@@ -79,7 +79,7 @@
   background: #03070a !important;
   z-index: -1 !important;
   pointer-events: none !important;
-  transform: translate3d(-10px, 2px, -22px) !important;
+  transform: translate3d(-12px, 3px, -28px) !important;
   transform-style: preserve-3d !important;
 }
 
@@ -187,14 +187,14 @@
 }
 
 @keyframes shareCardHitAccept {
-  0% { filter: none; transform: perspective(900px) rotateY(calc(-11deg + var(--px, 0deg))) rotateX(calc(2deg + var(--py, 0deg))) scale(1); }
-  22% { filter: brightness(1.3); transform: perspective(900px) rotateY(calc(-11deg + var(--px, 0deg))) rotateX(calc(2deg + var(--py, 0deg))) scale(1.04); }
-  100% { filter: none; transform: perspective(900px) rotateY(calc(-11deg + var(--px, 0deg))) rotateX(calc(2deg + var(--py, 0deg))) scale(1); }
+  0% { filter: none; transform: perspective(700px) rotateY(calc(-18deg + var(--px, 0deg))) rotateX(calc(4deg + var(--py, 0deg))) scale(1); }
+  22% { filter: brightness(1.3); transform: perspective(700px) rotateY(calc(-18deg + var(--px, 0deg))) rotateX(calc(4deg + var(--py, 0deg))) scale(1.04); }
+  100% { filter: none; transform: perspective(700px) rotateY(calc(-18deg + var(--px, 0deg))) rotateX(calc(4deg + var(--py, 0deg))) scale(1); }
 }
 @keyframes shareCardHitReject {
-  0% { filter: none; transform: perspective(900px) rotateY(calc(-11deg + var(--px, 0deg))) rotateX(calc(1.5deg + var(--py, 0deg))) scale(1); }
-  22% { filter: brightness(1.3); transform: perspective(900px) rotateY(calc(-11deg + var(--px, 0deg))) rotateX(calc(1.5deg + var(--py, 0deg))) scale(1.04); }
-  100% { filter: none; transform: perspective(900px) rotateY(calc(-11deg + var(--px, 0deg))) rotateX(calc(1.5deg + var(--py, 0deg))) scale(1); }
+  0% { filter: none; transform: perspective(700px) rotateY(calc(-18deg + var(--px, 0deg))) rotateX(calc(3deg + var(--py, 0deg))) scale(1); }
+  22% { filter: brightness(1.3); transform: perspective(700px) rotateY(calc(-18deg + var(--px, 0deg))) rotateX(calc(3deg + var(--py, 0deg))) scale(1.04); }
+  100% { filter: none; transform: perspective(700px) rotateY(calc(-18deg + var(--px, 0deg))) rotateX(calc(3deg + var(--py, 0deg))) scale(1); }
 }
 .forge-counter.accepted.share-smash {
   animation: shareCardHitAccept 0.38s cubic-bezier(0.2, 0.8, 0.2, 1) both !important;
