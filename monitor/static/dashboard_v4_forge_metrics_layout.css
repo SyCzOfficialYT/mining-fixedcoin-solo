@@ -1,107 +1,110 @@
-/* FIXCORE forge metrics: compact cards using the exact accepted/rejected 3D card language. */
+/* FIXCORE forge metric cards — exact physical shell of the Accepted/Rejected cards. */
 .forge-stage .hashrate-card,
 .forge-stage .forge-shares-min {
-  position:absolute!important; left:30px!important; right:auto!important;
-  width:170px!important; min-width:170px!important;
-  height:108px!important; min-height:108px!important;
-  margin:0!important; padding:11px 12px 9px 14px!important;
-  box-sizing:border-box!important; overflow:visible!important;
-  border:2px solid #39ff8a!important; border-radius:14px!important;
-  background:#060c10!important; backdrop-filter:none!important;
-  -webkit-backdrop-filter:none!important;
-  transform-style:preserve-3d!important; backface-visibility:hidden!important;
-  transform-origin:50% 50%!important; will-change:transform!important; z-index:48!important;
-  transform:perspective(760px) rotateY(calc(-18deg + var(--metric-px,0deg))) rotateX(calc(2.5deg + var(--metric-py,0deg)))!important;
+  position:absolute!important;
+  box-sizing:border-box!important;
+  width:210px!important;
+  min-width:210px!important;
+  height:126px!important;
+  min-height:126px!important;
+  margin:0!important;
+  padding:.65rem .8rem .7rem .95rem!important;
+  border-radius:14px!important;
+  background:#050a0e!important;
+  overflow:visible!important;
+  transform-style:preserve-3d!important;
+  backface-visibility:hidden!important;
+  transform-origin:center center!important;
+  will-change:transform!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:stretch!important;
+  justify-content:flex-start!important;
+  text-align:left!important;
+  z-index:48!important;
+  border:2px solid #39ff8a!important;
+  transform:perspective(700px) rotateY(calc(-18deg + var(--metric-px,0deg))) rotateX(calc(4deg + var(--metric-py,0deg)))!important;
   box-shadow:
-    inset 0 0 0 1px rgba(57,255,138,.30),
-    inset 0 0 12px rgba(57,255,138,.07),
-    0 0 0 1px rgba(57,255,138,.35),
-    0 0 6px 1px rgba(57,255,138,.62),
-    0 0 16px 2px rgba(57,255,138,.32),
-    0 0 30px 4px rgba(57,255,138,.14),
-    4px 8px 20px rgba(0,0,0,.55)!important;
+    inset 0 0 0 1px rgba(57,255,138,.2),
+    0 0 6px 0 rgba(57,255,138,.65),
+    0 0 14px 1px rgba(57,255,138,.35),
+    0 0 30px 2px rgba(57,255,138,.15),
+    3px 6px 16px rgba(0,0,0,.5)!important;
 }
-.forge-stage .hashrate-card{top:31px!important}
-.forge-stage .forge-shares-min{top:151px!important;transform:perspective(760px) rotateY(calc(-18deg + var(--metric-px,0deg))) rotateX(calc(1.8deg + var(--metric-py,0deg)))!important}
 
-/* Rear plate: this is the physical depth layer. */
+.forge-stage .hashrate-card{left:30px!important;right:auto!important;top:42px!important}
+.forge-stage .forge-shares-min{left:30px!important;right:auto!important;top:203px!important;transform:perspective(700px) rotateY(calc(-18deg + var(--metric-px,0deg))) rotateX(calc(3deg + var(--metric-py,0deg)))!important}
+
+/* IDENTICAL rear/depth plate to the right-side Accepted/Rejected cards. */
 .forge-stage .hashrate-card::before,
 .forge-stage .forge-shares-min::before{
-  content:""!important; position:absolute!important; inset:0!important;
-  border-radius:14px!important; box-sizing:border-box!important;
-  pointer-events:none!important; z-index:-1!important;
-  transform:translate3d(-10px,4px,-26px)!important;
-  background:#03070a!important; border:2px solid rgba(57,255,138,.82)!important;
-  box-shadow:0 0 7px rgba(57,255,138,.32),0 0 16px rgba(57,255,138,.13)!important;
+  content:""!important;
+  display:block!important;
+  position:absolute!important;
+  inset:0!important;
+  border-radius:14px!important;
+  background:#03070a!important;
+  z-index:-1!important;
+  pointer-events:none!important;
+  transform:translate3d(-12px,3px,-28px)!important;
+  transform-style:preserve-3d!important;
+  border:2px solid rgba(57,255,138,.95)!important;
+  box-shadow:0 0 6px rgba(57,255,138,.4),0 0 14px rgba(57,255,138,.15)!important;
 }
 
-/* Soft right thumb/rim, matching the reference card construction. */
 .forge-stage .hashrate-card::after,
-.forge-stage .forge-shares-min::after{
-  content:""!important; position:absolute!important;
-  top:6px!important; bottom:6px!important; right:-7px!important; width:14px!important;
-  border-radius:0 12px 12px 0!important; pointer-events:none!important;
-  z-index:-1!important; filter:blur(.3px)!important; opacity:.95!important;
-  background:linear-gradient(90deg,#39ff8a 0%,#1a8a4e 55%,transparent 100%)!important;
-  box-shadow:2px 0 8px rgba(57,255,138,.52),4px 0 16px rgba(57,255,138,.22)!important;
-}
+.forge-stage .forge-shares-min::after{content:none!important;display:none!important}
 
-/* True depth hierarchy: label/value/graph sit above the card plane. */
 .forge-stage .hashrate-card>span,
 .forge-stage .forge-shares-min>span{
-  display:block!important; width:100%!important; margin:0 0 4px!important; padding:0!important;
-  color:#8aa0aa!important; font:600 8px/1.15 'JetBrains Mono',monospace!important;
-  letter-spacing:.15em!important; text-align:left!important; white-space:nowrap!important;
-  transform:translateZ(11px)!important;
+  display:block!important;position:relative!important;inset:auto!important;width:100%!important;box-sizing:border-box!important;
+  flex:0 0 auto!important;margin:0 0 1px!important;padding:0!important;align-self:stretch!important;z-index:4!important;
+  color:#8aa0aa!important;font:600 10px/1 Inter,ui-sans-serif,system-ui,sans-serif!important;letter-spacing:.12em!important;
+  text-transform:uppercase!important;text-align:left!important;white-space:nowrap!important;transform:translateZ(8px)!important;
 }
 .forge-stage .hashrate-card>strong,
 .forge-stage .forge-shares-min>strong{
-  display:block!important; width:100%!important; margin:0!important; padding:0!important;
-  color:#e9f8fa!important; font:700 20px/1.05 'JetBrains Mono',monospace!important;
-  letter-spacing:-.025em!important; text-align:left!important; white-space:nowrap!important;
-  text-shadow:0 0 10px rgba(220,250,255,.12)!important; transform:translateZ(18px)!important;
+  position:relative!important;inset:auto!important;display:block!important;width:100%!important;box-sizing:border-box!important;
+  flex:0 0 auto!important;margin:0!important;padding:0!important;align-self:stretch!important;z-index:4!important;
+  color:#e9f8fa!important;font:700 1.9rem/1 "JetBrains Mono",ui-monospace,monospace!important;letter-spacing:-.02em!important;
+  text-align:left!important;white-space:nowrap!important;text-shadow:0 0 10px rgba(220,250,255,.12)!important;transform:translateZ(14px)!important;
 }
 .forge-stage .hashrate-card>small,
 .forge-stage .forge-shares-min>small{
-  display:block!important; width:100%!important; margin:4px 0 0!important; padding:0!important;
-  color:#5e777e!important; font:500 6.5px/1.15 'JetBrains Mono',monospace!important;
-  letter-spacing:.09em!important; text-align:left!important; white-space:nowrap!important;
-  text-transform:uppercase!important; transform:translateZ(8px)!important;
+  position:relative!important;inset:auto!important;display:block!important;width:100%!important;box-sizing:border-box!important;
+  flex:0 0 auto!important;margin:2px 0 0!important;padding:0!important;align-self:stretch!important;z-index:4!important;
+  color:#5e777e!important;font:500 7px/1.15 "JetBrains Mono",monospace!important;letter-spacing:.10em!important;
+  text-align:left!important;text-transform:uppercase!important;white-space:nowrap!important;transform:translateZ(7px)!important;
 }
 .forge-stage .hashrate-card>svg,
 .forge-stage .forge-shares-min>svg{
-  display:block!important; width:100%!important; height:28px!important; min-height:28px!important;
-  margin:6px 0 0!important; padding:0!important; overflow:visible!important;
-  transform:translateZ(10px)!important;
+  display:block!important;position:relative!important;flex:1 1 auto!important;align-self:stretch!important;width:100%!important;
+  min-height:30px!important;height:30px!important;margin:7px 0 0!important;padding:0!important;overflow:visible!important;z-index:4!important;
+  transform:translateZ(9px)!important;
 }
 .forge-stage .hashrate-card polyline,
 .forge-stage .forge-shares-min polyline{
-  fill:none!important; stroke:#58ef6d!important; stroke-width:2.1!important;
-  filter:drop-shadow(0 0 4px rgba(84,239,108,.5))!important;
+  fill:none!important;stroke:#39ff8a!important;stroke-width:2.1!important;filter:drop-shadow(0 0 4px rgba(57,255,138,.5))!important;
 }
 
-@media(max-width:900px){
+@media(max-width:700px){
   .forge-stage .hashrate-card,.forge-stage .forge-shares-min{
-    left:18px!important; width:158px!important; min-width:158px!important;
-    height:104px!important; min-height:104px!important; padding:10px 10px 8px 12px!important;
+    left:22px!important;width:200px!important;min-width:200px!important;height:120px!important;min-height:120px!important;
   }
-  .forge-stage .hashrate-card{top:27px!important}
-  .forge-stage .forge-shares-min{top:141px!important}
+  .forge-stage .hashrate-card{top:42px!important}
+  .forge-stage .forge-shares-min{top:197px!important}
 }
-@media(max-width:620px){
+@media(max-width:520px){
   .forge-stage .hashrate-card,.forge-stage .forge-shares-min{
-    left:14px!important; width:148px!important; min-width:148px!important;
-    height:98px!important; min-height:98px!important; padding:9px 9px 7px 11px!important;
+    left:14px!important;width:190px!important;min-width:190px!important;height:116px!important;min-height:116px!important;
+    padding:.65rem .8rem .7rem .95rem!important;
   }
-  .forge-stage .hashrate-card{top:22px!important}
-  .forge-stage .forge-shares-min{top:125px!important}
-  .forge-stage .hashrate-card>span,.forge-stage .forge-shares-min>span{font-size:7px!important}
-  .forge-stage .hashrate-card>strong,.forge-stage .forge-shares-min>strong{font-size:18px!important}
-  .forge-stage .hashrate-card>small,.forge-stage .forge-shares-min>small{font-size:6px!important}
-  .forge-stage .hashrate-card>svg,.forge-stage .forge-shares-min>svg{height:25px!important;min-height:25px!important;margin-top:5px!important}
+  .forge-stage .hashrate-card{top:36px!important}
+  .forge-stage .forge-shares-min{top:187px!important}
+  .forge-stage .hashrate-card>span,.forge-stage .forge-shares-min>span{font-size:10px!important}
+  .forge-stage .hashrate-card>strong,.forge-stage .forge-shares-min>strong{font-size:1.9rem!important}
+  .forge-stage .hashrate-card>svg,.forge-stage .forge-shares-min>svg{min-height:27px!important;height:27px!important;margin-top:6px!important}
 }
 @media(prefers-reduced-motion:reduce){
-  .forge-stage .hashrate-card,.forge-stage .forge-shares-min{
-    transform:perspective(760px) rotateY(-18deg) rotateX(2deg)!important; will-change:auto!important;
-  }
+  .forge-stage .hashrate-card,.forge-stage .forge-shares-min{will-change:auto!important}
 }
