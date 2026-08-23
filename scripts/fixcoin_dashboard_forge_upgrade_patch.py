@@ -25,8 +25,10 @@ if anchor_js not in html:
 html = html.replace(anchor_js, anchor_js + JS, 1)
 
 # Fail the image build if the final realtime forge/proximity primitives disappear.
+# The forge element also carries the panel class, so verify it as a token rather
+# than requiring the impossible exact string class="forge".
 required = [
-    'class="forge"',
+    'class="forge panel"',
     'id="forgeStage"',
     'id="forgeCore"',
     'id="candidatePct"',
