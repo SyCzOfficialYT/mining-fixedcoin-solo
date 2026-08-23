@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Restore the four wallet balance metrics and live Recent Activity UI."""
 from pathlib import Path
+import re
 
 HTML = Path('/app/monitor/templates/dashboard_v4.html')
 APP = Path('/app/monitor/app.py')
@@ -62,11 +63,17 @@ new_balance = old_balance + (
 )
 once(old_balance, new_balance, 'restored confirmed/unconfirmed/immature/total balance cards')
 
-once(
-    '<script defer src="/static/dashboard_v4_forge.js?v=20260823-2"></script>',
-    '<script defer src="/static/dashboard_v4_forge.js?v=20260823-2"></script><script defer src="/static/dashboard_v4_balance_activity.js?v=20260823-2"></script>',
-    'patched dashboard realtime balance/activity client'
-)
+# The forge script is versioned independently by later visual patches. Match
+# the actual script tag rather than pinning an obsolete query-string version.
+# This keeps the patch stable when dashboard_v4_forge.js moves from v2 to v3+.
+balance_script = '<script defer src="/static/dashboard_v4_balance_activity.js?v=20260823-2"></script>'
+if balance_script not in text:
+    forge_script = re.search(r'<script defer src="/static/dashboard_v4_forge\.js\?v=[^"]+"></script>', text)
+    if not forge_script:
+        raise RuntimeError('missing dashboard balance/activity anchor: dashboard v4 forge client script')
+    text = text[:forge_script.end()] + balance_script + text[forge_script.end():]
+    changed = True
+    print('patched dashboard realtime balance/activity client')
 
 if changed:
     HTML.write_text(text)
