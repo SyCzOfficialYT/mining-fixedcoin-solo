@@ -1,121 +1,155 @@
 :root {
-  --share3d-green: #00ff88;
-  --share3d-red: #ff3b3b;
+  --share3d-green: #39ff8a;
+  --share3d-red: #ff4455;
 }
 
-/* Reference geometry: two compact 230x130 HUD cards, real Z extrusion. */
+/*
+ * SHARE CARDS — direct adaptation of the supplied reference.
+ * The dashboard already provides the scene/stage; the cards below intentionally
+ * keep the reference geometry instead of inventing a different 3D treatment.
+ */
 .forge-stage {
-  perspective: 1200px !important;
-  perspective-origin: 50% 50% !important;
+  perspective: 800px !important;
+  perspective-origin: 25% 50% !important;
   transform-style: preserve-3d !important;
-  overflow: hidden !important;
+}
+
+/* The reference has no external stream particles/labels. */
+.accept-stream,
+.reject-stream {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
 
 .forge-counter {
   position: absolute !important;
   box-sizing: border-box !important;
-  isolation: isolate !important;
-  overflow: visible !important;
-  transform-style: preserve-3d !important;
-  backface-visibility: hidden !important;
-  transform-origin: 50% 50% !important;
-  will-change: transform !important;
   width: 230px !important;
   height: 130px !important;
   min-width: 230px !important;
   min-height: 130px !important;
-  padding: 20px 22px !important;
+  padding: 11px 13px 12px 16px !important;
+  margin: 0 !important;
   border: 0 !important;
-  border-radius: 16px !important;
-  background: rgba(10, 14, 20, .88) !important;
-  display: block !important;
-  --px: 0deg;
-  --py: 0deg;
-  box-shadow: 0 14px 28px rgba(0,0,0,.42) !important;
+  border-radius: 14px !important;
+  background: #060c10 !important;
+  overflow: visible !important;
+  isolation: isolate !important;
+  transform-style: preserve-3d !important;
+  backface-visibility: hidden !important;
+  transform-origin: 50% 50% !important;
+  will-change: transform !important;
+  display: grid !important;
+  grid-template-columns: 1fr auto !important;
+  grid-template-rows: auto auto !important;
+  align-items: center !important;
+  column-gap: 10px !important;
 }
 
-/* Exact reference direction: Accept left-tilted, Reject right-tilted. */
+/* Exact reference: BOTH cards use the same left-facing Y direction. */
 .forge-counter.accepted {
+  left: auto !important;
   right: 18px !important;
   top: 34px !important;
-  transform: perspective(1200px) rotateY(calc(-18deg + var(--px))) rotateX(calc(4deg + var(--py))) translateZ(30px) !important;
-  border: 2px solid var(--share3d-green) !important;
+  bottom: auto !important;
+  transform: rotateY(calc(-12deg + var(--px, 0deg))) rotateX(calc(2deg + var(--py, 0deg))) !important;
+  border: 2px solid #39ff8a !important;
   box-shadow:
-    0 0 20px rgba(0,255,136,.50),
-    0 0 60px rgba(0,255,136,.15),
-    inset 0 0 20px rgba(0,255,136,.08),
-    0 16px 30px rgba(0,0,0,.45) !important;
+    inset 0 0 0 1px rgba(57, 255, 138, 0.35),
+    inset 0 0 12px rgba(57, 255, 138, 0.08),
+    0 0 0 1px rgba(57, 255, 138, 0.4),
+    0 0 6px 1px rgba(57, 255, 138, 0.7),
+    0 0 16px 2px rgba(57, 255, 138, 0.4),
+    0 0 36px 4px rgba(57, 255, 138, 0.18),
+    4px 8px 20px rgba(0, 0, 0, 0.55) !important;
 }
 
 .forge-counter.rejected {
+  left: auto !important;
   right: 18px !important;
   top: 182px !important;
   bottom: auto !important;
-  transform: perspective(1200px) rotateY(calc(18deg + var(--px))) rotateX(calc(4deg + var(--py))) translateZ(30px) !important;
-  border: 2px solid var(--share3d-red) !important;
+  transform: rotateY(calc(-12deg + var(--px, 0deg))) rotateX(calc(1.5deg + var(--py, 0deg))) !important;
+  border: 2px solid #ff4455 !important;
   box-shadow:
-    0 0 20px rgba(255,59,59,.50),
-    0 0 60px rgba(255,59,59,.15),
-    inset 0 0 20px rgba(255,59,59,.08),
-    0 16px 30px rgba(0,0,0,.45) !important;
+    inset 0 0 0 1px rgba(255, 68, 85, 0.35),
+    inset 0 0 12px rgba(255, 68, 85, 0.08),
+    0 0 0 1px rgba(255, 68, 85, 0.4),
+    0 0 6px 1px rgba(255, 68, 85, 0.7),
+    0 0 16px 2px rgba(255, 68, 85, 0.4),
+    0 0 36px 4px rgba(255, 68, 85, 0.18),
+    4px 8px 20px rgba(0, 0, 0, 0.55) !important;
 }
 
-/* Real extrusion: the rear face is 35px behind the front face. */
+/* Reference soft right bevel: a rounded strip, not a polygon/cube wall. */
 .forge-counter::before {
   content: "" !important;
   position: absolute !important;
-  inset: -2px !important;
-  border-radius: 18px !important;
-  transform: translateZ(-35px) !important;
-  transform-style: preserve-3d !important;
+  top: 6px !important;
+  bottom: 6px !important;
+  right: -7px !important;
+  width: 14px !important;
+  border-radius: 0 12px 12px 0 !important;
   z-index: -1 !important;
   pointer-events: none !important;
+  filter: blur(.3px) !important;
   opacity: .95 !important;
+  transform: translateZ(-1px) !important;
 }
 
 .forge-counter.accepted::before {
-  background: linear-gradient(90deg, rgba(0,255,136,.15), rgba(0,255,136,.05)) !important;
-  box-shadow: -20px 0 40px rgba(0,255,136,.25) !important;
+  background: linear-gradient(90deg, #39ff8a 0%, #1a8a4e 55%, transparent 100%) !important;
+  box-shadow:
+    2px 0 8px rgba(57,255,138,.55),
+    4px 0 16px rgba(57,255,138,.25) !important;
 }
 
 .forge-counter.rejected::before {
-  background: linear-gradient(90deg, rgba(255,59,59,.15), rgba(255,59,59,.05)) !important;
-  box-shadow: 20px 0 40px rgba(255,59,59,.25) !important;
+  background: linear-gradient(90deg, #ff4455 0%, #8a1a28 55%, transparent 100%) !important;
+  box-shadow:
+    2px 0 8px rgba(255,68,85,.55),
+    4px 0 16px rgba(255,68,85,.25) !important;
 }
 
-/* A single soft floating shadow; no fake second card. */
+/* Second softer depth layer from the supplied reference. */
 .forge-counter::after {
   content: "" !important;
   position: absolute !important;
-  inset: 2px !important;
-  border-radius: 15px !important;
-  transform: translate3d(0, 10px, -38px) !important;
+  top: 10px !important;
+  bottom: 10px !important;
+  right: -11px !important;
+  width: 10px !important;
+  border-radius: 0 10px 10px 0 !important;
   z-index: -2 !important;
   pointer-events: none !important;
-  opacity: .32 !important;
-  filter: blur(9px) !important;
+  opacity: .45 !important;
+  filter: blur(1.5px) !important;
+  transform: translateZ(-3px) !important;
 }
 
-.forge-counter.accepted::after { background: rgba(0,255,136,.32) !important; }
-.forge-counter.rejected::after { background: rgba(255,59,59,.32) !important; }
-
-/* Existing legacy forge rules positioned these stream particles outside the cards.
-   The reference has only the status dot inside each card. */
-.accept-stream .stream-core,
-.reject-stream .reject-core {
-  display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
+.forge-counter.accepted::after {
+  background: #39ff8a !important;
+  box-shadow: 0 0 12px rgba(57,255,138,.5) !important;
 }
 
+.forge-counter.rejected::after {
+  background: #ff4455 !important;
+  box-shadow: 0 0 12px rgba(255,68,85,.5) !important;
+}
+
+/* Direct children mirror the exact card content layout in the supplied code. */
 .forge-counter > span:not(.event-dot) {
-  position: absolute !important;
-  left: 22px !important;
-  top: 20px !important;
-  right: 52px !important;
+  grid-column: 1 / -1 !important;
+  position: relative !important;
+  left: auto !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: auto !important;
   z-index: 4 !important;
-  display: block !important;
-  margin: 0 !important;
+  margin: 0 0 1px !important;
+  padding: 0 !important;
   transform: translateZ(2px) !important;
   font-size: 10px !important;
   font-weight: 600 !important;
@@ -127,45 +161,48 @@
 }
 
 .forge-counter > strong {
-  position: absolute !important;
-  left: 22px !important;
-  top: 42px !important;
+  position: relative !important;
+  left: auto !important;
+  top: auto !important;
   z-index: 4 !important;
   display: block !important;
   margin: 0 !important;
+  padding: 0 !important;
   transform: translateZ(3px) !important;
-  font-size: 34px !important;
+  font-size: 31px !important;
   font-weight: 700 !important;
   line-height: 1 !important;
   letter-spacing: -.02em !important;
 }
 
 .forge-counter.accepted > strong {
-  color: var(--share3d-green) !important;
-  text-shadow: 0 0 10px rgba(0,255,136,.5) !important;
+  color: #39ff8a !important;
+  text-shadow: 0 0 10px rgba(57,255,138,.5) !important;
 }
 
 .forge-counter.rejected > strong {
-  color: var(--share3d-red) !important;
-  text-shadow: 0 0 10px rgba(255,59,59,.5) !important;
+  color: #ff4455 !important;
+  text-shadow: 0 0 10px rgba(255,68,85,.5) !important;
 }
 
 .forge-counter > b {
-  position: absolute !important;
-  left: 22px !important;
-  top: 88px !important;
+  position: relative !important;
+  left: auto !important;
+  top: auto !important;
   z-index: 4 !important;
   display: block !important;
   margin: 0 !important;
+  padding: 0 !important;
   transform: translateZ(3px) !important;
   font-size: 12px !important;
   font-weight: 500 !important;
   line-height: 1 !important;
 }
 
-.forge-counter.accepted > b { color: var(--share3d-green) !important; }
-.forge-counter.rejected > b { color: var(--share3d-red) !important; }
+.forge-counter.accepted > b { color: #39ff8a !important; }
+.forge-counter.rejected > b { color: #ff4455 !important; }
 
+/* Reference icon: 34px circular outline on the right. */
 .forge-counter > i {
   position: absolute !important;
   right: 13px !important;
@@ -188,10 +225,10 @@
   transform: translateZ(4px) !important;
 }
 
-.forge-counter.accepted > i { color: var(--share3d-green) !important; }
-.forge-counter.rejected > i { color: var(--share3d-red) !important; }
+.forge-counter.accepted > i { color: #39ff8a !important; }
+.forge-counter.rejected > i { color: #ff4455 !important; }
 
-/* The ONLY visible status point: bottom-right, inside the front face. */
+/* ONLY the small status point is allowed to be visible, inside the card. */
 .forge-counter .event-dot {
   position: absolute !important;
   right: 16px !important;
@@ -212,55 +249,67 @@
 }
 
 .forge-counter.accepted .event-dot {
-  background: var(--share3d-green) !important;
-  box-shadow: 0 0 12px var(--share3d-green), 0 0 25px var(--share3d-green) !important;
+  background: #39ff8a !important;
+  box-shadow: 0 0 12px #39ff8a, 0 0 25px #39ff8a !important;
 }
 
 .forge-counter.rejected .event-dot {
-  background: var(--share3d-red) !important;
-  box-shadow: 0 0 12px var(--share3d-red), 0 0 25px var(--share3d-red) !important;
+  background: #ff4455 !important;
+  box-shadow: 0 0 12px #ff4455, 0 0 25px #ff4455 !important;
 }
 
-/* Keep the hit animation on the same reference geometry. */
-.forge-counter.accepted.share-smash,
+/* Keep impact animations on the same reference geometry. */
+.forge-counter.accepted.share-smash {
+  animation: shareCardHitAccept .38s cubic-bezier(.2,.8,.2,1) both !important;
+}
+
 .forge-counter.rejected.share-smash {
-  animation: shareCardHit .38s cubic-bezier(.2,.8,.2,1) both !important;
+  animation: shareCardHitReject .38s cubic-bezier(.2,.8,.2,1) both !important;
 }
 
-@keyframes shareCardHit {
-  0% { filter: none; transform: perspective(1200px) rotateY(calc(-18deg + var(--px))) rotateX(calc(4deg + var(--py))) translateZ(30px) scale(1); }
-  22% { filter: brightness(1.45); transform: perspective(1200px) rotateY(calc(-18deg + var(--px))) rotateX(calc(4deg + var(--py))) translateZ(60px) scale(1.12); }
-  58% { filter: brightness(1.12); transform: perspective(1200px) rotateY(calc(-18deg + var(--px))) rotateX(calc(4deg + var(--py))) translateZ(20px) scale(.95); }
-  100% { filter: none; transform: perspective(1200px) rotateY(calc(-18deg + var(--px))) rotateX(calc(4deg + var(--py))) translateZ(30px) scale(1); }
+@keyframes shareCardHitAccept {
+  0% { filter:none; transform:rotateY(calc(-12deg + var(--px,0deg))) rotateX(calc(2deg + var(--py,0deg))) translateZ(0) scale(1); }
+  22% { filter:brightness(1.45); transform:rotateY(calc(-12deg + var(--px,0deg))) rotateX(calc(2deg + var(--py,0deg))) translateZ(12px) scale(1.06); }
+  58% { filter:brightness(1.12); transform:rotateY(calc(-12deg + var(--px,0deg))) rotateX(calc(2deg + var(--py,0deg))) translateZ(-2px) scale(.985); }
+  100% { filter:none; transform:rotateY(calc(-12deg + var(--px,0deg))) rotateX(calc(2deg + var(--py,0deg))) translateZ(0) scale(1); }
 }
 
 @keyframes shareCardHitReject {
-  0% { filter: none; transform: perspective(1200px) rotateY(calc(18deg + var(--px))) rotateX(calc(4deg + var(--py))) translateZ(30px) scale(1); }
-  22% { filter: brightness(1.45); transform: perspective(1200px) rotateY(calc(18deg + var(--px))) rotateX(calc(4deg + var(--py))) translateZ(60px) scale(1.12); }
-  58% { filter: brightness(1.12); transform: perspective(1200px) rotateY(calc(18deg + var(--px))) rotateX(calc(4deg + var(--py))) translateZ(20px) scale(.95); }
-  100% { filter: none; transform: perspective(1200px) rotateY(calc(18deg + var(--px))) rotateX(calc(4deg + var(--py))) translateZ(30px) scale(1); }
+  0% { filter:none; transform:rotateY(calc(-12deg + var(--px,0deg))) rotateX(calc(1.5deg + var(--py,0deg))) translateZ(0) scale(1); }
+  22% { filter:brightness(1.45); transform:rotateY(calc(-12deg + var(--px,0deg))) rotateX(calc(1.5deg + var(--py,0deg))) translateZ(12px) scale(1.06); }
+  58% { filter:brightness(1.12); transform:rotateY(calc(-12deg + var(--px,0deg))) rotateX(calc(1.5deg + var(--py,0deg))) translateZ(-2px) scale(.985); }
+  100% { filter:none; transform:rotateY(calc(-12deg + var(--px,0deg))) rotateX(calc(1.5deg + var(--py,0deg))) translateZ(0) scale(1); }
 }
 
-.forge-counter.rejected.share-smash { animation-name: shareCardHitReject !important; }
-
 @media (max-width: 700px) {
-  .forge-counter { width: 230px !important; height: 130px !important; min-width: 230px !important; min-height: 130px !important; }
+  .forge-counter {
+    width: 230px !important;
+    height: 130px !important;
+    min-width: 230px !important;
+    min-height: 130px !important;
+  }
   .forge-counter.accepted { right: 18px !important; top: 34px !important; }
-  .forge-counter.rejected { right: 18px !important; top: 182px !important; bottom: auto !important; }
+  .forge-counter.rejected { right: 18px !important; top: 182px !important; bottom:auto !important; }
 }
 
 @media (max-width: 420px) {
-  .forge-counter { width: 205px !important; height: 116px !important; min-width: 205px !important; min-height: 116px !important; padding: 16px 18px !important; }
+  .forge-counter {
+    width: 205px !important;
+    height: 116px !important;
+    min-width: 205px !important;
+    min-height: 116px !important;
+    padding: 10px 11px 11px 14px !important;
+  }
   .forge-counter.accepted { right: 12px !important; top: 30px !important; }
-  .forge-counter.rejected { right: 12px !important; top: 160px !important; }
-  .forge-counter > span:not(.event-dot) { left: 18px !important; top: 16px !important; font-size: 9px !important; }
-  .forge-counter > strong { left: 18px !important; top: 37px !important; font-size: 30px !important; }
-  .forge-counter > b { left: 18px !important; top: 79px !important; font-size: 11px !important; }
+  .forge-counter.rejected { right: 12px !important; top: 164px !important; }
+  .forge-counter > span:not(.event-dot) { font-size: 9px !important; }
+  .forge-counter > strong { font-size: 30px !important; }
+  .forge-counter > b { font-size: 11px !important; }
   .forge-counter > i { right: 11px !important; top: 39px !important; width: 30px !important; height: 30px !important; font-size: 20px !important; }
   .forge-counter .event-dot { right: 14px !important; bottom: 14px !important; width: 9px !important; height: 9px !important; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .forge-counter { will-change: auto !important; }
-  .forge-counter.share-smash { animation: none !important; }
+  .forge-counter { will-change:auto !important; }
+  .forge-counter.share-smash { animation:none !important; }
 }
