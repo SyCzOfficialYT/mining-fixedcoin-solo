@@ -12,7 +12,20 @@ js = JS.read_text()
 css = CSS.read_text()
 dash = DASH_JS.read_text()
 
+# The miner owns the frame-accurate clock. The legacy 250 ms timer must not
+# fight it or snap the countdown back to stale poll data.
 dash = dash.replace('setInterval(()=>updateTimer(state?.round||{}),250);', '/* dashboard_v4_miner.js owns the frame-accurate round clock */', 1)
+
+# Convert the existing authoritative SSE messages into DOM events consumed by
+# the vector miner. There is deliberately only ONE EventSource connection.
+old_stream = "if(e.type==='accept'){acceptFx(e.work);poll(false)}else if(e.type==='reject'){rejectFx(e.share_diff);poll(false)}else if(e.type==='block'){blockFx();poll(false)}else if(e.type==='round'){poll(false)}else if(e.type==='state'){poll(false)}"
+new_stream = "if(e.type==='accept'){acceptFx(e.work);window.dispatchEvent(new CustomEvent('fixedcoin:accept',{detail:e}));poll(false)}else if(e.type==='reject'){rejectFx(e.share_diff);window.dispatchEvent(new CustomEvent('fixedcoin:reject',{detail:e}));poll(false)}else if(e.type==='block'){blockFx();window.dispatchEvent(new CustomEvent('fixedcoin:block',{detail:e}));poll(false)}else if(e.type==='round'){window.dispatchEvent(new CustomEvent('fixedcoin:round',{detail:e}));poll(false)}else if(e.type==='state'){poll(false)}"
+if old_stream in dash:
+    dash = dash.replace(old_stream, new_stream, 1)
+    print('patched SSE bridge: accept/reject/block/real-round -> vector miner')
+elif "fixedcoin:accept" not in dash:
+    raise RuntimeError('dashboard SSE handler anchor missing; refusing to ship a non-reactive miner')
+
 DASH_JS.write_text(dash)
 
 old = '<div class="miner-reference-wrap" id="minerFigure"><img class="miner-reference" src="/static/miner_reference.svg?v=20260823-2" alt="FIX-ASIC miner" draggable="false"></div>'
@@ -39,4 +52,4 @@ for forbidden in ('<image', '<img', 'miner_reference.svg'):
 if '.miner-puppet' not in css or '.miner-reference-wrap>img' not in css:
     raise RuntimeError('dashboard miner CSS hardening missing')
 
-print('dashboard miner v2 verified: pure vector humanoid rig, coordinated body/arm/hammer motion, impact effects, and realtime particles')
+print('dashboard miner v2 verified: pure vector humanoid rig, coordinated body/arm/hammer motion, SSE-driven strikes, impact effects, and realtime particles')
