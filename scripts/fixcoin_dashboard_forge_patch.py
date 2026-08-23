@@ -19,12 +19,13 @@ if 'dashboard_v4_miner.js' in html or 'miner-reference' in html or '<img' in htm
 
 # Live VarDiff HUD: show the actual current worker/pool difficulty, never the
 # decorative "VarDiff" placeholder used by the old reference composition.
-css_link='<link rel="stylesheet" href="/static/dashboard_v4_forge_hud.css?v=20260823-1">'
-if css_link not in html:
-    anchor='<link rel="stylesheet" href="/static/dashboard_v4_shares_min.css?v=20260823-1">'
-    if anchor not in html:
-        raise RuntimeError('dashboard v4 shares/min stylesheet anchor missing')
-    html=html.replace(anchor,anchor+css_link,1)
+css_link='<link rel="stylesheet" href="/static/dashboard_v4_forge_hud.css?v=20260823-2">'
+# Replace an older generated link if the patch has already run in a working tree.
+html=re.sub(r'<link rel="stylesheet" href="/static/dashboard_v4_forge_hud\.css\?v=[^"]+">', '', html)
+anchor='<link rel="stylesheet" href="/static/dashboard_v4_shares_min.css?v=20260823-1">'
+if anchor not in html:
+    raise RuntimeError('dashboard v4 shares/min stylesheet anchor missing')
+html=html.replace(anchor,anchor+css_link,1)
 
 hud='<div class="forge-vardiff-hud" id="forgeVarDiff"><span>VARDIFF MODE</span><strong id="poolDiffValue">—</strong><small id="poolDiffLabel">POOL DIFF · LIVE</small></div>'
 if 'id="poolDiffValue"' not in html:
@@ -33,8 +34,9 @@ if 'id="poolDiffValue"' not in html:
         raise RuntimeError('forge vignette anchor missing')
     html=html.replace(anchor,anchor+hud,1)
 
-# The status dots belong to the counters themselves; stream markers are now
-# purely an implementation detail and are hidden by the HUD stylesheet.
+# Status dots are real children of the counters and are positioned by the
+# forge HUD stylesheet in the bottom-right card corner. The stream markers are
+# implementation-only and remain hidden by CSS.
 html=html.replace('<div class="forge-counter accepted" id="acceptedCounter"><span>ACCEPTED SHARES</span>', '<div class="forge-counter accepted" id="acceptedCounter"><span>ACCEPTED SHARES</span>', 1)
 html=html.replace('</div><div class="forge-counter rejected" id="rejectedCounter"><span>REJECTED SHARES</span>', '</div><div class="forge-counter rejected" id="rejectedCounter"><span>REJECTED SHARES</span>', 1)
 
