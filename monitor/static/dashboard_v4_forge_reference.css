@@ -1,0 +1,42 @@
+/* FIXCOIN Forge reference integration — v20260823-1 */
+
+/* One continuous surface: Forge stage + Network Proximity are one instrument. */
+.forge{background:linear-gradient(180deg,#020a0f 0%,#02090d 58%,#01070a 100%)!important;box-shadow:0 0 0 1px rgba(0,255,255,.025) inset,0 22px 70px rgba(0,0,0,.4)!important}
+.forge-stage{height:492px!important;min-height:492px!important;background:radial-gradient(ellipse at 48% 47%,rgba(14,88,107,.18),transparent 28%),radial-gradient(ellipse at 78% 53%,rgba(22,255,113,.075),transparent 23%),linear-gradient(180deg,#020b11 0%,#02090d 64%,#02080b 100%)!important}
+.forge-stage:before{opacity:.38!important;background-size:52px 52px!important}
+.forge-stage:after{background:radial-gradient(circle at 49% 57%,rgba(64,255,112,.08),transparent 24%),radial-gradient(circle at 79% 55%,rgba(58,255,113,.05),transparent 20%)!important}
+.forge-vignette{background:radial-gradient(ellipse at center,transparent 42%,rgba(0,0,0,.32) 100%)!important}
+
+/* Remove the visual box. Candidate is part of the Forge field, not a card. */
+.forge>.candidate{margin:0!important;width:100%!important;height:256px!important;min-height:256px!important;display:grid!important;grid-template-columns:minmax(0,1.35fr) minmax(280px,.65fr)!important;grid-template-rows:1fr!important;position:relative!important;overflow:hidden!important;border:0!important;border-top:1px solid rgba(24,87,99,.72)!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;z-index:12!important}
+.forge>.candidate:before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(rgba(0,229,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,.022) 1px,transparent 1px);background-size:48px 48px;transform:perspective(900px) rotateX(58deg) translateY(72px) scale(1.2);transform-origin:50% 100%;opacity:.28;mask-image:linear-gradient(to bottom,transparent 0%,#000 35%,#000 100%)}
+.forge>.candidate:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(2,12,16,.06),transparent 24%,transparent 75%,rgba(2,12,16,.10));z-index:1}
+.forge>.candidate .candidate-left,.forge>.candidate .candidate-core{position:relative;z-index:3;background:transparent!important}
+.forge>.candidate .candidate-left{padding:24px 34px 22px!important;justify-content:center!important}
+.forge>.candidate .candidate-pct{margin:20px 0 0!important;font-size:60px!important;line-height:.92!important}
+.forge>.candidate .candidate-track{margin-top:14px!important;height:14px!important}
+.forge>.candidate .next-height{margin-top:34px!important;padding-top:13px!important}
+.forge>.candidate .candidate-core{border-left:1px solid rgba(18,56,66,.9)!important;min-height:100%!important}
+.forge>.candidate .candidate-core:before{width:238px!important;height:238px!important;opacity:.82}
+.forge>.candidate .candidate-core .ring-a{width:184px!important}.forge>.candidate .candidate-core .ring-b{width:214px!important}.forge>.candidate .candidate-core .ring-c{width:248px!important}
+.forge>.candidate .candidate-core .core-cube{width:104px!important;height:104px!important}
+.forge>.candidate .candidate-core .core-cube span{font-size:34px!important}
+.forge>.candidate .activity-panel{display:none!important}
+
+/* Keep Combo as a left-gutter HUD element, visually touching the Forge field. */
+.forge>.combo{left:64px!important;right:auto!important;top:516px!important;z-index:30!important}
+
+/* The bottom border belongs to the outer Forge, not the Candidate region. */
+.forge>.candidate .candidate-track:before{z-index:1!important}
+
+@media(max-width:900px){
+  .forge-stage{height:430px!important;min-height:430px!important}
+  .forge>.candidate{height:300px!important;min-height:300px!important;grid-template-columns:1fr!important;grid-template-rows:1fr 220px!important;margin:0!important}
+  .forge>.candidate .candidate-core{border-left:0!important;border-top:1px solid rgba(18,56,66,.9)!important}
+  .forge>.combo{top:448px!important;left:28px!important}
+}
+@media(max-width:620px){
+  .forge-stage{height:390px!important;min-height:390px!important}
+  .forge>.candidate{height:360px!important;min-height:360px!important;grid-template-rows:1fr 220px!important}
+  .forge>.combo{top:408px!important;left:18px!important}
+}
