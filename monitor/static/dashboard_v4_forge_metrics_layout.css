@@ -1,11 +1,11 @@
-/* v4.8: centered forge metrics — clean cyber HUD typography with live sparklines. */
+/* v4.9: centered forge metric HUD — reference-aligned typography with live sparklines. */
 .forge-stage .hashrate-card,
 .forge-stage .forge-shares-min {
   left: 32px !important;
   right: auto !important;
   width: 184px !important;
   min-height: 150px !important;
-  padding: 15px 15px 12px !important;
+  padding: 18px 15px 12px !important;
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
@@ -26,66 +26,65 @@
   transform-style: preserve-3d !important;
 }
 
-/* Centered information hierarchy, matching the reference HUD. */
+/* The entire text stack is centered inside the card. */
+.forge-stage .hashrate-card > span,
+.forge-stage .forge-shares-min > span,
+.forge-stage .hashrate-card > strong,
+.forge-stage .forge-shares-min > strong,
+.forge-stage .hashrate-card > small,
+.forge-stage .forge-shares-min > small {
+  display: block !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  align-self: center !important;
+  flex: 0 0 auto !important;
+  padding: 0 !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+}
+
 .forge-stage .hashrate-card > span,
 .forge-stage .forge-shares-min > span {
-  display: block !important;
-  flex: 0 0 auto !important;
-  width: 100% !important;
   margin: 0 0 7px !important;
-  padding: 0 !important;
   line-height: 1.15 !important;
   font-size: 10px !important;
   font-weight: 600 !important;
   letter-spacing: .16em !important;
-  white-space: nowrap !important;
-  text-align: center !important;
   color: #9ab2b8 !important;
 }
 
 .forge-stage .hashrate-card > strong,
 .forge-stage .forge-shares-min > strong {
-  display: block !important;
-  flex: 0 0 auto !important;
-  width: 100% !important;
   margin: 0 !important;
-  padding: 0 !important;
   line-height: 1.05 !important;
   font-size: 23px !important;
   font-weight: 700 !important;
   letter-spacing: -.025em !important;
-  white-space: nowrap !important;
-  text-align: center !important;
   color: #e9f8fa !important;
   text-shadow: 0 0 8px rgba(220,250,255,.12) !important;
 }
 
 .forge-stage .hashrate-card > small,
 .forge-stage .forge-shares-min > small {
-  display: block !important;
-  flex: 0 0 auto !important;
-  width: 100% !important;
   margin: 8px 0 0 !important;
-  padding: 0 !important;
   line-height: 1.15 !important;
   font-size: 8px !important;
   font-weight: 500 !important;
   letter-spacing: .12em !important;
-  white-space: nowrap !important;
-  text-align: center !important;
   color: #67828a !important;
   text-transform: uppercase !important;
 }
 
-/* The graph stays live, centered, and visually separated from the text. */
+/* Keep the live graph intact, centered and separated from the text. */
 .forge-stage .hashrate-card > svg,
 .forge-stage .forge-shares-min > svg {
   display: block !important;
   flex: 1 1 auto !important;
+  align-self: stretch !important;
   width: 100% !important;
   min-height: 42px !important;
   height: 42px !important;
-  margin: 10px auto 0 !important;
+  margin: 12px auto 0 !important;
   padding: 4px 0 0 !important;
   overflow: visible !important;
 }
@@ -143,7 +142,7 @@
     left: 18px !important;
     width: 162px !important;
     min-height: 145px !important;
-    padding: 12px 11px 10px !important;
+    padding: 15px 11px 10px !important;
   }
   .forge-stage .hashrate-card > span,
   .forge-stage .forge-shares-min > span { font-size: 9px !important; }
@@ -155,6 +154,6 @@
   .forge-stage .forge-shares-min > svg {
     min-height: 38px !important;
     height: 38px !important;
-    margin-top: 8px !important;
+    margin-top: 10px !important;
   }
 }
