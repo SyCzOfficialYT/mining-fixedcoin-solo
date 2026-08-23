@@ -17,7 +17,10 @@ html_required = ['forge-core-wrap','id="forgeCore"','id="forgeParticleField"','p
 missing += [item for item in html_required if item not in html]
 forge_required = ['fixedcoin:accept','fixedcoin:reject','fixedcoin:block','hit-accept','hit-reject','forge-dust']
 missing += [item for item in forge_required if item not in forge_js]
-css_required = ['.forge-core{','.core-energy{','.core-ring','.forge.hit-accept','.forge.hit-reject']
+# The FIXCORE SVG uses the semantic .forge-ring class. .core-ring was the
+# old validator name and caused a false-negative even though the ring system
+# is present and wired to the current forge implementation.
+css_required = ['.forge-core{','.core-energy{','.forge-ring{','.forge.hit-accept','.forge.hit-reject']
 missing += [item for item in css_required if item not in forge_css]
 if missing:
     raise RuntimeError('dashboard v4 is missing required realtime/FIXCORE primitives: ' + ', '.join(missing))
