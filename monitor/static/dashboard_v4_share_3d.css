@@ -1,0 +1,259 @@
+:root {
+  --share3d-green: #39ff8a;
+  --share3d-red: #ff4455;
+}
+
+.forge.panel,
+section.forge,
+#forge {
+  overflow: visible !important;
+}
+
+.forge-stage,
+#forgeStage {
+  overflow: visible !important;
+  perspective: 800px !important;
+  perspective-origin: 25% 50% !important;
+  transform-style: preserve-3d !important;
+}
+
+.accept-stream,
+.reject-stream {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.forge-counter {
+  position: absolute !important;
+  box-sizing: border-box !important;
+  width: 224px !important;
+  min-width: 224px !important;
+  height: auto !important;
+  min-height: 82px !important;
+  margin: 0 !important;
+  padding: 0.7rem 0.85rem 0.72rem 1rem !important;
+  border-radius: 14px !important;
+  background: #060c10 !important;
+  overflow: visible !important;
+  transform-style: preserve-3d !important;
+  backface-visibility: hidden !important;
+  transform-origin: center center !important;
+  will-change: transform !important;
+  display: grid !important;
+  grid-template-columns: 1fr auto !important;
+  grid-template-rows: auto auto !important;
+  align-items: center !important;
+  column-gap: 0.65rem !important;
+  z-index: 48 !important;
+}
+
+.forge-counter.accepted {
+  right: 22px !important;
+  left: auto !important;
+  top: 34px !important;
+  bottom: auto !important;
+  transform: rotateY(calc(-12deg + var(--px, 0deg))) rotateX(calc(2deg + var(--py, 0deg))) !important;
+  border: 2px solid var(--share3d-green) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(57, 255, 138, 0.35),
+    inset 0 0 12px rgba(57, 255, 138, 0.08),
+    0 0 0 1px rgba(57, 255, 138, 0.4),
+    0 0 6px 1px rgba(57, 255, 138, 0.7),
+    0 0 16px 2px rgba(57, 255, 138, 0.4),
+    0 0 36px 4px rgba(57, 255, 138, 0.18),
+    4px 8px 20px rgba(0, 0, 0, 0.55) !important;
+}
+
+.forge-counter.rejected {
+  right: 22px !important;
+  left: auto !important;
+  top: 131px !important;
+  bottom: auto !important;
+  transform: rotateY(calc(-12deg + var(--px, 0deg))) rotateX(calc(1.5deg + var(--py, 0deg))) !important;
+  border: 2px solid var(--share3d-red) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 68, 85, 0.35),
+    inset 0 0 12px rgba(255, 68, 85, 0.08),
+    0 0 0 1px rgba(255, 68, 85, 0.4),
+    0 0 6px 1px rgba(255, 68, 85, 0.7),
+    0 0 16px 2px rgba(255, 68, 85, 0.4),
+    0 0 36px 4px rgba(255, 68, 85, 0.18),
+    4px 8px 20px rgba(0, 0, 0, 0.55) !important;
+}
+
+.forge-counter::before {
+  content: "" !important;
+  display: block !important;
+  position: absolute !important;
+  top: 6px !important;
+  bottom: 6px !important;
+  right: -7px !important;
+  width: 14px !important;
+  border-radius: 0 12px 12px 0 !important;
+  z-index: -1 !important;
+  pointer-events: none !important;
+  filter: blur(0.3px) !important;
+  opacity: 0.95 !important;
+}
+.forge-counter.accepted::before {
+  background: linear-gradient(90deg, #39ff8a 0%, #1a8a4e 55%, transparent 100%) !important;
+  box-shadow:
+    2px 0 8px rgba(57, 255, 138, 0.55),
+    4px 0 16px rgba(57, 255, 138, 0.25) !important;
+}
+.forge-counter.rejected::before {
+  background: linear-gradient(90deg, #ff4455 0%, #8a1a28 55%, transparent 100%) !important;
+  box-shadow:
+    2px 0 8px rgba(255, 68, 85, 0.55),
+    4px 0 16px rgba(255, 68, 85, 0.25) !important;
+}
+
+.forge-counter::after {
+  content: "" !important;
+  display: block !important;
+  position: absolute !important;
+  top: 10px !important;
+  bottom: 10px !important;
+  right: -11px !important;
+  width: 10px !important;
+  border-radius: 0 10px 10px 0 !important;
+  z-index: -2 !important;
+  pointer-events: none !important;
+  opacity: 0.45 !important;
+  filter: blur(1.5px) !important;
+}
+.forge-counter.accepted::after {
+  background: #39ff8a !important;
+  box-shadow: 0 0 12px rgba(57, 255, 138, 0.5) !important;
+}
+.forge-counter.rejected::after {
+  background: #ff4455 !important;
+  box-shadow: 0 0 12px rgba(255, 68, 85, 0.5) !important;
+}
+
+.forge-counter > span:not(.event-dot) {
+  grid-column: 1 / -1 !important;
+  position: relative !important;
+  inset: auto !important;
+  z-index: 4 !important;
+  margin: 0 0 1px !important;
+  padding: 0 !important;
+  font: 600 10px/1 Inter, ui-sans-serif, system-ui, sans-serif !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+  color: #8aa0aa !important;
+  white-space: nowrap !important;
+}
+
+.forge-counter > strong {
+  position: relative !important;
+  inset: auto !important;
+  z-index: 4 !important;
+  display: block !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  font: 700 1.95rem/1 "JetBrains Mono", ui-monospace, monospace !important;
+  letter-spacing: -0.02em !important;
+}
+.forge-counter.accepted > strong {
+  color: #39ff8a !important;
+  text-shadow: 0 0 10px rgba(57, 255, 138, 0.5) !important;
+}
+.forge-counter.rejected > strong {
+  color: #ff4455 !important;
+  text-shadow: 0 0 10px rgba(255, 68, 85, 0.5) !important;
+}
+
+.forge-counter > b {
+  position: absolute !important;
+  left: 1rem !important;
+  top: 54px !important;
+  right: auto !important;
+  bottom: auto !important;
+  z-index: 4 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  font: 500 12px/1.2 Inter, ui-sans-serif, system-ui, sans-serif !important;
+}
+.forge-counter.accepted > b { color: #39ff8a !important; }
+.forge-counter.rejected > b { color: #ff4455 !important; }
+
+.forge-counter > i {
+  grid-row: 2 !important;
+  grid-column: 2 !important;
+  position: relative !important;
+  inset: auto !important;
+  align-self: center !important;
+  justify-self: end !important;
+  z-index: 4 !important;
+  width: 34px !important;
+  height: 34px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border-radius: 50% !important;
+  display: grid !important;
+  place-items: center !important;
+  font: 600 14px/1 Inter, ui-sans-serif, system-ui, sans-serif !important;
+  font-style: normal !important;
+  background: transparent !important;
+}
+.forge-counter.accepted > i {
+  border: 1.5px solid #39ff8a !important;
+  color: #39ff8a !important;
+  box-shadow: 0 0 8px rgba(57, 255, 138, 0.35) !important;
+}
+.forge-counter.rejected > i {
+  border: 1.5px solid #ff4455 !important;
+  color: #ff4455 !important;
+  box-shadow: 0 0 8px rgba(255, 68, 85, 0.35) !important;
+}
+
+.forge-counter .event-dot {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+@keyframes shareCardHitAccept {
+  0% { filter: none; transform: rotateY(calc(-12deg + var(--px, 0deg))) rotateX(calc(2deg + var(--py, 0deg))) scale(1); }
+  22% { filter: brightness(1.4); transform: rotateY(calc(-12deg + var(--px, 0deg))) rotateX(calc(2deg + var(--py, 0deg))) scale(1.05); }
+  100% { filter: none; transform: rotateY(calc(-12deg + var(--px, 0deg))) rotateX(calc(2deg + var(--py, 0deg))) scale(1); }
+}
+@keyframes shareCardHitReject {
+  0% { filter: none; transform: rotateY(calc(-12deg + var(--px, 0deg))) rotateX(calc(1.5deg + var(--py, 0deg))) scale(1); }
+  22% { filter: brightness(1.4); transform: rotateY(calc(-12deg + var(--px, 0deg))) rotateX(calc(1.5deg + var(--py, 0deg))) scale(1.05); }
+  100% { filter: none; transform: rotateY(calc(-12deg + var(--px, 0deg))) rotateX(calc(1.5deg + var(--py, 0deg))) scale(1); }
+}
+.forge-counter.accepted.share-smash {
+  animation: shareCardHitAccept 0.38s cubic-bezier(0.2, 0.8, 0.2, 1) both !important;
+}
+.forge-counter.rejected.share-smash {
+  animation: shareCardHitReject 0.38s cubic-bezier(0.2, 0.8, 0.2, 1) both !important;
+}
+
+@media (max-width: 620px) {
+  .forge-counter {
+    width: min(224px, calc(100% - 28px)) !important;
+    min-width: 0 !important;
+  }
+  .forge-counter.accepted {
+    right: 14px !important;
+    top: 28px !important;
+  }
+  .forge-counter.rejected {
+    right: 14px !important;
+    top: 124px !important;
+    bottom: auto !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .forge-counter {
+    will-change: auto !important;
+    transform: none !important;
+  }
+  .forge-counter.share-smash { animation: none !important; }
+}
