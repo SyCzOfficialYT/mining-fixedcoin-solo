@@ -22,22 +22,24 @@ const shortWork=msg=>{
 };
 const clock=v=>String(v||'').slice(11,19);
 
+function setBalance(id,value){
+  const el=$(id);
+  if(el)el.textContent=Number.isFinite(Number(value))?fmtCoin(value)+' FIX':'—';
+}
+
 function renderBalance(s){
   const w=s?.wallet||{};
-  const total=Number(w.total);
   const confirmed=Number(w.confirmed);
   const pending=Number(w.pending);
   const immature=Number(w.immature);
-  const value=Number.isFinite(total)?total:(Number.isFinite(confirmed)?confirmed:NaN);
-  const el=$('balanceValue');
-  if(el)el.textContent=Number.isFinite(value)?fmtCoin(value)+' FIX':'—';
-  const meta=$('balanceMeta');
-  if(meta){
-    const parts=[];
-    if(Number.isFinite(pending)&&pending!==0)parts.push('pending '+fmtCoin(pending));
-    if(Number.isFinite(immature)&&immature!==0)parts.push('immature '+fmtCoin(immature));
-    meta.textContent=parts.length?parts.join(' · '):'confirmed wallet balance';
-  }
+  // These are deliberately separate: immature is NOT folded into unconfirmed.
+  const total=(Number.isFinite(confirmed)?confirmed:0)
+             +(Number.isFinite(pending)?pending:0)
+             +(Number.isFinite(immature)?immature:0);
+  setBalance('balanceConfirmed',confirmed);
+  setBalance('balanceUnconfirmed',pending);
+  setBalance('balanceImmature',immature);
+  setBalance('balanceTotal',total);
 }
 
 function classify(e){
