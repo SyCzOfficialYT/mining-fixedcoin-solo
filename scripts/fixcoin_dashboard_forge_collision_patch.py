@@ -5,12 +5,16 @@ import re
 
 HTML = Path('/app/monitor/templates/dashboard_v4.html')
 html = HTML.read_text()
-VERSION = '20260823-8'
+VERSION = '20260823-9'
 CSS = f'<link rel="stylesheet" href="/static/dashboard_v4_forge_collision.css?v={VERSION}">'
 JS = f'<script defer src="/static/dashboard_v4_forge_collision.js?v={VERSION}"></script>'
 
 html = re.sub(r'<link rel="stylesheet" href="/static/dashboard_v4_forge_collision\.css\?v=[^"]+">', '', html)
 html = re.sub(r'<script[^>]+dashboard_v4_forge_collision\.js\?v=[^>]+></script>', '', html)
+
+# Bust the legacy share-impact asset. It remains as a compatibility stub, but
+# an old browser-cached copy must never bring back the shared long glow.
+html = re.sub(r'/static/dashboard_v4_share_impact\.js\?v=[0-9-]+', f'/static/dashboard_v4_share_impact.js?v={VERSION}', html)
 
 transparency_match = re.search(r'<link rel="stylesheet" href="/static/dashboard_v4_forge_transparency\.css\?v=[^"]+">', html)
 if transparency_match:
@@ -35,6 +39,7 @@ else:
 required = [
     'dashboard_v4_forge_collision.css',
     'dashboard_v4_forge_collision.js',
+    f'/static/dashboard_v4_share_impact.js?v={VERSION}',
     'class="forge-rock rock-left"',
     'class="forge-rock rock-right"',
     'id="acceptedCounter"',
@@ -45,4 +50,4 @@ if missing:
     raise RuntimeError('forge collision patch verification failed: ' + ', '.join(missing))
 
 HTML.write_text(html)
-print('dashboard collision layer applied: each particle owns an isolated neon pulse; centered progress field orbits smoothly')
+print('dashboard collision layer applied: legacy shared glow disabled; each particle owns its own counter pulse; centered progress field orbits smoothly')
