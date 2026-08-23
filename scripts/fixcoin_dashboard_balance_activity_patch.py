@@ -33,11 +33,21 @@ if new_semantics not in app_text:
 else:
     print('wallet balance semantics already patched')
 
-once(
-    '<link rel="stylesheet" href="/static/dashboard_v4_forge_motion.css?v=20260823-1">',
-    '<link rel="stylesheet" href="/static/dashboard_v4_forge_motion.css?v=20260823-1"><link rel="stylesheet" href="/static/dashboard_v4_balance_activity.css?v=20260823-2">',
-    'patched dashboard balance/activity stylesheet'
-)
+# The forge motion stylesheet has already advanced through several dashboard
+# iterations. Do not hard-code an obsolete version here: find the current
+# forge-motion link and append the balance/activity stylesheet after it.
+forge_motion_marker = '<link rel="stylesheet" href="/static/dashboard_v4_forge_motion.css?v='
+forge_motion_start = text.find(forge_motion_marker)
+if '/static/dashboard_v4_balance_activity.css?' not in text:
+    if forge_motion_start < 0:
+        raise RuntimeError('missing dashboard balance/activity stylesheet anchor: forge motion stylesheet')
+    forge_motion_end = text.find('">', forge_motion_start)
+    if forge_motion_end < 0:
+        raise RuntimeError('missing dashboard balance/activity stylesheet anchor: malformed forge motion link')
+    forge_motion_end += 2
+    text = text[:forge_motion_end] + '<link rel="stylesheet" href="/static/dashboard_v4_balance_activity.css?v=20260823-2">' + text[forge_motion_end:]
+    changed = True
+    print('patched dashboard balance/activity stylesheet')
 
 old_balance = '<div class="stat panel"><span>INVALID SHARES</span><strong class="red" id="invalidShares">0</strong><small id="invalidPct">0.0%</small></div>'
 new_balance = old_balance + (
