@@ -6,8 +6,9 @@ import re
 HTML = Path('/app/monitor/templates/dashboard_v4.html')
 html = HTML.read_text()
 
-CSS = '<link rel="stylesheet" href="/static/dashboard_v4_forge_upgrade.css?v=20260823-1">'
-JS = '<script defer src="/static/dashboard_v4_forge_upgrade.js?v=20260823-1"></script>'
+VERSION = '20260823-2'
+CSS = f'<link rel="stylesheet" href="/static/dashboard_v4_forge_upgrade.css?v={VERSION}">'
+JS = f'<script defer src="/static/dashboard_v4_forge_upgrade.js?v={VERSION}"></script>'
 
 # Inject exactly once. The script intentionally runs late so it observes the
 # authoritative dashboard_v4 realtime client instead of opening a second API/SSE flow.
@@ -24,9 +25,6 @@ if anchor_js not in html:
     raise RuntimeError('dashboard forge client anchor missing')
 html = html.replace(anchor_js, anchor_js + JS, 1)
 
-# Fail the image build if the final realtime forge/proximity primitives disappear.
-# The forge element also carries the panel class, so verify it as a token rather
-# than requiring the impossible exact string class="forge".
 required = [
     'class="forge panel"',
     'id="forgeStage"',
@@ -41,4 +39,4 @@ if missing:
     raise RuntimeError('dashboard forge upgrade verification failed: ' + ', '.join(missing))
 
 HTML.write_text(html)
-print('dashboard forge upgrade applied: continuous 0.001% progress particles, FIXCORE charge field, candidate conduit, and block-found choreography')
+print('dashboard forge upgrade applied: persistent 0.001% progress particles, FIXCORE charge field, candidate liquid conduit, and block-found choreography')
