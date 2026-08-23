@@ -1,1 +1,25 @@
-:root{--impact-green:#55ff70;--impact-red:#ff4d4d}.share-collision-projectile,.share-impact-burst,.share-impact-ring{position:fixed;left:0;top:0;pointer-events:none;backface-visibility:hidden;will-change:transform,opacity;contain:layout style paint;transform:translate3d(0,0,0)}.share-collision-projectile{width:11px;height:11px;margin:-5.5px;border-radius:50%;z-index:1000;mix-blend-mode:screen}.share-collision-projectile.accept{background:#e5ffe9;box-shadow:0 0 7px var(--impact-green),0 0 18px var(--impact-green),0 0 38px rgba(85,255,112,.8)}.share-collision-projectile.reject{background:#ffe0dc;box-shadow:0 0 7px var(--impact-red),0 0 18px var(--impact-red),0 0 38px rgba(255,77,77,.8)}.share-impact-burst{width:8px;height:8px;margin:-4px;border-radius:50%;z-index:999}.share-impact-burst.accept{background:#baffc4;box-shadow:0 0 10px var(--impact-green),0 0 28px var(--impact-green),0 0 60px rgba(85,255,112,.75)}.share-impact-burst.reject{background:#ffb5ad;box-shadow:0 0 10px var(--impact-red),0 0 28px var(--impact-red),0 0 60px rgba(255,77,77,.75)}.share-impact-ring{width:20px;height:20px;margin:-10px;border:2px solid currentColor;border-radius:50%;z-index:998;box-shadow:0 0 12px currentColor,0 0 32px currentColor}.share-impact-ring.accept{color:var(--impact-green)}.share-impact-ring.reject{color:var(--impact-red)}@media(prefers-reduced-motion:reduce){.share-collision-projectile,.share-impact-burst,.share-impact-ring{display:none!important}}
+:root{--impact-green:#55ff70;--impact-red:#ff4d4d}
+
+/* One event layer over the forge. The old canvas/dust emitters are disabled so
+   there can never be a second particle stream travelling the wrong direction. */
+.share-event-layer{position:absolute;inset:0;overflow:visible;pointer-events:none;z-index:80;contain:layout style paint}
+.forge-stage>.particle-canvas{display:none!important}
+.forge-stage .forge-dust{display:none!important}
+
+.share-flight,.share-spark,.share-impact-ring{position:absolute;left:0;top:0;pointer-events:none;backface-visibility:hidden;will-change:transform,opacity;contain:layout style paint;transform:translate3d(0,0,0)}
+.share-flight{width:10px;height:10px;margin:-5px;border-radius:50%;z-index:3;mix-blend-mode:screen}
+.share-flight.accept,.share-spark.accept{background:#dfffe8;box-shadow:0 0 7px var(--impact-green),0 0 18px var(--impact-green),0 0 34px rgba(85,255,112,.72)}
+.share-flight.reject,.share-spark.reject{background:#ffe1dc;box-shadow:0 0 7px var(--impact-red),0 0 18px var(--impact-red),0 0 34px rgba(255,77,77,.72)}
+.share-flight{width:16px;height:16px;margin:-8px;filter:blur(.15px)}
+.share-spark{border-radius:50%;z-index:2;opacity:var(--spark-alpha,.85);mix-blend-mode:screen}
+.share-spark.accept{box-shadow:0 0 6px var(--impact-green),0 0 16px rgba(85,255,112,.85)}
+.share-spark.reject{box-shadow:0 0 6px var(--impact-red),0 0 16px rgba(255,77,77,.85)}
+.share-impact-ring{width:24px;height:24px;margin:0;border:2px solid currentColor;border-radius:50%;z-index:4;box-shadow:0 0 12px currentColor,0 0 34px currentColor,0 0 64px currentColor}
+.share-impact-ring.accept{color:var(--impact-green)}
+.share-impact-ring.reject{color:var(--impact-red)}
+
+.forge-counter.share-impact{filter:brightness(1.2)}
+.forge-counter.accepted.share-impact{box-shadow:inset 0 0 0 1px rgba(57,255,138,.35),0 0 8px rgba(57,255,138,.9),0 0 22px rgba(57,255,138,.58),0 0 46px rgba(57,255,138,.22),3px 8px 20px rgba(0,0,0,.55)!important}
+.forge-counter.rejected.share-impact{box-shadow:inset 0 0 0 1px rgba(255,68,85,.35),0 0 8px rgba(255,68,85,.9),0 0 22px rgba(255,68,85,.58),0 0 46px rgba(255,68,85,.22),3px 8px 20px rgba(0,0,0,.55)!important}
+
+@media(prefers-reduced-motion:reduce){.share-event-layer{display:none!important}}
