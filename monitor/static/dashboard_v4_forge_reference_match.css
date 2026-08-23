@@ -1,0 +1,234 @@
+/* FIXCOIN Forge — reference match pass.  Target: the approved 1678x937 concept geometry. */
+:root{--ref-cyan:#19d9ff;--ref-green:#4dff70;--ref-red:#ff5050;--ref-bg:#01080c;--ref-line:rgba(25,86,99,.9);--ref-muted:#718a91}
+
+/* ==================== FORGE COMPOSITION ==================== */
+.forge#forge{
+  position:relative!important;
+  overflow:visible!important;
+  isolation:isolate!important;
+}
+.forge#forge .forge-stage{
+  position:relative!important;
+  height:560px!important;
+  min-height:560px!important;
+  overflow:hidden!important;
+  background:
+    radial-gradient(circle at 50% 47%,rgba(30,255,110,.055),transparent 34%),
+    linear-gradient(180deg,rgba(1,8,12,.18),rgba(1,8,12,.72))!important;
+}
+.forge#forge .forge-stage:before{
+  content:""!important;
+  position:absolute!important;
+  inset:0!important;
+  pointer-events:none!important;
+  background:
+    linear-gradient(rgba(25,228,255,.045) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(25,228,255,.045) 1px,transparent 1px),
+    radial-gradient(ellipse at 50% 78%,rgba(0,255,120,.06),transparent 55%)!important;
+  background-size:38px 38px,38px 38px,100% 100%!important;
+  mask-image:linear-gradient(180deg,#000 0,#000 76%,transparent 100%)!important;
+}
+
+/* Mountains: low, dim, clipped inside the forge stage. */
+.forge#forge .forge-rock{
+  top:auto!important;
+  bottom:-18px!important;
+  left:0!important;
+  right:0!important;
+  height:190px!important;
+  opacity:.23!important;
+  filter:blur(.25px)!important;
+  z-index:2!important;
+  clip-path:inset(0 0 18px 0)!important;
+  transform:none!important;
+}
+.forge#forge .forge-rock.rock-left{transform:translate3d(-2%,0,0)!important}
+.forge#forge .forge-rock.rock-right{transform:translate3d(2%,0,0)!important}
+
+/* ==================== CENTER CORE ==================== */
+.forge-core-wrap{inset:1% 20% 0!important;z-index:8!important;overflow:visible!important}
+.forge-core{width:min(72%,540px)!important;filter:drop-shadow(0 0 32px rgba(37,255,122,.20))!important}
+.forge-core-label{top:72%!important;font-size:9px!important;letter-spacing:.28em!important}
+.forge-core-status{top:77.5%!important;font-size:7px!important}
+
+/* ==================== VARDIFF ==================== */
+.forge-stage .vardiff-card{
+  position:absolute!important;
+  top:18px!important;
+  left:50%!important;
+  width:282px!important;
+  min-height:96px!important;
+  padding:12px 16px!important;
+  transform:translateX(-50%)!important;
+  z-index:18!important;
+  border:1px solid rgba(142,196,204,.75)!important;
+  border-radius:2px!important;
+  background:linear-gradient(145deg,rgba(2,11,15,.92),rgba(1,7,10,.78))!important;
+  box-shadow:inset 0 0 0 1px rgba(25,228,255,.025),0 14px 28px rgba(0,0,0,.32)!important;
+  text-align:center!important;
+}
+
+/* ==================== SIDE INSTRUMENTS ==================== */
+.forge-stage .hashrate-card,.forge-stage .forge-shares-min,
+.forge-stage .forge-counter.accepted,.forge-stage .forge-counter.rejected{
+  box-sizing:border-box!important;
+  overflow:visible!important;
+  border-radius:0!important;
+  backdrop-filter:none!important;
+  transform-style:preserve-3d!important;
+}
+.forge-stage .hashrate-card,.forge-stage .forge-shares-min{
+  left:48px!important;
+  right:auto!important;
+  width:350px!important;
+  height:238px!important;
+  min-height:238px!important;
+  padding:24px 26px 20px!important;
+  background:linear-gradient(145deg,rgba(2,11,15,.93),rgba(1,7,10,.82))!important;
+  border:1px solid rgba(25,81,94,.96)!important;
+  clip-path:polygon(14px 0,calc(100% - 14px) 0,100% 14px,100% calc(100% - 14px),calc(100% - 14px) 100%,14px 100%,0 calc(100% - 14px),0 14px)!important;
+  box-shadow:inset 0 0 0 1px rgba(25,228,255,.03),0 18px 40px rgba(0,0,0,.38)!important;
+  text-align:left!important;
+}
+.forge-stage .hashrate-card{top:28px!important;transform:perspective(900px) rotateY(7deg) rotateX(1deg)!important}
+.forge-stage .forge-shares-min{top:282px!important;transform:perspective(900px) rotateY(7deg) rotateX(.8deg)!important}
+.forge-stage .hashrate-card:before,.forge-stage .forge-shares-min:before{
+  content:""!important;position:absolute!important;inset:8px!important;z-index:-1!important;
+  border:1px solid rgba(25,217,255,.15)!important;
+  clip-path:inherit!important;transform:translate3d(10px,7px,-22px)!important;
+  box-shadow:0 0 12px rgba(25,217,255,.08)!important;
+}
+.forge-stage .hashrate-card:after,.forge-stage .forge-shares-min:after{
+  content:""!important;position:absolute!important;left:16px!important;right:16px!important;bottom:18px!important;height:1px!important;
+  background:linear-gradient(90deg,transparent,rgba(25,228,255,.22),transparent)!important;
+  box-shadow:none!important;
+}
+.forge-stage .hashrate-card>span,.forge-stage .forge-shares-min>span{
+  margin:0 0 8px!important;color:#8ca4aa!important;font:600 11px/1.1 var(--mono)!important;letter-spacing:.16em!important;
+}
+.forge-stage .hashrate-card>strong,.forge-stage .forge-shares-min>strong{
+  margin:0!important;color:#dbe8eb!important;font:800 34px/.98 var(--mono)!important;letter-spacing:-.04em!important;text-shadow:none!important;
+}
+.forge-stage .hashrate-card>small,.forge-stage .forge-shares-min>small{
+  margin:9px 0 0!important;color:#627b82!important;font:500 9px/1.15 var(--mono)!important;letter-spacing:.12em!important;text-transform:uppercase!important;
+}
+.forge-stage .hashrate-card>svg,.forge-stage .forge-shares-min>svg{
+  width:100%!important;height:62px!important;min-height:62px!important;margin:18px 0 0!important;opacity:.95!important;
+}
+.forge-stage .hashrate-card polyline,.forge-stage .forge-shares-min polyline{
+  fill:none!important;stroke:#58ef6d!important;stroke-width:2.4!important;filter:drop-shadow(0 0 5px rgba(84,239,108,.36))!important;
+}
+
+/* Right share cards: same beveled instrument family, larger and closer to reference. */
+.forge-stage .forge-counter.accepted,.forge-stage .forge-counter.rejected{
+  right:48px!important;left:auto!important;width:348px!important;height:190px!important;min-height:190px!important;
+  padding:22px 24px!important;
+  background:linear-gradient(145deg,rgba(2,11,15,.94),rgba(1,7,10,.84))!important;
+  border:1px solid rgba(25,81,94,.96)!important;
+  clip-path:polygon(14px 0,calc(100% - 14px) 0,100% 14px,100% calc(100% - 14px),calc(100% - 14px) 100%,14px 100%,0 calc(100% - 14px),0 14px)!important;
+  box-shadow:inset 0 0 0 1px rgba(25,228,255,.03),0 18px 40px rgba(0,0,0,.38)!important;
+}
+.forge-stage .forge-counter.accepted{top:48px!important;bottom:auto!important;transform:perspective(900px) rotateY(-7deg) rotateX(1deg)!important}
+.forge-stage .forge-counter.rejected{top:auto!important;bottom:48px!important;transform:perspective(900px) rotateY(-7deg) rotateX(.8deg)!important}
+.forge-stage .forge-counter.accepted:before,.forge-stage .forge-counter.rejected:before{
+  content:""!important;position:absolute!important;inset:8px!important;z-index:-1!important;
+  border:1px solid rgba(25,217,255,.15)!important;clip-path:inherit!important;transform:translate3d(10px,7px,-22px)!important;
+}
+.forge-stage .forge-counter.accepted>span:first-child,.forge-stage .forge-counter.rejected>span:first-child{
+  color:#8ca4aa!important;font:600 11px/1.1 var(--mono)!important;letter-spacing:.16em!important;
+}
+.forge-stage .forge-counter.accepted>strong,.forge-stage .forge-counter.rejected>strong{
+  color:#dbe8eb!important;font:800 42px/.95 var(--mono)!important;letter-spacing:-.05em!important;text-shadow:none!important;
+}
+.forge-stage .forge-counter.accepted>b,.forge-stage .forge-counter.rejected>b{
+  color:#627b82!important;font:600 10px/1 var(--mono)!important;letter-spacing:.09em!important;
+}
+.forge-stage .forge-counter.accepted>i,.forge-stage .forge-counter.rejected>i{
+  width:48px!important;height:48px!important;right:20px!important;top:50%!important;transform:translateY(-50%)!important;
+  border:1px solid rgba(87,105,111,.85)!important;box-shadow:none!important;color:#789095!important;
+}
+.forge-stage .forge-counter.accepted>i{color:#70d68a!important}.forge-stage .forge-counter.rejected>i{color:#e08a8a!important}
+
+/* Idle is quiet. Event glow is still available to the collision engine. */
+.forge-stage .forge-counter.accepted.collision-pulse,.forge-stage .forge-counter.accepted.collision-active{box-shadow:inset 0 0 0 1px rgba(77,255,112,.20),0 0 12px rgba(77,255,112,.75),0 0 34px rgba(77,255,112,.30),0 18px 40px rgba(0,0,0,.36)!important;border-color:rgba(77,255,112,.84)!important}
+.forge-stage .forge-counter.rejected.collision-pulse,.forge-stage .forge-counter.rejected.collision-active{box-shadow:inset 0 0 0 1px rgba(255,78,78,.20),0 0 12px rgba(255,78,78,.75),0 0 34px rgba(255,78,78,.30),0 18px 40px rgba(0,0,0,.36)!important;border-color:rgba(255,78,78,.84)!important}
+
+/* ==================== COMBO ==================== */
+.forge-stage .combo{left:72px!important;right:auto!important;top:auto!important;bottom:22px!important;width:180px!important;padding:0 10px!important;transform:none!important;text-align:left!important;background:transparent!important;border:0!important;box-shadow:none!important;z-index:12!important}
+.forge-stage .combo:before{content:""!important;display:block!important;width:100%!important;height:1px!important;margin:0 0 9px!important;background:linear-gradient(90deg,rgba(25,217,255,.20),transparent)!important;box-shadow:none!important}
+.forge-stage .combo>span{color:#80979d!important;font:600 9px/1.1 var(--mono)!important;letter-spacing:.16em!important;text-align:left!important}
+.forge-stage .combo>strong{color:#ffb62e!important;font:800 30px/1 var(--mono)!important;letter-spacing:-.03em!important;text-align:left!important;text-shadow:0 0 10px rgba(255,182,46,.16)!important}
+.forge-stage .combo>small{color:#d06f61!important;font:500 8px/1.2 var(--mono)!important;letter-spacing:.10em!important;text-align:left!important}
+
+/* ==================== CANDIDATE COMMAND DECK ==================== */
+#candidate.candidate{
+  position:relative!important;
+  z-index:30!important;
+  width:82%!important;
+  margin-left:18%!important;
+  margin-right:0!important;
+  margin-top:-1px!important;
+  min-height:294px!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,1.85fr) minmax(310px,.72fr)!important;
+  grid-template-rows:1fr!important;
+  overflow:visible!important;
+  border:1px solid rgba(25,81,94,.96)!important;
+  border-radius:0!important;
+  clip-path:polygon(16px 0,calc(100% - 16px) 0,100% 16px,100% calc(100% - 16px),calc(100% - 16px) 100%,16px 100%,0 calc(100% - 16px),0 16px)!important;
+  background:linear-gradient(145deg,rgba(2,11,15,.72),rgba(1,7,10,.58))!important;
+  box-shadow:inset 0 0 0 1px rgba(25,228,255,.025),0 18px 48px rgba(0,0,0,.30)!important;
+}
+#candidate.candidate:before{
+  content:""!important;position:absolute!important;inset:0!important;z-index:-1!important;pointer-events:none!important;
+  background:
+    linear-gradient(90deg,transparent 0 71%,rgba(25,228,255,.05) 71% 71.15%,transparent 71.15%),
+    radial-gradient(circle at 74% 42%,rgba(55,255,112,.055),transparent 28%)!important;
+}
+#candidate.candidate:after{
+  content:""!important;position:absolute!important;inset:8px!important;pointer-events:none!important;
+  border:1px solid rgba(25,217,255,.08)!important;clip-path:inherit!important;transform:translate3d(10px,7px,-18px)!important;
+}
+#candidate .candidate-left{padding:20px 26px 18px!important;display:flex!important;justify-content:center!important;position:relative!important;z-index:4!important}
+#candidate .section-heading h2{font-size:0!important}
+#candidate .section-heading h2:after{content:"BLOCK CANDIDATE  //  NETWORK PROXIMITY"!important;font-size:16px!important;letter-spacing:.14em!important}
+#candidate .section-heading p{font-size:0!important}
+#candidate .section-heading p:after{content:"Best submitted share measured against the current network block target."!important;font-size:10px!important}
+#candidate .candidate-pct{margin-top:22px!important;font-size:clamp(56px,4.8vw,74px)!important}
+#candidate .candidate-track{margin-top:12px!important;height:13px!important}
+#candidate .next-height{margin-top:28px!important;padding-top:11px!important}
+#candidate .candidate-core{border-left:1px solid rgba(25,81,94,.72)!important;background:transparent!important;min-height:294px!important;overflow:hidden!important}
+#candidate .candidate-core:before{width:250px!important;height:250px!important}
+#candidate .candidate-core .core-cube{width:108px!important;height:108px!important}
+
+/* Candidate particles read as an energy ribbon, not a giant card glow. */
+#candidate .candidate-track #candidateMeter{box-shadow:0 0 10px rgba(77,255,112,.45),0 0 24px rgba(77,255,112,.16)!important}
+
+/* ==================== DESKTOP REFERENCE BREAKPOINT ==================== */
+@media (min-width:1450px){
+  .forge-stage .hashrate-card,.forge-stage .forge-shares-min{left:58px!important;width:360px!important;height:244px!important;min-height:244px!important}
+  .forge-stage .hashrate-card{top:28px!important}.forge-stage .forge-shares-min{top:296px!important}
+  .forge-stage .forge-counter.accepted,.forge-stage .forge-counter.rejected{right:58px!important;width:360px!important;height:196px!important;min-height:196px!important}
+  .forge-stage .forge-counter.accepted{top:52px!important}.forge-stage .forge-counter.rejected{bottom:52px!important}
+  #candidate.candidate{min-height:300px!important;grid-template-columns:minmax(0,1.9fr) minmax(330px,.72fr)!important}
+}
+
+@media(max-width:1100px){
+  .forge#forge .forge-stage{height:500px!important;min-height:500px!important}
+  .forge-stage .hashrate-card,.forge-stage .forge-shares-min{left:28px!important;width:240px!important;height:190px!important;min-height:190px!important}
+  .forge-stage .hashrate-card{top:24px!important}.forge-stage .forge-shares-min{top:240px!important}
+  .forge-stage .forge-counter.accepted,.forge-stage .forge-counter.rejected{right:28px!important;width:250px!important;height:160px!important;min-height:160px!important}
+  .forge-stage .forge-counter.accepted{top:34px!important}.forge-stage .forge-counter.rejected{bottom:34px!important}
+  #candidate.candidate{width:86%!important;margin-left:14%!important;grid-template-columns:1fr 280px!important}
+}
+@media(max-width:800px){
+  .forge#forge .forge-stage{height:640px!important;min-height:640px!important}
+  .forge-core-wrap{inset:4% 8% 12%!important}
+  .forge-stage .hashrate-card,.forge-stage .forge-shares-min{left:18px!important;width:210px!important;height:150px!important;min-height:150px!important}
+  .forge-stage .hashrate-card{top:18px!important}.forge-stage .forge-shares-min{top:182px!important}
+  .forge-stage .forge-counter.accepted,.forge-stage .forge-counter.rejected{right:18px!important;width:210px!important;height:135px!important;min-height:135px!important}
+  .forge-stage .forge-counter.accepted{top:18px!important}.forge-stage .forge-counter.rejected{bottom:18px!important}
+  .forge-stage .combo{left:18px!important;bottom:12px!important}
+  #candidate.candidate{width:100%!important;margin-left:0!important;grid-template-columns:1fr!important;clip-path:none!important}
+  #candidate .candidate-core{min-height:250px!important;border-left:0!important;border-top:1px solid rgba(25,81,94,.72)!important}
+}
