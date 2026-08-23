@@ -5,7 +5,7 @@ import re
 
 HTML = Path('/app/monitor/templates/dashboard_v4.html')
 html = HTML.read_text()
-VERSION = '20260823-8'
+VERSION = '20260823-14'
 REF = f'<link rel="stylesheet" href="/static/dashboard_v4_forge_reference.css?v={VERSION}">'
 UP = f'<link rel="stylesheet" href="/static/dashboard_v4_forge_upgrade.css?v={VERSION}">'
 TRAN = f'<link rel="stylesheet" href="/static/dashboard_v4_forge_transparency.css?v={VERSION}">'
