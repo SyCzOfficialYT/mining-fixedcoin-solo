@@ -1,39 +1,42 @@
-/* v4.6: mirrored forge metrics — the cards face the FIXCORE in the center.
-   Keep the live graphs intact; improve internal typography hierarchy and spacing. */
+/* v4.7: readable mirrored forge metrics — typography gets its own space; graphs stay intact. */
 .forge-stage .hashrate-card,
 .forge-stage .forge-shares-min {
   left: 32px !important;
   right: auto !important;
-  width: 176px !important;
-  min-height: 145px !important;
-  padding: 13px 13px 10px !important;
+  width: 184px !important;
+  min-height: 150px !important;
+  padding: 15px 15px 12px !important;
   display: flex !important;
   flex-direction: column !important;
   align-items: stretch !important;
   justify-content: flex-start !important;
-  border: 1px solid rgba(25,217,255,.42) !important;
-  background: linear-gradient(135deg, rgba(5,15,19,.96), rgba(2,9,12,.92)) !important;
+  overflow: visible !important;
+  border: 1px solid rgba(25,217,255,.48) !important;
+  background: linear-gradient(135deg, rgba(5,15,19,.97), rgba(2,9,12,.94)) !important;
   box-shadow:
-    inset 0 0 0 1px rgba(25,217,255,.08),
-    inset -12px 0 24px rgba(25,217,255,.045),
-    0 0 10px rgba(25,217,255,.18),
-    0 0 28px rgba(25,217,255,.08),
-    0 16px 28px rgba(0,0,0,.38) !important;
+    inset 0 0 0 1px rgba(25,217,255,.09),
+    inset -12px 0 24px rgba(25,217,255,.05),
+    0 0 10px rgba(25,217,255,.2),
+    0 0 28px rgba(25,217,255,.09),
+    0 16px 28px rgba(0,0,0,.4) !important;
   transform: perspective(760px) rotateY(18deg) rotateX(2deg) !important;
   transform-origin: center center !important;
   transform-style: preserve-3d !important;
 }
 
-/* Typography hierarchy: label → value → source/context → graph. */
+/* Keep the information block together and away from the graph. */
 .forge-stage .hashrate-card > span,
 .forge-stage .forge-shares-min > span {
   display: block !important;
   flex: 0 0 auto !important;
-  margin: 0 0 5px !important;
+  margin: 0 0 6px !important;
+  padding: 0 !important;
   line-height: 1.15 !important;
-  font-size: 9px !important;
+  font-size: 10px !important;
+  font-weight: 600 !important;
   letter-spacing: .16em !important;
-  color: #89a4aa !important;
+  white-space: nowrap !important;
+  color: #9ab2b8 !important;
 }
 
 .forge-stage .hashrate-card > strong,
@@ -41,34 +44,41 @@
   display: block !important;
   flex: 0 0 auto !important;
   margin: 0 !important;
+  padding: 0 !important;
   line-height: 1.05 !important;
-  font-size: 21px !important;
+  font-size: 23px !important;
+  font-weight: 700 !important;
   letter-spacing: -.025em !important;
-  color: #e7f7f8 !important;
+  white-space: nowrap !important;
+  color: #e9f8fa !important;
+  text-shadow: 0 0 8px rgba(220,250,255,.12) !important;
 }
 
 .forge-stage .hashrate-card > small,
 .forge-stage .forge-shares-min > small {
   display: block !important;
   flex: 0 0 auto !important;
-  margin: 7px 0 0 !important;
-  line-height: 1.1 !important;
-  font-size: 7px !important;
+  margin: 8px 0 0 !important;
+  padding: 0 !important;
+  line-height: 1.15 !important;
+  font-size: 8px !important;
+  font-weight: 500 !important;
   letter-spacing: .12em !important;
-  color: #5e777e !important;
+  white-space: nowrap !important;
+  color: #67828a !important;
   text-transform: uppercase !important;
 }
 
-/* The graph owns the lower portion of the card instead of competing with text. */
+/* The graph is deliberately separated from the text block and remains live. */
 .forge-stage .hashrate-card > svg,
 .forge-stage .forge-shares-min > svg {
   display: block !important;
   flex: 1 1 auto !important;
   width: 100% !important;
-  min-height: 38px !important;
-  height: 38px !important;
-  margin: auto 0 0 !important;
-  padding-top: 6px !important;
+  min-height: 42px !important;
+  height: 42px !important;
+  margin: 10px 0 0 !important;
+  padding: 4px 0 0 !important;
   overflow: visible !important;
 }
 
@@ -113,20 +123,34 @@
 
 @media (max-width: 700px) {
   .forge-stage .hashrate-card,
-  .forge-stage .forge-shares-min { left: 28px !important; width: 166px !important; }
+  .forge-stage .forge-shares-min {
+    left: 28px !important;
+    width: 174px !important;
+  }
   .forge-stage .hashrate-card { top: calc(50% - 146px) !important; }
   .forge-stage .forge-shares-min { top: calc(50% + 26px) !important; }
 }
 
 @media (max-width: 520px) {
   .forge-stage .hashrate-card,
-  .forge-stage .forge-shares-min { left: 18px !important; width: 154px !important; }
+  .forge-stage .forge-shares-min {
+    left: 18px !important;
+    width: 162px !important;
+    min-height: 145px !important;
+    padding: 12px 11px 10px !important;
+  }
+  .forge-stage .hashrate-card > span,
+  .forge-stage .forge-shares-min > span { font-size: 9px !important; }
+  .forge-stage .hashrate-card > strong,
+  .forge-stage .forge-shares-min > strong { font-size: 20px !important; }
+  .forge-stage .hashrate-card > small,
+  .forge-stage .forge-shares-min > small { font-size: 7px !important; }
+  .forge-stage .hashrate-card > svg,
+  .forge-stage .forge-shares-min > svg {
+    min-height: 38px !important;
+    height: 38px !important;
+    margin-top: 8px !important;
+  }
   .forge-stage .hashrate-card { top: calc(50% - 136px) !important; }
   .forge-stage .forge-shares-min { top: calc(50% + 24px) !important; }
-  .forge-stage .hashrate-card,
-  .forge-stage .forge-shares-min { min-height: 145px !important; padding: 11px 10px 9px !important; }
-  .forge-stage .hashrate-card > strong,
-  .forge-stage .forge-shares-min > strong { font-size: 18px !important; }
-  .forge-stage .hashrate-card > svg,
-  .forge-stage .forge-shares-min > svg { min-height: 34px !important; height: 34px !important; }
 }
