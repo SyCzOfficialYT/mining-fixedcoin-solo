@@ -25,6 +25,26 @@ if 'FIX_DASH_APP_STARTED' not in text:
     changed = True
     print('patched dashboard uptime telemetry')
 
+# If stats.json does not persist the round start, derive it from the most recent
+# NEW ROUND log entry so the visible 10-minute countdown remains functional.
+if 'dashboard round-start log fallback' not in text:
+    marker = '    pool=config(); fixed_diff=as_number(pool.get("fixed_difficulty",13354),13354);'
+    inject = '''    # dashboard round-start log fallback
+    if not stats.get("round_started_at"):
+        for recent_line in reversed(lines(LOG, 400)):
+            if "NEW ROUND" in recent_line:
+                round_ts = recent_line[:19]
+                if parse_ts(round_ts):
+                    stats["round_started_at"] = round_ts
+                    break
+    pool=config(); fixed_diff=as_number(pool.get("fixed_difficulty",13354),13354);'''
+    if marker not in text:
+        raise RuntimeError('dashboard status pool anchor not found')
+    text = text.replace(marker, inject, 1)
+    text = text.replace('    # dashboard round-start log fallback', '    # dashboard round-start log fallback', 1)
+    changed = True
+    print('patched dashboard timer: NEW ROUND fallback')
+
 if '@app.get("/api/stream")' not in text:
     marker = '@app.get("/api/logs")\n'
     stream = """
