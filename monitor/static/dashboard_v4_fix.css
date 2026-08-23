@@ -1,2 +1,87 @@
-/* Dashboard v4 hardening / reference-quality layout overrides */
-.block-history{overflow:hidden}.history-table{max-height:420px;overflow-y:auto;overflow-x:auto;scrollbar-width:thin;scrollbar-color:#1f6d79 #02070a;overscroll-behavior:contain}.history-table::-webkit-scrollbar{width:8px;height:8px}.history-table::-webkit-scrollbar-track{background:#02070a}.history-table::-webkit-scrollbar-thumb{background:#1f6d79;border-radius:8px;border:2px solid #02070a}.history-labels,.history-row{min-width:920px}.history-row{display:grid;grid-template-columns:120px 1.15fr 1.15fr 120px minmax(300px,1.8fr);align-items:center;gap:16px;padding:12px 14px;border-bottom:1px solid rgba(23,63,74,.55);font:12px var(--mono);color:#b5cdd2}.history-labels{position:sticky;top:0;z-index:5;background:linear-gradient(180deg,#06151c,#030b11);color:#64838b;font-size:10px}.history-row>span:last-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.validity{font:700 10px var(--mono);letter-spacing:.08em}.validity.valid{color:#62f56d}.validity.immature{color:#1be4ff}.validity.invalid{color:#ff5555}.forge-stage{min-height:560px}.hashrate-card{left:28px;top:28px;z-index:46}.forge-art{left:170px;right:250px;inset-block:0;width:auto}.miner-figure,.anvil{display:none!important}.forge-art .forge-rock,.forge-art .ore-glow{display:none!important}.reference-miner{position:absolute;left:50%;bottom:22px;width:min(560px,58vw);height:500px;transform:translateX(-50%);object-fit:contain;object-position:center bottom;z-index:9;filter:drop-shadow(0 24px 42px rgba(0,0,0,.78)) saturate(1.04) contrast(1.04);animation:referenceMinerFloat 5s ease-in-out infinite;pointer-events:none;user-select:none}.forge-art:has(.reference-miner){filter:none}.forge-art:has(.reference-miner):after{content:"";position:absolute;left:50%;bottom:26px;width:min(520px,52vw);height:70px;transform:translateX(-50%);background:radial-gradient(ellipse,rgba(0,229,255,.14),transparent 70%);filter:blur(20px);z-index:1}.accept-stream{z-index:30}.reject-wall{z-index:32}.forge-counter{z-index:48}.combo{z-index:48}.particle-layer{z-index:38}@keyframes referenceMinerFloat{0%,100%{transform:translateX(-50%) translateY(0) scale(1)}50%{transform:translateX(-50%) translateY(-5px) scale(1.008)}}.round-panel .remaining{min-width:150px;display:block}.round-panel small{min-height:16px}.status{min-width:78px;text-align:center}@media(max-width:900px){.dashboard{width:min(100% - 12px,760px);margin:8px auto 16px}.hero{grid-template-columns:1fr}.round-panel{border-left:0;border-top:1px solid #123842;min-height:250px}.hero-main{padding:24px 20px}.hero-values{grid-template-columns:1fr 50px 1fr}.hero-value strong{font-size:clamp(34px,9vw,58px)}.forge{min-height:650px}.forge-stage{height:590px}.forge-art{left:110px;right:170px}.reference-miner{width:min(600px,78vw);height:500px;bottom:28px}.hashrate-card{left:18px;top:18px;width:150px}.forge-counter{right:16px!important}.candidate{grid-template-columns:1fr!important}.history-table{max-height:360px}}@media(max-width:620px){.eyebrow{font-size:11px}.subtitle{font-size:11px}.hero-values{grid-template-columns:1fr}.versus{display:none}.hero-value.network{text-align:left;margin-top:16px}.target-track{margin-top:20px}.forge-stage{height:610px}.forge-art{left:0;right:0}.reference-miner{width:620px;max-width:145%;height:500px;left:50%;bottom:24px}.hashrate-card{width:142px;transform:scale(.92);transform-origin:top left}.accepted{top:24px!important}.rejected{bottom:24px!important}.combo{left:18px!important;bottom:24px!important}.history-row{grid-template-columns:100px 180px 170px 100px 300px}.history-table{max-height:320px}}
+/* v4.2 reference-layout hardening: preserve the reference composition on phones and prevent HUD collisions. */
+
+/* The reference miner is a portrait asset. Never stretch it into a square. */
+.forge-stage{min-height:560px}
+.forge-art{left:185px;right:270px;inset-block:0;display:block}
+.reference-miner{left:50%;bottom:18px;width:min(500px,54vw);height:auto;max-height:500px;aspect-ratio:180 / 202;object-fit:contain;object-position:center bottom;transform:translateX(-50%);filter:drop-shadow(0 24px 42px rgba(0,0,0,.82)) saturate(1.08) contrast(1.05);z-index:9}
+.hashrate-card{left:30px;top:30px;z-index:48}
+.accept-stream{right:14%;top:28%;z-index:30}
+.reject-wall{right:24%;bottom:78px;z-index:32}
+.forge-counter{z-index:48}
+.combo{z-index:48}
+
+/* Richer forge depth: cave walls, warm impact pool, floor perspective and ore glow. */
+.forge-stage{background:
+ radial-gradient(ellipse at 42% 58%,rgba(16,113,135,.22),transparent 28%),
+ radial-gradient(ellipse at 77% 54%,rgba(42,255,108,.10),transparent 24%),
+ radial-gradient(ellipse at 49% 82%,rgba(255,161,35,.13),transparent 15%),
+ linear-gradient(180deg,#020a10 0%,#02080c 65%,#010507 100%)}
+.forge-stage:before{opacity:.58}
+.forge-stage:after{background:
+ radial-gradient(circle at 48% 72%,rgba(255,178,43,.18),transparent 10%),
+ radial-gradient(circle at 75% 55%,rgba(58,255,113,.10),transparent 18%),
+ linear-gradient(90deg,rgba(0,0,0,.55),transparent 22%,transparent 78%,rgba(0,0,0,.52))}
+.forge-art:before,.forge-art:after{content:"";position:absolute;pointer-events:none}
+.forge-art:before{left:-18%;right:-18%;bottom:0;height:46%;background:linear-gradient(160deg,transparent 0 24%,rgba(14,46,55,.45) 25%,transparent 42%),linear-gradient(20deg,transparent 0 35%,rgba(7,27,34,.72) 36%,transparent 58%);clip-path:polygon(0 100%,0 44%,13% 57%,22% 31%,33% 53%,46% 18%,57% 48%,68% 28%,78% 56%,89% 36%,100% 54%,100% 100%);opacity:.72;z-index:2}
+.forge-art:after{left:18%;right:4%;bottom:30px;height:2px;background:linear-gradient(90deg,transparent,#24535d 12%,#2b6570 48%,#24535d 88%,transparent);box-shadow:0 0 28px rgba(25,225,255,.18);z-index:10}
+
+/* Keep the hash-rate HUD outside the miner silhouette. */
+@media (min-width:901px){.hashrate-card{max-width:176px}.forge-art{left:205px;right:300px}.reference-miner{width:min(500px,52vw)}}
+
+/* Tablet/mobile: this follows the reference image's hierarchy instead of shrinking every element into one pile. */
+@media(max-width:900px){
+  .forge{min-height:0}
+  .forge-stage{height:610px;min-height:610px}
+  .forge-art{left:0;right:0;inset-block:0}
+  .reference-miner{width:min(470px,82vw);height:auto;max-height:500px;bottom:28px}
+  .hashrate-card{left:18px;top:18px;width:145px}
+  .accept-stream{right:-2%;top:34%;transform:scale(.82);transform-origin:center right}
+  .reject-wall{right:14%;bottom:80px;height:190px}
+  .forge-counter{right:12px;width:165px}
+  .combo{left:18px;bottom:24px}
+}
+@media(max-width:620px){
+  .dashboard{width:calc(100% - 14px);gap:8px}
+  .hero{border-radius:15px}
+  .hero-main{padding:20px 16px 15px}
+  .hero-values{grid-template-columns:1fr 30px 1fr;gap:4px}
+  .hero-value strong{font-size:clamp(31px,9.4vw,48px)}
+  .round-panel{grid-template-columns:1fr 1fr;padding:13px 14px}
+  .round-id{font-size:21px;padding:6px 10px}
+  .estimate{font-size:22px}.remaining{font-size:31px}
+  .forge-stage{height:545px;min-height:545px}
+  .forge-head{padding:12px 13px}
+  .forge-head .eyebrow{font-size:9px}
+  .live{font-size:7px}
+  .hashrate-card{left:12px;top:14px;width:132px;padding:9px 10px;transform:none}
+  .hashrate-card strong{font-size:15px}
+  .reference-miner{width:min(430px,92vw);max-width:92vw;bottom:26px}
+  .accept-stream{right:-11%;top:37%;transform:scale(.68);transform-origin:center right}
+  .reject-wall{right:16%;bottom:58px;height:165px}
+  .reject-wall span{font-size:8px}
+  .forge-counter{width:143px;padding:9px 11px}
+  .forge-counter strong{font-size:28px}
+  .forge-counter span{font-size:7px}
+  .forge-counter i{width:30px;height:30px;top:21px}
+  .accepted{top:21px}.rejected{bottom:19px}
+  .combo{left:13px;bottom:18px}.combo strong{font-size:27px}
+  .candidate{display:grid}
+  .candidate-left{padding:20px 16px}
+  .candidate-pct{font-size:48px;margin-top:22px}
+  .candidate-core{min-height:245px}
+  .activity-panel{padding:17px 14px}
+  .activity-row{grid-template-columns:22px 1fr auto;padding:7px 0}
+  .stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .stat{min-height:120px;padding:13px}
+  .block-history{padding:17px 12px 6px}
+  .history-table{max-height:330px;overflow-y:auto}
+}
+
+/* Block history must be a real scroll container, not a clipped card. */
+.block-history{overflow:visible}
+.history-table{max-height:420px;overflow-y:auto;overflow-x:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#2a7d88 #02070a}
+.history-table::-webkit-scrollbar{width:8px;height:8px}.history-table::-webkit-scrollbar-track{background:#02070a}.history-table::-webkit-scrollbar-thumb{background:#2a7d88;border-radius:8px;border:2px solid #02070a}
+.history-labels,.history-row{min-width:920px}
+@media(max-width:620px){.history-labels{display:none}.history-row{min-width:0;grid-template-columns:1fr 1fr;min-height:74px}.history-row>span:nth-child(5){grid-column:1/-1}}
+
+@media(prefers-reduced-motion:reduce){.reference-miner{animation:none!important}}
