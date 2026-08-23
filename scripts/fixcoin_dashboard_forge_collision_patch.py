@@ -1,25 +1,29 @@
 #!/usr/bin/env python3
-"""Apply the final Forge HUD/collision layer after the base dashboard patches."""
+"""Apply the final Forge reference geometry and collision layer after the base dashboard patches."""
 from pathlib import Path
 import re
 
 HTML = Path('/app/monitor/templates/dashboard_v4.html')
 html = HTML.read_text()
-VERSION = '20260823-10'
+VERSION = '20260823-11'
 COLLISION_CSS = f'<link rel="stylesheet" href="/static/dashboard_v4_forge_collision.css?v={VERSION}">'
 COLLISION_JS = f'<script defer src="/static/dashboard_v4_forge_collision.js?v={VERSION}"></script>'
 HUD_CSS = f'<link rel="stylesheet" href="/static/dashboard_v4_forge_hud_match.css?v={VERSION}">'
+REFERENCE_CSS = f'<link rel="stylesheet" href="/static/dashboard_v4_forge_reference_final.css?v={VERSION}">'
 
+# Remove legacy burst renderer: it conflicts with true per-particle impacts.
 html = re.sub(r'<script[^>]+/static/dashboard_v4_share_impact\.js\?v=[^>]+></script>', '', html)
+# Remove prior final-layer includes regardless of cache-buster.
 html = re.sub(r'<link rel="stylesheet" href="/static/dashboard_v4_forge_collision\.css\?v=[^"]+">', '', html)
 html = re.sub(r'<script[^>]+dashboard_v4_forge_collision\.js\?v=[^>]+></script>', '', html)
 html = re.sub(r'<link rel="stylesheet" href="/static/dashboard_v4_forge_hud_match\.css\?v=[^"]+">', '', html)
+html = re.sub(r'<link rel="stylesheet" href="/static/dashboard_v4_forge_reference_final\.css\?v=[^"]+">', '', html)
 
 anchor_match = re.search(r'<link rel="stylesheet" href="/static/dashboard_v4_forge_metrics_layout\.css\?v=[^"]+">', html)
 if not anchor_match:
     raise RuntimeError('forge metrics stylesheet anchor missing')
 anchor = anchor_match.group(0)
-html = html.replace(anchor, anchor + COLLISION_CSS + HUD_CSS, 1)
+html = html.replace(anchor, anchor + COLLISION_CSS + HUD_CSS + REFERENCE_CSS, 1)
 
 parallax = re.search(r'(<script defer src="/static/dashboard_v4_share_parallax\.js\?v=[^"]+"></script>)', html)
 if not parallax:
@@ -30,6 +34,7 @@ required = [
     'dashboard_v4_forge_collision.css',
     'dashboard_v4_forge_collision.js',
     'dashboard_v4_forge_hud_match.css',
+    'dashboard_v4_forge_reference_final.css',
     'dashboard_v4_share_parallax.js',
     'class="forge-rock rock-left"',
     'class="forge-rock rock-right"',
@@ -43,4 +48,4 @@ if '/static/dashboard_v4_share_impact.js?' in html:
     raise RuntimeError('legacy share-impact JS is still included; refusing to build conflicting particle engines')
 
 HTML.write_text(html)
-print('dashboard Forge final layer applied: candidate-style metric/counter HUD, contained mountain background, legacy burst renderer removed, per-particle collision layer loaded')
+print('dashboard Forge reference geometry applied: left/right instruments, bounded mountains, centered VarDiff, lower command deck, and per-particle collision layer')
