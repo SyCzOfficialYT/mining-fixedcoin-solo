@@ -93,6 +93,34 @@
   width: 100% !important;
 }
 
+/* Event dots remain attached to their own counter and only light on a real hit. */
+.forge-counter .event-dot {
+  display: block !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  position: absolute !important;
+  right: 7px !important;
+  bottom: 7px !important;
+  left: auto !important;
+  top: auto !important;
+  width: 6px !important;
+  height: 6px !important;
+  margin: 0 !important;
+  border-radius: 50% !important;
+  transform: scale(.45) !important;
+  z-index: 30 !important;
+}
+.forge-counter.accepted .event-dot { background:#39ff8a !important; box-shadow:0 0 5px #39ff8a,0 0 12px rgba(57,255,138,.9),0 0 24px rgba(57,255,138,.45) !important; }
+.forge-counter.rejected .event-dot { background:#ff4455 !important; box-shadow:0 0 5px #ff4455,0 0 12px rgba(255,68,85,.9),0 0 24px rgba(255,68,85,.45) !important; }
+.forge.hit-accept .accepted .event-dot,
+.forge.hit-reject .rejected .event-dot { visibility:visible !important; animation:mirrorEventDot 1.05s cubic-bezier(.16,.85,.25,1) both !important; }
+@keyframes mirrorEventDot {
+  0% { opacity:0; transform:scale(.35); }
+  18% { opacity:1; transform:scale(1.45); }
+  44% { opacity:1; transform:scale(1); }
+  100% { opacity:0; transform:scale(.9); }
+}
+
 /* Real share-event particle layer. It is clipped to the forge stage so no
    event particle can escape the dashboard viewport. */
 .share-event-layer {
@@ -157,23 +185,12 @@
 
 @media (max-width: 700px) {
   .hashrate-card,
-  .forge-shares-min {
-    width: 176px !important;
-  }
-  .hashrate-card {
-    left: 32px !important;
-    top: 29px !important;
-  }
-  .forge-shares-min {
-    left: 32px !important;
-    top: 183px !important;
-  }
+  .forge-shares-min { width: 176px !important; }
+  .hashrate-card { left: 32px !important; top: 29px !important; }
+  .forge-shares-min { left: 32px !important; top: 183px !important; }
 }
 
 @media (max-width: 520px) {
   .hashrate-card,
-  .forge-shares-min {
-    width: 150px !important;
-    padding: 10px 11px !important;
-  }
+  .forge-shares-min { width: 150px !important; padding: 10px 11px !important; }
 }
