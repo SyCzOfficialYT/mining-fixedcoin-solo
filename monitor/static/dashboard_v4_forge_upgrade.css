@@ -1,12 +1,49 @@
-/* FIXCOIN Forge visual upgrade — v20260823-4 */
+/* FIXCOIN Forge visual upgrade — v20260823-5 */
 .forge-stage .progress-particle-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:7;overflow:visible;mix-blend-mode:screen}
 .candidate-track{overflow:visible!important}
 .candidate-track .candidate-particle-canvas{position:absolute;inset:-18px -1px;width:calc(100% + 2px);height:50px;pointer-events:none;z-index:4;overflow:visible;mix-blend-mode:screen}
 .candidate-track i{position:relative;z-index:2}
 
-/* One continuous Forge instrument. Candidate is a HUD zone, never a card. */
-.forge{min-height:0!important;overflow:hidden!important;background:linear-gradient(180deg,#020b11 0%,#02080c 72%,#01070a 100%)!important}
-.forge-stage{height:448px!important;min-height:448px!important;background:radial-gradient(ellipse at 45% 57%,rgba(16,100,121,.18),transparent 32%),radial-gradient(ellipse at 76% 52%,rgba(22,255,113,.08),transparent 26%),linear-gradient(180deg,#020b11,#02080c 70%,#01070a)!important}
+/* One continuous Forge instrument. Candidate is a transparent HUD zone, never a card. */
+.forge{
+  min-height:0!important;
+  overflow:hidden!important;
+  background:
+    radial-gradient(ellipse at 45% 57%,rgba(16,100,121,.18),transparent 32%),
+    radial-gradient(ellipse at 76% 52%,rgba(22,255,113,.08),transparent 26%),
+    linear-gradient(180deg,#020b11 0%,#02080c 72%,#01070a 100%)!important;
+}
+.forge-stage{
+  height:448px!important;
+  min-height:448px!important;
+  background:transparent!important;
+}
+
+/* Extend the Forge atmosphere into the lower HUD so the Candidate region literally
+   reveals the same Forge background instead of a second panel background. */
+.forge::before{
+  content:""!important;
+  position:absolute!important;
+  left:0!important;
+  right:0!important;
+  top:58px!important;
+  bottom:0!important;
+  pointer-events:none!important;
+  z-index:0!important;
+  background:
+    linear-gradient(rgba(0,229,255,.028) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,229,255,.022) 1px,transparent 1px),
+    radial-gradient(ellipse at 45% 34%,rgba(16,100,121,.18),transparent 30%),
+    radial-gradient(ellipse at 76% 42%,rgba(22,255,113,.08),transparent 24%),
+    linear-gradient(180deg,rgba(2,11,17,.18),rgba(1,7,10,.18));
+  background-size:48px 48px,48px 48px,auto,auto,auto;
+  background-position:center top,center top,center center,center center,center center;
+  opacity:.9;
+}
+.forge > .forge-head{position:relative;z-index:60}
+.forge > .forge-stage,
+.forge > .candidate,
+.forge > .combo{z-index:12}
 
 /* Candidate is physically inside Forge and visually dissolves into the same background. */
 .forge > .candidate{
@@ -25,16 +62,18 @@
   z-index:12!important;
   overflow:hidden!important;
 }
-
-.forge > .candidate::before,.forge > .candidate::after{display:none!important;content:none!important}
+.forge > .candidate::before,
+.forge > .candidate::after,
+.forge > .candidate.panel::before,
+.forge > .candidate.panel::after{display:none!important;content:none!important;background:none!important;box-shadow:none!important}
 .forge > .candidate .candidate-left{padding:18px 28px 17px 225px!important;justify-content:center!important;background:transparent!important}
 .forge > .candidate .candidate-pct{margin:18px 0 0!important;font-size:54px!important;line-height:.95!important}
 .forge > .candidate .candidate-track{margin-top:10px!important;height:12px!important}
-.forge > .candidate .next-height{margin-top:30px!important;padding-top:10px!important;border-top:1px solid rgba(23,63,74,.45)!important}
+.forge > .candidate .next-height{margin-top:30px!important;padding-top:10px!important;border-top:1px solid rgba(23,63,74,.36)!important}
 .forge > .candidate .candidate-core{
-  border-left:1px solid rgba(18,56,66,.5)!important;
+  border-left:1px solid rgba(18,56,66,.34)!important;
   min-height:100%!important;
-  background:radial-gradient(circle at 50% 44%,rgba(55,255,112,.05),transparent 38%),transparent!important;
+  background:transparent!important;
 }
 .forge > .candidate .candidate-core:before{width:210px!important;height:210px!important}
 .forge > .candidate .candidate-core .ring-a{width:160px!important}
@@ -76,7 +115,7 @@
 .candidate.block-found{border:0!important;outline:0!important;box-shadow:none!important;background:transparent!important;animation:none!important}
 .candidate.block-found .candidate-pct{color:#baffc5!important;text-shadow:0 0 30px rgba(98,255,122,.65),0 0 70px rgba(98,255,122,.28)!important}
 .candidate.block-found .candidate-track{border-color:#5cff7a!important;box-shadow:0 0 24px rgba(92,255,122,.28),inset 0 2px 7px #000!important}
-.candidate.block-found .candidate-core{background:radial-gradient(circle at 50% 44%,rgba(75,255,111,.28),transparent 42%),transparent!important}
+.candidate.block-found .candidate-core{background:transparent!important}
 .candidate.block-found .candidate-core:before{border-color:rgba(92,255,120,.65);box-shadow:0 0 0 22px rgba(92,255,120,.08),0 0 0 48px rgba(92,255,120,.04);animation:candidateFoundRings 1.8s ease-out}
 .candidate.block-found .core-cube{border-color:#69ff87;box-shadow:0 0 35px rgba(80,255,110,.45),inset 0 0 28px rgba(80,255,110,.12);animation:cubeFound 1.2s ease-out}
 .candidate.block-found .core-cube span{color:#d8ffe0;text-shadow:0 0 25px rgba(105,255,135,.9)}
@@ -92,7 +131,7 @@
   .forge-stage{height:430px!important;min-height:430px!important}
   .forge > .candidate{height:300px!important;min-height:300px!important;grid-template-columns:1fr!important;grid-template-rows:1fr 220px!important}
   .forge > .candidate .candidate-left{padding:18px 24px!important}
-  .forge > .candidate .candidate-core{border-left:0!important;border-top:1px solid rgba(18,56,66,.5)!important}
+  .forge > .candidate .candidate-core{border-left:0!important;border-top:1px solid rgba(18,56,66,.34)!important}
   .forge-stage .hashrate-card,.forge-stage .forge-shares-min{left:28px!important;width:190px!important;min-height:150px!important}
   .forge-stage .hashrate-card{top:10px!important}.forge-stage .forge-shares-min{top:178px!important}
   .forge-stage .forge-counter.accepted,#forgeStage .forge-counter.accepted{right:26px!important;top:52px!important;width:220px!important;min-width:220px!important}
