@@ -6,7 +6,7 @@ import re
 HTML = Path('/app/monitor/templates/dashboard_v4.html')
 html = HTML.read_text()
 
-VERSION = '20260823-2'
+VERSION = '20260823-3'
 CSS = f'<link rel="stylesheet" href="/static/dashboard_v4_forge_upgrade.css?v={VERSION}">'
 JS = f'<script defer src="/static/dashboard_v4_forge_upgrade.js?v={VERSION}"></script>'
 
@@ -25,12 +25,45 @@ if anchor_js not in html:
     raise RuntimeError('dashboard forge client anchor missing')
 html = html.replace(anchor_js, anchor_js + JS, 1)
 
+# --- Compose the reference layout -------------------------------------------------
+# The reference is one continuous Forge instrument: the Network Proximity panel
+# lives INSIDE the Forge outer panel, beneath the live proof-of-work stage.
+# Keep all existing selectors/IDs so the realtime JS remains authoritative.
+candidate_match = re.search(r'<section class="candidate panel" id="candidate">.*?</section>', html, flags=re.S)
+forge_match = re.search(r'<section class="forge panel" id="forge">.*?</section>', html, flags=re.S)
+if not candidate_match:
+    raise RuntimeError('dashboard candidate section missing before forge integration')
+if not forge_match:
+    raise RuntimeError('dashboard forge section missing before forge integration')
+
+candidate_html = candidate_match.group(0)
+# Remove the standalone candidate section first.
+html = html[:candidate_match.start()] + html[candidate_match.end():]
+
+# The combo is deliberately in the left gutter beside the integrated candidate
+# panel, matching the reference rather than sitting beneath the Shares/Min card.
+combo_match = re.search(r'<div class="combo" id="combo">.*?</div>', html, flags=re.S)
+combo_html = combo_match.group(0) if combo_match else ''
+if combo_match:
+    html = html[:combo_match.start()] + html[combo_match.end():]
+
+forge_start = html.find('<section class="forge panel" id="forge">')
+if forge_start < 0:
+    raise RuntimeError('dashboard forge section missing after candidate extraction')
+forge_end = html.find('</section>', forge_start)
+if forge_end < 0:
+    raise RuntimeError('dashboard forge closing section missing')
+
+html = html[:forge_end] + (combo_html + candidate_html) + html[forge_end:]
+
 required = [
     'class="forge panel"',
     'id="forgeStage"',
     'id="forgeCore"',
+    'id="candidate"',
     'id="candidatePct"',
     'class="candidate-track"',
+    'id="combo"',
     'dashboard_v4_forge_upgrade.css',
     'dashboard_v4_forge_upgrade.js',
 ]
@@ -38,5 +71,12 @@ missing = [x for x in required if x not in html]
 if missing:
     raise RuntimeError('dashboard forge upgrade verification failed: ' + ', '.join(missing))
 
+# Verify candidate is now inside the Forge section rather than a second sibling.
+forge_start = html.find('<section class="forge panel" id="forge">')
+candidate_pos = html.find('<section class="candidate panel" id="candidate">')
+forge_end = html.find('</section>', forge_start)
+if not (forge_start < candidate_pos < forge_end):
+    raise RuntimeError('dashboard forge upgrade verification failed: candidate not integrated inside forge panel')
+
 HTML.write_text(html)
-print('dashboard forge upgrade applied: persistent 0.001% progress particles, FIXCORE charge field, candidate liquid conduit, and block-found choreography')
+print('dashboard forge upgrade applied: integrated network-proximity panel, reference-aligned Forge geometry, persistent 0.001% progress particles, and block-found choreography')
