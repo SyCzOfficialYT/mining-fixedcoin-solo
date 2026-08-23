@@ -1,26 +1,107 @@
-/* v4.9: centered forge metric HUD — reference-aligned typography with live sparklines. */
-.forge-stage .hashrate-card,.forge-stage .forge-shares-min{left:32px!important;right:auto!important;width:184px!important;min-height:150px!important;padding:18px 15px 12px!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:flex-start!important;overflow:visible!important;box-sizing:border-box!important;text-align:center!important;border:1px solid rgba(25,217,255,.48)!important;background:linear-gradient(135deg,rgba(5,15,19,.97),rgba(2,9,12,.94))!important;box-shadow:inset 0 0 0 1px rgba(25,217,255,.09),inset -12px 0 24px rgba(25,217,255,.05),0 0 10px rgba(25,217,255,.2),0 0 28px rgba(25,217,255,.09),0 16px 28px rgba(0,0,0,.4)!important;transform:perspective(760px) rotateY(18deg) rotateX(2deg)!important;transform-origin:center center!important;transform-style:preserve-3d!important}.forge-stage .hashrate-card>span,.forge-stage .forge-shares-min>span,.forge-stage .hashrate-card>strong,.forge-stage .forge-shares-min>strong,.forge-stage .hashrate-card>small,.forge-stage .forge-shares-min>small{display:block!important;width:100%!important;box-sizing:border-box!important;align-self:center!important;flex:0 0 auto!important;padding:0!important;text-align:center!important;white-space:nowrap!important}.forge-stage .hashrate-card>span,.forge-stage .forge-shares-min>span{margin:0 0 7px!important;line-height:1.15!important;font-size:10px!important;font-weight:600!important;letter-spacing:.16em!important;color:#9ab2b8!important}.forge-stage .hashrate-card>strong,.forge-stage .forge-shares-min>strong{margin:0!important;line-height:1.05!important;font-size:23px!important;font-weight:700!important;letter-spacing:-.025em!important;color:#e9f8fa!important;text-shadow:0 0 8px rgba(220,250,255,.12)!important}.forge-stage .hashrate-card>small,.forge-stage .forge-shares-min>small{margin:8px 0 0!important;line-height:1.15!important;font-size:8px!important;font-weight:500!important;letter-spacing:.12em!important;color:#67828a!important;text-transform:uppercase!important}.forge-stage .hashrate-card>svg,.forge-stage .forge-shares-min>svg{display:block!important;flex:1 1 auto!important;align-self:stretch!important;width:100%!important;min-height:42px!important;height:42px!important;margin:12px auto 0!important;padding:4px 0 0!important;overflow:visible!important}.forge-stage .hashrate-card polyline,.forge-stage .forge-shares-min polyline{fill:none!important;stroke:#58ef6d!important;stroke-width:2.1!important;filter:drop-shadow(0 0 4px rgba(84,239,108,.5))!important}.forge-stage .hashrate-card{top:calc(50% - 151px)!important}.forge-stage .forge-shares-min{top:calc(50% + 29px)!important;transform:perspective(760px) rotateY(18deg) rotateX(1.5deg)!important}.forge-stage .hashrate-card::before,.forge-stage .forge-shares-min::before{transform:translate3d(12px,3px,-28px)!important;border-color:rgba(25,217,255,.55)!important;box-shadow:0 0 8px rgba(25,217,255,.22),0 0 18px rgba(25,217,255,.10)!important}.forge-stage .hashrate-card::after,.forge-stage .forge-shares-min::after{content:""!important;position:absolute!important;top:12px!important;right:-5px!important;bottom:12px!important;width:5px!important;border-radius:0 8px 8px 0!important;background:linear-gradient(180deg,rgba(25,217,255,.7),rgba(25,217,255,.12),transparent)!important;box-shadow:0 0 12px rgba(25,217,255,.28)!important;pointer-events:none!important}@media(max-width:700px){.forge-stage .hashrate-card,.forge-stage .forge-shares-min{left:28px!important;width:174px!important}}@media(max-width:520px){.forge-stage .hashrate-card,.forge-stage .forge-shares-min{left:18px!important;width:162px!important;min-height:145px!important;padding:15px 11px 10px!important}.forge-stage .hashrate-card>span,.forge-stage .forge-shares-min>span{font-size:9px!important}.forge-stage .hashrate-card>strong,.forge-stage .forge-shares-min>strong{font-size:20px!important}.forge-stage .hashrate-card>small,.forge-stage .forge-shares-min>small{font-size:7px!important}.forge-stage .hashrate-card>svg,.forge-stage .forge-shares-min>svg{min-height:38px!important;height:38px!important;margin-top:10px!important}}
+/* FIXCORE forge metrics: compact cards using the exact accepted/rejected 3D card language. */
+.forge-stage .hashrate-card,
+.forge-stage .forge-shares-min {
+  position:absolute!important; left:30px!important; right:auto!important;
+  width:170px!important; min-width:170px!important;
+  height:108px!important; min-height:108px!important;
+  margin:0!important; padding:11px 12px 9px 14px!important;
+  box-sizing:border-box!important; overflow:visible!important;
+  border:2px solid #39ff8a!important; border-radius:14px!important;
+  background:#060c10!important; backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+  transform-style:preserve-3d!important; backface-visibility:hidden!important;
+  transform-origin:50% 50%!important; will-change:transform!important; z-index:48!important;
+  transform:perspective(760px) rotateY(calc(-18deg + var(--metric-px,0deg))) rotateX(calc(2.5deg + var(--metric-py,0deg)))!important;
+  box-shadow:
+    inset 0 0 0 1px rgba(57,255,138,.30),
+    inset 0 0 12px rgba(57,255,138,.07),
+    0 0 0 1px rgba(57,255,138,.35),
+    0 0 6px 1px rgba(57,255,138,.62),
+    0 0 16px 2px rgba(57,255,138,.32),
+    0 0 30px 4px rgba(57,255,138,.14),
+    4px 8px 20px rgba(0,0,0,.55)!important;
+}
+.forge-stage .hashrate-card{top:31px!important}
+.forge-stage .forge-shares-min{top:151px!important;transform:perspective(760px) rotateY(calc(-18deg + var(--metric-px,0deg))) rotateX(calc(1.8deg + var(--metric-py,0deg)))!important}
 
-/* v5.0 visual correction: the forge metric cards use the same soft 3D bevel language as the accepted/rejected share cards. */
-.forge-stage .hashrate-card,.forge-stage .forge-shares-min{height:126px!important;min-height:126px!important;padding:14px 14px 11px 16px!important;align-items:flex-start!important;justify-content:flex-start!important;text-align:left!important;border:2px solid rgba(25,217,255,.82)!important;border-radius:14px!important;background:#060c10!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;box-shadow:inset 0 0 0 1px rgba(25,217,255,.30),inset 0 0 12px rgba(25,217,255,.07),0 0 0 1px rgba(25,217,255,.35),0 0 6px 1px rgba(25,217,255,.55),0 0 16px 2px rgba(25,217,255,.28),0 0 30px 4px rgba(25,217,255,.12),4px 8px 20px rgba(0,0,0,.55)!important;transform:perspective(800px) rotateY(-12deg) rotateX(2deg)!important;transform-origin:50% 50%!important;transform-style:preserve-3d!important;backface-visibility:hidden!important;will-change:transform!important}
-.forge-stage .hashrate-card::before,.forge-stage .forge-shares-min::before{content:""!important;position:absolute!important;top:6px!important;bottom:6px!important;right:-7px!important;width:14px!important;border-radius:0 12px 12px 0!important;z-index:-1!important;pointer-events:none!important;filter:blur(.3px)!important;opacity:.95!important;transform:none!important;border:0!important;background:linear-gradient(90deg,#19d9ff 0%,#08758a 55%,transparent 100%)!important;box-shadow:2px 0 8px rgba(25,217,255,.48),4px 0 16px rgba(25,217,255,.20)!important}
-.forge-stage .hashrate-card::after,.forge-stage .forge-shares-min::after{content:""!important;position:absolute!important;top:10px!important;bottom:10px!important;right:-11px!important;width:10px!important;border-radius:0 10px 10px 0!important;z-index:-2!important;pointer-events:none!important;opacity:.42!important;filter:blur(1.5px)!important;background:#19d9ff!important;box-shadow:0 0 12px rgba(25,217,255,.45)!important;transform:none!important}
-.forge-stage .hashrate-card>span,.forge-stage .forge-shares-min>span{display:block!important;width:100%!important;box-sizing:border-box!important;align-self:stretch!important;flex:0 0 auto!important;margin:0 0 5px!important;padding:0!important;text-align:left!important;white-space:nowrap!important;line-height:1.15!important;font:600 9px/1.15 'JetBrains Mono',monospace!important;letter-spacing:.16em!important;color:#8aa0aa!important}
-.forge-stage .hashrate-card>strong,.forge-stage .forge-shares-min>strong{display:block!important;width:100%!important;box-sizing:border-box!important;align-self:stretch!important;flex:0 0 auto!important;margin:0!important;padding:0!important;text-align:left!important;white-space:nowrap!important;line-height:1.05!important;font:700 22px/1.05 'JetBrains Mono',monospace!important;letter-spacing:-.025em!important;color:#e9f8fa!important;text-shadow:0 0 10px rgba(220,250,255,.12)!important;transform:translateZ(3px)!important}
-.forge-stage .hashrate-card>small,.forge-stage .forge-shares-min>small{display:block!important;width:100%!important;box-sizing:border-box!important;align-self:stretch!important;flex:0 0 auto!important;margin:5px 0 0!important;padding:0!important;text-align:left!important;white-space:nowrap!important;line-height:1.15!important;font:500 7px/1.15 'JetBrains Mono',monospace!important;letter-spacing:.10em!important;color:#5e777e!important;text-transform:uppercase!important}
-.forge-stage .hashrate-card>svg,.forge-stage .forge-shares-min>svg{display:block!important;flex:1 1 auto!important;align-self:stretch!important;width:100%!important;min-height:34px!important;height:34px!important;margin:8px 0 0!important;padding:2px 0 0!important;overflow:visible!important;transform:translateZ(2px)!important}
-.forge-stage .hashrate-card polyline,.forge-stage .forge-shares-min polyline{fill:none!important;stroke:#58ef6d!important;stroke-width:2.1!important;filter:drop-shadow(0 0 4px rgba(84,239,108,.5))!important}
-.forge-stage .hashrate-card{top:calc(50% - 151px)!important}.forge-stage .forge-shares-min{top:calc(50% + 29px)!important;transform:perspective(800px) rotateY(-12deg) rotateX(1.5deg)!important}
-@media(max-width:700px){.forge-stage .hashrate-card,.forge-stage .forge-shares-min{left:28px!important;width:174px!important;min-width:174px!important;height:120px!important;min-height:120px!important}}@media(max-width:520px){.forge-stage .hashrate-card,.forge-stage .forge-shares-min{left:18px!important;width:162px!important;min-width:162px!important;height:116px!important;min-height:116px!important;padding:13px 12px 10px 14px!important}.forge-stage .hashrate-card>span,.forge-stage .forge-shares-min>span{font-size:8px!important}.forge-stage .hashrate-card>strong,.forge-stage .forge-shares-min>strong{font-size:20px!important}.forge-stage .hashrate-card>small,.forge-stage .forge-shares-min>small{font-size:6.5px!important}.forge-stage .hashrate-card>svg,.forge-stage .forge-shares-min>svg{min-height:30px!important;height:30px!important;margin-top:7px!important}}
+/* Rear plate: this is the physical depth layer. */
+.forge-stage .hashrate-card::before,
+.forge-stage .forge-shares-min::before{
+  content:""!important; position:absolute!important; inset:0!important;
+  border-radius:14px!important; box-sizing:border-box!important;
+  pointer-events:none!important; z-index:-1!important;
+  transform:translate3d(-10px,4px,-26px)!important;
+  background:#03070a!important; border:2px solid rgba(57,255,138,.82)!important;
+  box-shadow:0 0 7px rgba(57,255,138,.32),0 0 16px rgba(57,255,138,.13)!important;
+}
 
-/* Block-candidate HUD v5: make the panel read like a network-proximity instrument, not a generic progress card. */
-.candidate{min-height:354px;display:grid;grid-template-columns:minmax(0,1.35fr) minmax(280px,.65fr);grid-template-rows:1fr auto;background:linear-gradient(145deg,rgba(4,17,23,.98),rgba(1,7,11,.99))!important}
-.candidate-left{padding:28px 30px 24px;position:relative;z-index:3;display:flex;flex-direction:column;justify-content:center}
-.candidate .section-heading{display:flex;align-items:center;gap:14px;margin-bottom:4px}.candidate .section-heading .target-icon{width:32px;height:32px;display:grid;place-items:center;border:1px solid rgba(98,245,109,.78);border-radius:50%;color:var(--green);font:700 18px var(--mono);box-shadow:0 0 18px rgba(98,245,109,.12),inset 0 0 12px rgba(98,245,109,.06)}.candidate .section-heading h2{margin:0;color:#b9d0d4;font:700 17px/1.1 var(--mono);letter-spacing:.16em}.candidate .section-heading p{margin:6px 0 0;color:#607a82;font:500 11px/1.35 var(--sans)}
-.candidate-pct{display:block;margin:27px 0 0;color:var(--green);font:800 clamp(58px,6vw,78px)/.92 var(--mono);letter-spacing:-.07em;text-shadow:0 0 32px rgba(98,245,109,.16)}.candidate .caption{display:block;margin-top:9px;color:#6c878e;font-size:9px;letter-spacing:.2em}.candidate-track{margin-top:14px;height:14px;border-color:#18515e;background:linear-gradient(180deg,#01080b,#020507);box-shadow:inset 0 2px 7px #000,0 0 14px rgba(24,224,255,.04)}.candidate-track:after{content:"NETWORK BLOCK TARGET";position:absolute;right:0;top:21px;color:#4d6971;font:600 8px var(--mono);letter-spacing:.13em}.candidate .next-height{display:flex;justify-content:space-between;align-items:center;margin-top:42px;padding-top:13px;border-top:1px solid rgba(23,63,74,.75)}.candidate .next-height>span{font-size:9px;color:#718a90}.candidate .next-height strong{font:800 22px var(--mono);color:#cfe3e6}
-.candidate-core{position:relative;min-height:0;display:grid;place-items:center;align-content:center;border-left:1px solid rgba(18,56,66,.9);background:radial-gradient(circle at 50% 44%,rgba(55,255,112,.08),transparent 36%),linear-gradient(180deg,rgba(3,17,22,.55),rgba(1,8,12,.25));overflow:hidden}.candidate-core:before{content:"";position:absolute;width:250px;height:250px;border:1px solid rgba(25,228,255,.14);border-radius:50%;box-shadow:0 0 0 22px rgba(25,228,255,.018),0 0 0 48px rgba(25,228,255,.012);animation:candidateHalo 9s linear infinite}.candidate-core small{position:relative;margin-top:8px;color:#58f16b;font:700 9px var(--mono);letter-spacing:.2em}.candidate-core b{position:relative;margin-top:6px;color:#8df69a;font:700 8px var(--mono);letter-spacing:.18em}.candidate-core .core-cube{position:relative;z-index:2;width:112px;height:112px;display:grid;place-items:center;transform:rotate(45deg);border:1px solid rgba(77,255,112,.68);background:rgba(6,39,26,.25);box-shadow:0 0 24px rgba(77,255,112,.10),inset 0 0 22px rgba(77,255,112,.05)}.candidate-core .core-cube:before,.candidate-core .core-cube:after{content:"";position:absolute;inset:15px;border:1px solid rgba(77,255,112,.32)}.candidate-core .core-cube:after{inset:29px;border-color:rgba(25,228,255,.25)}.candidate-core .core-cube span{transform:rotate(-45deg);color:#72ff8b;font:800 36px var(--mono);text-shadow:0 0 18px rgba(98,245,109,.55)}.candidate-core .core-grid{position:absolute;inset:12%;opacity:.35;background:linear-gradient(rgba(25,228,255,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(25,228,255,.08) 1px,transparent 1px);background-size:28px 28px;mask-image:radial-gradient(circle,#000 0 45%,transparent 72%)}.candidate-core .core-ring{position:absolute;border:1px solid rgba(72,255,123,.2);border-radius:50%;aspect-ratio:1}.candidate-core .ring-a{width:190px}.candidate-core .ring-b{width:225px;border-style:dashed}.candidate-core .ring-c{width:260px;border-color:rgba(25,228,255,.12)}.activity-panel{grid-column:1/-1;border-top:1px solid rgba(18,58,69,.7);padding:10px 30px;display:none}
-/* Make the language explicit without changing JS selectors/data bindings. */
-.forge-head .eyebrow{font-size:0}.forge-head .eyebrow:before{content:"LIVE SHARE FORGE  •  REALTIME PROOF OF WORK  •  NETWORK BLOCK PROXIMITY";font-size:15px;color:#9db4b9}.candidate .section-heading h2{font-size:0}.candidate .section-heading h2:after{content:"BLOCK CANDIDATE  //  NETWORK PROXIMITY";font-size:17px}.candidate .section-heading p{font-size:0}.candidate .section-heading p:after{content:"Best submitted share measured against the current network block target.";font-size:11px}
-@keyframes candidateHalo{to{transform:rotate(360deg)}}
-@media(max-width:900px){.candidate{grid-template-columns:1fr;grid-template-rows:auto auto}.candidate-core{min-height:280px;border-left:0;border-top:1px solid rgba(18,56,66,.9)}.candidate-left{padding:25px 24px}.candidate-pct{font-size:clamp(54px,11vw,74px)}.forge-head .eyebrow:before{font-size:10px}.candidate .section-heading h2:after{font-size:14px}}
-@media(max-width:620px){.candidate .section-heading h2:after{font-size:12px}.candidate .section-heading p:after{font-size:10px}.candidate-pct{margin-top:22px}.candidate .next-height{margin-top:36px}.candidate-core:before{width:210px;height:210px}.candidate-core .ring-a{width:160px}.candidate-core .ring-b{width:190px}.candidate-core .ring-c{width:220px}.candidate-core .core-cube{width:92px;height:92px}.candidate-core .core-cube span{font-size:30px}}
+/* Soft right thumb/rim, matching the reference card construction. */
+.forge-stage .hashrate-card::after,
+.forge-stage .forge-shares-min::after{
+  content:""!important; position:absolute!important;
+  top:6px!important; bottom:6px!important; right:-7px!important; width:14px!important;
+  border-radius:0 12px 12px 0!important; pointer-events:none!important;
+  z-index:-1!important; filter:blur(.3px)!important; opacity:.95!important;
+  background:linear-gradient(90deg,#39ff8a 0%,#1a8a4e 55%,transparent 100%)!important;
+  box-shadow:2px 0 8px rgba(57,255,138,.52),4px 0 16px rgba(57,255,138,.22)!important;
+}
+
+/* True depth hierarchy: label/value/graph sit above the card plane. */
+.forge-stage .hashrate-card>span,
+.forge-stage .forge-shares-min>span{
+  display:block!important; width:100%!important; margin:0 0 4px!important; padding:0!important;
+  color:#8aa0aa!important; font:600 8px/1.15 'JetBrains Mono',monospace!important;
+  letter-spacing:.15em!important; text-align:left!important; white-space:nowrap!important;
+  transform:translateZ(11px)!important;
+}
+.forge-stage .hashrate-card>strong,
+.forge-stage .forge-shares-min>strong{
+  display:block!important; width:100%!important; margin:0!important; padding:0!important;
+  color:#e9f8fa!important; font:700 20px/1.05 'JetBrains Mono',monospace!important;
+  letter-spacing:-.025em!important; text-align:left!important; white-space:nowrap!important;
+  text-shadow:0 0 10px rgba(220,250,255,.12)!important; transform:translateZ(18px)!important;
+}
+.forge-stage .hashrate-card>small,
+.forge-stage .forge-shares-min>small{
+  display:block!important; width:100%!important; margin:4px 0 0!important; padding:0!important;
+  color:#5e777e!important; font:500 6.5px/1.15 'JetBrains Mono',monospace!important;
+  letter-spacing:.09em!important; text-align:left!important; white-space:nowrap!important;
+  text-transform:uppercase!important; transform:translateZ(8px)!important;
+}
+.forge-stage .hashrate-card>svg,
+.forge-stage .forge-shares-min>svg{
+  display:block!important; width:100%!important; height:28px!important; min-height:28px!important;
+  margin:6px 0 0!important; padding:0!important; overflow:visible!important;
+  transform:translateZ(10px)!important;
+}
+.forge-stage .hashrate-card polyline,
+.forge-stage .forge-shares-min polyline{
+  fill:none!important; stroke:#58ef6d!important; stroke-width:2.1!important;
+  filter:drop-shadow(0 0 4px rgba(84,239,108,.5))!important;
+}
+
+@media(max-width:900px){
+  .forge-stage .hashrate-card,.forge-stage .forge-shares-min{
+    left:18px!important; width:158px!important; min-width:158px!important;
+    height:104px!important; min-height:104px!important; padding:10px 10px 8px 12px!important;
+  }
+  .forge-stage .hashrate-card{top:27px!important}
+  .forge-stage .forge-shares-min{top:141px!important}
+}
+@media(max-width:620px){
+  .forge-stage .hashrate-card,.forge-stage .forge-shares-min{
+    left:14px!important; width:148px!important; min-width:148px!important;
+    height:98px!important; min-height:98px!important; padding:9px 9px 7px 11px!important;
+  }
+  .forge-stage .hashrate-card{top:22px!important}
+  .forge-stage .forge-shares-min{top:125px!important}
+  .forge-stage .hashrate-card>span,.forge-stage .forge-shares-min>span{font-size:7px!important}
+  .forge-stage .hashrate-card>strong,.forge-stage .forge-shares-min>strong{font-size:18px!important}
+  .forge-stage .hashrate-card>small,.forge-stage .forge-shares-min>small{font-size:6px!important}
+  .forge-stage .hashrate-card>svg,.forge-stage .forge-shares-min>svg{height:25px!important;min-height:25px!important;margin-top:5px!important}
+}
+@media(prefers-reduced-motion:reduce){
+  .forge-stage .hashrate-card,.forge-stage .forge-shares-min{
+    transform:perspective(760px) rotateY(-18deg) rotateX(2deg)!important; will-change:auto!important;
+  }
+}
