@@ -1,45 +1,65 @@
-/* v4.4: center the mirrored left forge metrics around the forge midpoint.
-   Keep the live graphs and mirrored 3D treatment; only correct the vertical geometry. */
-
-.forge-stage .hashrate-card {
+/* v4.5: mirrored forge metrics — the cards face the FIXCORE in the center.
+   The live graphs remain untouched; only geometry, bevel direction and polish change. */
+.forge-stage .hashrate-card,
+.forge-stage .forge-shares-min {
   left: 32px !important;
   right: auto !important;
+  width: 176px !important;
+  min-height: 145px !important;
+  border: 1px solid rgba(25,217,255,.42) !important;
+  background: linear-gradient(135deg, rgba(5,15,19,.96), rgba(2,9,12,.92)) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(25,217,255,.08),
+    inset -12px 0 24px rgba(25,217,255,.045),
+    0 0 10px rgba(25,217,255,.18),
+    0 0 28px rgba(25,217,255,.08),
+    0 16px 28px rgba(0,0,0,.38) !important;
+  transform: perspective(760px) rotateY(18deg) rotateX(2deg) !important;
+  transform-origin: center center !important;
+  transform-style: preserve-3d !important;
+}
+
+.forge-stage .hashrate-card {
   top: calc(50% - 151px) !important;
 }
 
 .forge-stage .forge-shares-min {
-  left: 32px !important;
-  right: auto !important;
   top: calc(50% + 29px) !important;
+  transform: perspective(760px) rotateY(18deg) rotateX(1.5deg) !important;
 }
 
-/* Keep the left-side bevel genuinely mirrored: depth extends toward the
-   outside/left instead of creating a second plate toward the forge core. */
+/* Mirrored depth: the extra plate points inward, toward FIXCORE. */
 .forge-stage .hashrate-card::before,
 .forge-stage .forge-shares-min::before {
-  transform: translate3d(-12px, 3px, -28px) !important;
+  transform: translate3d(12px, 3px, -28px) !important;
+  border-color: rgba(25,217,255,.55) !important;
+  box-shadow: 0 0 8px rgba(25,217,255,.22), 0 0 18px rgba(25,217,255,.10) !important;
+}
+
+.forge-stage .hashrate-card::after,
+.forge-stage .forge-shares-min::after {
+  content: "" !important;
+  position: absolute !important;
+  top: 12px !important;
+  right: -5px !important;
+  bottom: 12px !important;
+  width: 5px !important;
+  border-radius: 0 8px 8px 0 !important;
+  background: linear-gradient(180deg, rgba(25,217,255,.7), rgba(25,217,255,.12), transparent) !important;
+  box-shadow: 0 0 12px rgba(25,217,255,.28) !important;
+  pointer-events: none !important;
 }
 
 @media (max-width: 700px) {
-  .forge-stage .hashrate-card {
-    left: 32px !important;
-    top: calc(50% - 151px) !important;
-  }
-
-  .forge-stage .forge-shares-min {
-    left: 32px !important;
-    top: calc(50% + 29px) !important;
-  }
+  .forge-stage .hashrate-card,
+  .forge-stage .forge-shares-min { left: 28px !important; width: 166px !important; }
+  .forge-stage .hashrate-card { top: calc(50% - 146px) !important; }
+  .forge-stage .forge-shares-min { top: calc(50% + 26px) !important; }
 }
 
 @media (max-width: 520px) {
-  .forge-stage .hashrate-card {
-    left: 20px !important;
-    top: calc(50% - 139px) !important;
-  }
-
-  .forge-stage .forge-shares-min {
-    left: 20px !important;
-    top: calc(50% + 25px) !important;
-  }
+  .forge-stage .hashrate-card,
+  .forge-stage .forge-shares-min { left: 18px !important; width: 154px !important; }
+  .forge-stage .hashrate-card { top: calc(50% - 136px) !important; }
+  .forge-stage .forge-shares-min { top: calc(50% + 24px) !important; }
 }
