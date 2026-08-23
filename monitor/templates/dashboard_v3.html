@@ -5,8 +5,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#02080d">
 <title>FixedCoin · Solo Mining</title>
-<link rel="stylesheet" href="/static/dashboard_v4.css?v=20260823-2">
-<link rel="stylesheet" href="/static/dashboard_reference.css?v=20260823-1">
+<link rel="stylesheet" href="/static/dashboard_v4.css?v=20260823-3">
+<link rel="stylesheet" href="/static/dashboard_reference.css?v=20260823-2">
+<link rel="stylesheet" href="/static/dashboard_3d_cards.css?v=20260823-1">
 </head>
 <body>
 <div class="scanlines"></div><div class="ambient ambient-a"></div><div class="ambient ambient-b"></div>
@@ -22,7 +23,7 @@
 </section>
 <section class="forge panel" id="forge">
 <div class="forge-head"><span class="eyebrow">LIVE SHARE FORGE <i>•</i> REALTIME PROOF OF WORK</span><div class="live"><i></i> STRATUM LIVE</div></div>
-<div class="forge-stage">
+<div class="forge-stage" id="forgeStage">
 <div class="mine-metric"><span>HASHRATE</span><strong id="forgeHashrate">—</strong><small>5M WINDOW</small><svg viewBox="0 0 180 45" preserveAspectRatio="none"><polyline id="hashSpark" points="0,38 18,30 36,34 54,18 72,28 90,14 108,24 126,10 144,20 162,12 180,16"/></svg></div>
 <div class="miner-wrap" id="minerWrap" aria-label="Animated FIX-ASIC miner"><div class="miner-glow"></div><div class="miner"><div class="antenna"></div><div class="miner-top"><i></i><i></i><i></i></div><div class="miner-body"><div class="miner-label">FIX-ASIC</div><div class="miner-slots"><i></i><i></i><i></i><i></i><i></i></div></div><div class="leg leg-a"></div><div class="leg leg-b"></div><div class="foot foot-a"></div><div class="foot foot-b"></div><div class="arm"><div class="hammer-handle"></div><div class="hammer-head"></div></div></div></div>
 <div class="anvil"><div class="anvil-top">F</div><div class="anvil-neck"></div><div class="anvil-base"></div><span>FIXCOIN</span></div><div class="impact"></div><div class="sparks" id="sparks"></div>
@@ -32,4 +33,4 @@
 <section class="candidate panel"><div class="candidate-left"><div class="section-title"><span class="target-icon">◎</span><div><h2>BLOCK CANDIDATE</h2><p>Best Share vs Network Difficulty</p></div></div><strong class="candidate-pct" id="candidatePct">0.000%</strong><span class="candidate-caption">PROGRESS TO BLOCK</span><div class="candidate-meter"><i id="candidateMeter"></i></div><div class="candidate-height"><span>BLOCK HEIGHT (NEXT)</span><strong id="nextHeight">#—</strong></div></div><div class="candidate-core" id="candidateCore"><div class="core-ring r1"></div><div class="core-ring r2"></div><div class="core-ring r3"></div><div class="cube">F</div><span>BLOCK</span></div><div class="activity"><div class="section-title compact"><h2>RECENT ACTIVITY</h2></div><div id="activityList"><div class="activity-row empty">Waiting for live shares…</div></div></div></section>
 <section class="stats-grid"><div class="stat panel"><span>AVG. SHARE DIFFICULTY</span><strong id="avgDiff">—</strong><small>(Last 10 min)</small><svg viewBox="0 0 180 36"><polyline id="avgSpark" points="0,28 20,24 40,26 60,18 80,22 100,12 120,19 140,11 160,16 180,8"/></svg></div><div class="stat panel"><span>SHARES / MIN</span><strong id="sharesMin">—</strong><small>(Last 10 min)</small><svg viewBox="0 0 180 36"><polyline id="shareSpark" points="0,29 20,28 40,25 60,27 80,19 100,21 120,15 140,17 160,10 180,13"/></svg></div><div class="stat panel"><span>VALID SHARES</span><strong id="validShares">0</strong><small id="validPct">0.0%</small></div><div class="stat panel"><span>INVALID SHARES</span><strong class="red" id="invalidShares">0</strong><small id="invalidPct">0.0%</small></div><div class="stat panel"><span>EST. TIME TO BLOCK</span><strong id="eta">—</strong><small>(At current rate)</small></div></section>
 <footer class="footer"><strong>FIXEDCOIN SOLO MINER</strong><span>UPTIME <b id="uptime">—</b></span><span>CONNECTED PEERS <b id="peers">—</b></span><span>NETWORK DIFFICULTY <b id="footerDiff">—</b></span><span>VERSION <b>v29.1.3</b></span></footer>
-</main><script defer src="/static/dashboard_v4.js?v=20260823-2"></script></body></html>
+</main><script defer src="/static/dashboard_v4.js?v=20260823-3"></script><script defer src="/static/dashboard_3d_cards.js?v=20260823-1"></script></body></html>
