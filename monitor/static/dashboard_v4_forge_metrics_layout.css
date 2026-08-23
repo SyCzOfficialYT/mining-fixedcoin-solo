@@ -12,3 +12,96 @@
 @keyframes candidateHalo{to{transform:rotate(360deg)}}
 @media(max-width:900px){.candidate{grid-template-columns:1fr;grid-template-rows:auto auto}.candidate-core{min-height:280px;border-left:0;border-top:1px solid rgba(18,56,66,.9)}.candidate-left{padding:25px 24px}.candidate-pct{font-size:clamp(54px,11vw,74px)}.forge-head .eyebrow:before{font-size:10px}.candidate .section-heading h2:after{font-size:14px}}
 @media(max-width:620px){.candidate .section-heading h2:after{font-size:12px}.candidate .section-heading p:after{font-size:10px}.candidate-pct{margin-top:22px}.candidate .next-height{margin-top:36px}.candidate-core:before{width:210px;height:210px}.candidate-core .ring-a{width:160px}.candidate-core .ring-b{width:190px}.candidate-core .ring-c{width:220px}.candidate-core .core-cube{width:92px;height:92px}.candidate-core .core-cube span{font-size:30px}}
+
+/* v4.10: transparent candidate deck and calmer, more legible Forge instruments. */
+#candidate.candidate{
+  background:transparent!important;
+  box-shadow:none!important;
+  backdrop-filter:none!important;
+  border-color:rgba(25,93,105,.74)!important;
+}
+#candidate.candidate:before{display:none!important}
+#candidate .candidate-left{background:transparent!important}
+#candidate .candidate-core{
+  background:transparent!important;
+  border-left-color:rgba(22,82,92,.48)!important;
+}
+#candidate .candidate-core:before{opacity:.62}
+
+/* The four live counters share one quiet glass treatment, while the live state
+   stays visible through the value, icon and a thin semantic accent. */
+.forge-stage .hashrate-card,.forge-stage .forge-shares-min,
+.forge-stage .forge-counter.accepted,.forge-stage .forge-counter.rejected{
+  border:1px solid rgba(57,117,127,.62)!important;
+  border-radius:12px!important;
+  background:linear-gradient(135deg,rgba(3,15,19,.78),rgba(2,10,14,.52))!important;
+  box-shadow:inset 0 1px 0 rgba(178,247,255,.055),0 12px 28px rgba(0,0,0,.25)!important;
+  backdrop-filter:blur(8px)!important;
+}
+.forge-stage .hashrate-card::after,.forge-stage .forge-shares-min::after,
+.forge-stage .forge-counter.accepted::after,.forge-stage .forge-counter.rejected::after{
+  content:""!important;position:absolute!important;left:13px!important;right:13px!important;top:9px!important;height:1px!important;
+  background:linear-gradient(90deg,transparent,rgba(92,218,232,.3),transparent)!important;
+}
+.forge-stage .hashrate-card,.forge-stage .forge-shares-min{
+  width:208px!important;min-height:142px!important;padding:16px 17px 13px!important;
+  transform:perspective(900px) rotateY(9deg) rotateX(1deg)!important;
+}
+.forge-stage .hashrate-card>span,.forge-stage .forge-shares-min>span{
+  color:#91abb1!important;font-size:9px!important;letter-spacing:.17em!important;
+}
+.forge-stage .hashrate-card>strong,.forge-stage .forge-shares-min>strong{
+  color:#effcff!important;font-size:26px!important;letter-spacing:-.05em!important;
+}
+.forge-stage .hashrate-card>small,.forge-stage .forge-shares-min>small{color:#668087!important}
+.forge-stage .hashrate-card>svg,.forge-stage .forge-shares-min>svg{margin-top:10px!important;height:39px!important;min-height:39px!important}
+
+.forge-stage .forge-counter.accepted,.forge-stage .forge-counter.rejected{
+  width:234px!important;min-height:120px!important;padding:17px 18px!important;
+  transform:perspective(900px) rotateY(-9deg) rotateX(1deg)!important;
+}
+.forge-stage .forge-counter.accepted{border-color:rgba(69,182,103,.68)!important}
+.forge-stage .forge-counter.rejected{border-color:rgba(190,71,79,.62)!important}
+.forge-stage .forge-counter.accepted>span:first-child,.forge-stage .forge-counter.rejected>span:first-child{
+  color:#91a8ad!important;font-size:9px!important;letter-spacing:.15em!important;
+}
+.forge-stage .forge-counter.accepted>strong,.forge-stage .forge-counter.rejected>strong{
+  margin-top:9px!important;font-size:38px!important;letter-spacing:-.06em!important;
+}
+.forge-stage .forge-counter.accepted>strong{color:#63f38b!important;text-shadow:0 0 16px rgba(77,255,112,.18)!important}
+.forge-stage .forge-counter.rejected>strong{color:#ff7380!important;text-shadow:0 0 16px rgba(255,78,78,.14)!important}
+.forge-stage .forge-counter.accepted>b,.forge-stage .forge-counter.rejected>b{color:#789197!important}
+.forge-stage .forge-counter.accepted>i,.forge-stage .forge-counter.rejected>i{
+  width:46px!important;height:46px!important;right:17px!important;
+  background:rgba(1,9,12,.42)!important;box-shadow:inset 0 0 16px rgba(0,0,0,.24)!important;
+}
+.forge-stage .forge-counter.accepted>i{color:#75ed96!important;border-color:rgba(77,255,112,.52)!important}
+.forge-stage .forge-counter.rejected>i{color:#ff7a84!important;border-color:rgba(255,78,78,.5)!important}
+
+@media(max-width:700px){
+  .forge-stage .hashrate-card,.forge-stage .forge-shares-min{width:174px!important}
+  .forge-stage .forge-counter.accepted,.forge-stage .forge-counter.rejected{width:188px!important}
+}
+
+/* The share-flight layer addresses the counters through #forgeStage.  Repeat
+   the calm resting state at that specificity; event classes still add impact. */
+#forgeStage .hashrate-card,#forgeStage .forge-shares-min,
+#forgeStage .forge-counter.accepted,#forgeStage .forge-counter.rejected{
+  border-width:1px!important;
+  box-shadow:inset 0 1px 0 rgba(178,247,255,.055),0 12px 28px rgba(0,0,0,.25)!important;
+}
+#forgeStage .hashrate-card::before,#forgeStage .forge-shares-min::before,
+#forgeStage .forge-counter.accepted::before,#forgeStage .forge-counter.rejected::before{
+  border:0!important;box-shadow:none!important;
+}
+#forgeStage .hashrate-card::after,#forgeStage .forge-shares-min::after,
+#forgeStage .forge-counter.accepted::after,#forgeStage .forge-counter.rejected::after{
+  content:""!important;position:absolute!important;left:13px!important;right:13px!important;top:9px!important;height:1px!important;
+  background:linear-gradient(90deg,transparent,rgba(92,218,232,.3),transparent)!important;
+}
+#forgeStage .forge-counter.accepted{border-color:rgba(69,182,103,.68)!important}
+#forgeStage .forge-counter.rejected{border-color:rgba(190,71,79,.62)!important}
+#forgeStage .forge-counter.accepted>strong{color:#63f38b!important;text-shadow:0 0 16px rgba(77,255,112,.18)!important}
+#forgeStage .forge-counter.rejected>strong{color:#ff7380!important;text-shadow:0 0 16px rgba(255,78,78,.14)!important}
+#forgeStage .forge-counter.accepted>b,#forgeStage .forge-counter.rejected>b{color:#789197!important}
+#forgeStage .forge-counter.accepted>i,#forgeStage .forge-counter.rejected>i{box-shadow:inset 0 0 16px rgba(0,0,0,.24)!important}
