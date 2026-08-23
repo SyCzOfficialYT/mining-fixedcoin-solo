@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
-if(window.__FIXEDCOIN_FORGE_COLLISION_V6__) return;
-window.__FIXEDCOIN_FORGE_COLLISION_V6__=true;
+if(window.__FIXEDCOIN_FORGE_COLLISION_V7__) return;
+window.__FIXEDCOIN_FORGE_COLLISION_V7__=true;
 const forge=document.getElementById('forge');
 const stage=document.getElementById('forgeStage');
 const core=document.getElementById('forgeCore');
@@ -16,9 +16,7 @@ const bezier=(a,c,b,t)=>{const u=1-t;return{x:u*u*a.x+2*u*t*c.x+t*t*b.x,y:u*u*a.
 let layer=stage.querySelector('.collision-field');
 if(!layer){layer=document.createElement('div');layer.className='collision-field';layer.setAttribute('aria-hidden','true');stage.appendChild(layer)}
 
-/* Each arriving comet owns exactly one neon hit. Hits are queued, but the queue
-   is intentionally drained very quickly so the card reads as BAM-BAM-BAM-BAM,
-   with a real dark gap between every impact. */
+/* Per-particle neon: a hard, short strobe with a real dark interval. */
 const pulseState={accept:{busy:false,queue:0},reject:{busy:false,queue:0}};
 function pulseCounter(kind){
   const card=stage.querySelector(kind==='accept'?'.forge-counter.accepted':'.forge-counter.rejected');
@@ -31,14 +29,15 @@ function pulseCounter(kind){
     pulseState[kind].queue--;
     const id=String(Number(card.dataset.collisionPulse||0)+1);
     card.dataset.collisionPulse=id;
-    card.style.setProperty('--collision-alpha',(0.94+Math.random()*0.06).toFixed(3));
+    card.style.setProperty('--collision-alpha',(0.96+Math.random()*0.04).toFixed(3));
     card.classList.remove('collision-pulse','collision-active');
     void card.offsetWidth;
     card.classList.add('collision-pulse','collision-active');
     window.setTimeout(()=>{
       if(card.dataset.collisionPulse===id){card.classList.remove('collision-pulse','collision-active');card.style.removeProperty('--collision-alpha')}
-      window.setTimeout(step,55);
-    },125);
+      /* 38ms true-dark gap before the next impact. */
+      window.setTimeout(step,38);
+    },82);
   };
   step();
 }
@@ -46,9 +45,9 @@ function impactRing(kind,x,y){
   const ring=document.createElement('i');ring.className=`collision-hit-ring ${kind}`;ring.style.left=`${x}px`;ring.style.top=`${y}px`;layer.appendChild(ring);
   const anim=ring.animate([
     {transform:'translate(-50%,-50%) scale(.18)',opacity:1},
-    {transform:'translate(-50%,-50%) scale(1.35)',opacity:.72,offset:.25},
-    {transform:'translate(-50%,-50%) scale(3.5)',opacity:0}
-  ],{duration:480,easing:'cubic-bezier(.16,1,.3,1)',fill:'forwards'});
+    {transform:'translate(-50%,-50%) scale(1.25)',opacity:.7,offset:.22},
+    {transform:'translate(-50%,-50%) scale(3.2)',opacity:0}
+  ],{duration:360,easing:'cubic-bezier(.16,1,.3,1)',fill:'forwards'});
   anim.finished.then(()=>ring.remove()).catch(()=>ring.remove());
 }
 function addEventParticle(kind,index,total){
@@ -60,8 +59,9 @@ function addEventParticle(kind,index,total){
   const size=3.4+Math.random()*4.6;el.style.width=`${size}px`;el.style.height=`${size}px`;
   el.style.setProperty('--tail-size',`${12+Math.random()*15}px`);
   layer.appendChild(el);
-  const duration=(kind==='accept'?2050:1920)*(0.95+Math.random()*.10);
-  const delay=index*105+Math.random()*28;
+  /* Readable but brisk flight, with impacts arriving in a tight visible chain. */
+  const duration=(kind==='accept'?1820:1720)*(0.95+Math.random()*.10);
+  const delay=index*92+Math.random()*18;
   const points=[0,.05,.11,.19,.29,.4,.52,.64,.74,.83,.9,.96,1].map(t=>{const p=bezier(a,control,b,t),s=Math.sin(Math.PI*t);return{x:p.x+nx*spread*s,y:p.y+ny*spread*s}});
   const frames=points.map((p,i)=>({transform:`translate3d(${p.x}px,${p.y}px,0) scale(${i===0?.2:i===1?.7:i>=points.length-2?1.45:1})`,opacity:i===0?0:i===1?.82:i>=points.length-2?1:.9}));
   const anim=el.animate(frames,{duration,delay,easing:'cubic-bezier(.17,.73,.16,1)',fill:'forwards'});
