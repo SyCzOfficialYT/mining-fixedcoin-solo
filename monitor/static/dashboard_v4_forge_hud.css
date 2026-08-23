@@ -1,0 +1,9 @@
+/* v4.4 reference HUD positioning: match the supplied mobile forge composition. */
+.forge-vardiff{position:absolute;left:50%;top:7%;transform:translateX(-50%);min-width:192px;height:69px;display:grid;place-items:center;padding:8px 18px;border:1px solid rgba(230,246,248,.8);border-radius:2px;background:rgba(0,5,9,.96);color:#f4f8fa;font:500 38px/1 var(--sans);letter-spacing:-.04em;z-index:58;box-shadow:0 0 0 1px rgba(255,255,255,.05) inset,0 12px 28px rgba(0,0,0,.28);pointer-events:none}
+.accept-stream{right:16.5%;top:53%;z-index:46}
+.reject-stream{right:19.5%;top:65.5%;z-index:46}
+.accepted{right:12px;top:21px;z-index:48}
+.rejected{right:12px;bottom:19px;z-index:48}
+.forge-shares-min{left:30px;top:184px;z-index:55}
+@media(max-width:900px){.forge-vardiff{top:7%;min-width:192px;height:69px}.accept-stream{right:16%;top:53%}.reject-stream{right:19%;top:65.5%}.accepted{right:12px;top:21px}.rejected{right:12px;bottom:19px}.forge-shares-min{left:18px;top:178px}}
+@media(max-width:620px){.forge-vardiff{top:7%;min-width:192px;width:192px;height:69px;padding:8px 14px;font-size:37px}.accept-stream{right:14%;top:53%}.reject-stream{right:17%;top:65.5%}.accepted{right:12px;top:21px}.rejected{right:12px;bottom:19px}.forge-shares-min{left:12px;top:172px}}
