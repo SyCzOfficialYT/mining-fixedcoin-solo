@@ -5,7 +5,7 @@ import re
 
 HTML = Path('/app/monitor/templates/dashboard_v4.html')
 html = HTML.read_text()
-VERSION = '20260823-11'
+VERSION = '20260823-12'
 COLLISION_CSS = f'<link rel="stylesheet" href="/static/dashboard_v4_forge_collision.css?v={VERSION}">'
 COLLISION_JS = f'<script defer src="/static/dashboard_v4_forge_collision.js?v={VERSION}"></script>'
 HUD_CSS = f'<link rel="stylesheet" href="/static/dashboard_v4_forge_hud_match.css?v={VERSION}">'
@@ -14,10 +14,13 @@ REFERENCE_CSS = f'<link rel="stylesheet" href="/static/dashboard_v4_forge_refere
 # Remove legacy burst renderer: it conflicts with true per-particle impacts.
 html = re.sub(r'<script[^>]+/static/dashboard_v4_share_impact\.js\?v=[^>]+></script>', '', html)
 # Remove prior final-layer includes regardless of cache-buster.
-html = re.sub(r'<link rel="stylesheet" href="/static/dashboard_v4_forge_collision\.css\?v=[^"]+">', '', html)
-html = re.sub(r'<script[^>]+dashboard_v4_forge_collision\.js\?v=[^>]+></script>', '', html)
-html = re.sub(r'<link rel="stylesheet" href="/static/dashboard_v4_forge_hud_match\.css\?v=[^"]+">', '', html)
-html = re.sub(r'<link rel="stylesheet" href="/static/dashboard_v4_forge_reference_final\.css\?v=[^"]+">', '', html)
+for pattern in (
+    r'<link rel="stylesheet" href="/static/dashboard_v4_forge_collision\.css\?v=[^"]+">',
+    r'<script[^>]+dashboard_v4_forge_collision\.js\?v=[^>]+></script>',
+    r'<link rel="stylesheet" href="/static/dashboard_v4_forge_hud_match\.css\?v=[^"]+">',
+    r'<link rel="stylesheet" href="/static/dashboard_v4_forge_reference_final\.css\?v=[^"]+">',
+):
+    html = re.sub(pattern, '', html)
 
 anchor_match = re.search(r'<link rel="stylesheet" href="/static/dashboard_v4_forge_metrics_layout\.css\?v=[^"]+">', html)
 if not anchor_match:
@@ -48,4 +51,4 @@ if '/static/dashboard_v4_share_impact.js?' in html:
     raise RuntimeError('legacy share-impact JS is still included; refusing to build conflicting particle engines')
 
 HTML.write_text(html)
-print('dashboard Forge reference geometry applied: left/right instruments, bounded mountains, centered VarDiff, lower command deck, and per-particle collision layer')
+print('dashboard Forge reference match applied: side instruments, centered VarDiff, contained mountains, lower candidate command deck, and per-particle collision layer')
