@@ -1,4 +1,4 @@
-/* v4.7: readable mirrored forge metrics — typography gets its own space; graphs stay intact. */
+/* v4.8: centered forge metrics — clean cyber HUD typography with live sparklines. */
 .forge-stage .hashrate-card,
 .forge-stage .forge-shares-min {
   left: 32px !important;
@@ -8,9 +8,11 @@
   padding: 15px 15px 12px !important;
   display: flex !important;
   flex-direction: column !important;
-  align-items: stretch !important;
+  align-items: center !important;
   justify-content: flex-start !important;
   overflow: visible !important;
+  box-sizing: border-box !important;
+  text-align: center !important;
   border: 1px solid rgba(25,217,255,.48) !important;
   background: linear-gradient(135deg, rgba(5,15,19,.97), rgba(2,9,12,.94)) !important;
   box-shadow:
@@ -24,18 +26,20 @@
   transform-style: preserve-3d !important;
 }
 
-/* Keep the information block together and away from the graph. */
+/* Centered information hierarchy, matching the reference HUD. */
 .forge-stage .hashrate-card > span,
 .forge-stage .forge-shares-min > span {
   display: block !important;
   flex: 0 0 auto !important;
-  margin: 0 0 6px !important;
+  width: 100% !important;
+  margin: 0 0 7px !important;
   padding: 0 !important;
   line-height: 1.15 !important;
   font-size: 10px !important;
   font-weight: 600 !important;
   letter-spacing: .16em !important;
   white-space: nowrap !important;
+  text-align: center !important;
   color: #9ab2b8 !important;
 }
 
@@ -43,6 +47,7 @@
 .forge-stage .forge-shares-min > strong {
   display: block !important;
   flex: 0 0 auto !important;
+  width: 100% !important;
   margin: 0 !important;
   padding: 0 !important;
   line-height: 1.05 !important;
@@ -50,6 +55,7 @@
   font-weight: 700 !important;
   letter-spacing: -.025em !important;
   white-space: nowrap !important;
+  text-align: center !important;
   color: #e9f8fa !important;
   text-shadow: 0 0 8px rgba(220,250,255,.12) !important;
 }
@@ -58,6 +64,7 @@
 .forge-stage .forge-shares-min > small {
   display: block !important;
   flex: 0 0 auto !important;
+  width: 100% !important;
   margin: 8px 0 0 !important;
   padding: 0 !important;
   line-height: 1.15 !important;
@@ -65,11 +72,12 @@
   font-weight: 500 !important;
   letter-spacing: .12em !important;
   white-space: nowrap !important;
+  text-align: center !important;
   color: #67828a !important;
   text-transform: uppercase !important;
 }
 
-/* The graph is deliberately separated from the text block and remains live. */
+/* The graph stays live, centered, and visually separated from the text. */
 .forge-stage .hashrate-card > svg,
 .forge-stage .forge-shares-min > svg {
   display: block !important;
@@ -77,7 +85,7 @@
   width: 100% !important;
   min-height: 42px !important;
   height: 42px !important;
-  margin: 10px 0 0 !important;
+  margin: 10px auto 0 !important;
   padding: 4px 0 0 !important;
   overflow: visible !important;
 }
@@ -127,8 +135,6 @@
     left: 28px !important;
     width: 174px !important;
   }
-  .forge-stage .hashrate-card { top: calc(50% - 146px) !important; }
-  .forge-stage .forge-shares-min { top: calc(50% + 26px) !important; }
 }
 
 @media (max-width: 520px) {
@@ -151,6 +157,4 @@
     height: 38px !important;
     margin-top: 8px !important;
   }
-  .forge-stage .hashrate-card { top: calc(50% - 136px) !important; }
-  .forge-stage .forge-shares-min { top: calc(50% + 24px) !important; }
 }
