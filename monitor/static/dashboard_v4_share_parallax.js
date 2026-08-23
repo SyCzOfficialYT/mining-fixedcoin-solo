@@ -1,7 +1,7 @@
 (() => {
   'use strict';
-  if (window.__FIXEDCOIN_SHARE_PARALLAX_V8__) return;
-  window.__FIXEDCOIN_SHARE_PARALLAX_V8__ = true;
+  if (window.__FIXEDCOIN_SHARE_PARALLAX_V9__) return;
+  window.__FIXEDCOIN_SHARE_PARALLAX_V9__ = true;
 
   const stage = document.getElementById('forgeStage');
   if (!stage) return;
@@ -24,18 +24,18 @@
       c.style.setProperty('--px', px);
       c.style.setProperty('--py', py);
     }
-    if (Math.abs(tx - cx) > 0.015 || Math.abs(ty - cy) > 0.015)
+    if (Math.abs(tx - cx) > 0.02 || Math.abs(ty - cy) > 0.02)
       raf = requestAnimationFrame(render);
   };
   const go = () => { if (!raf) raf = requestAnimationFrame(render); };
-  const set = (x, y) => { tx = clamp(x, -3, 3); ty = clamp(y, -2, 2); go(); };
+  const set = (x, y) => { tx = clamp(x, -5, 5); ty = clamp(y, -3, 3); go(); };
 
   const pointer = (x, y) => {
     const r = stage.getBoundingClientRect();
     if (!r.width || !r.height) return;
     const nx = clamp(((x - r.left) / r.width) * 2 - 1, -1, 1);
     const ny = clamp(((y - r.top) / r.height) * 2 - 1, -1, 1);
-    set(-nx * 3, -ny * 2);
+    set(-nx * 5, -ny * 3);
   };
 
   stage.addEventListener('pointermove', e => pointer(e.clientX, e.clientY), { passive: true });

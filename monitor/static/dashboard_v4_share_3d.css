@@ -37,94 +37,89 @@
 
 .forge-counter.accepted,
 #forgeStage .forge-counter.accepted {
-  right: 36px !important;
+  right: 40px !important;
   left: auto !important;
   top: 34px !important;
   bottom: auto !important;
-  transform: perspective(900px) rotateY(calc(-12deg + var(--px, 0deg))) rotateX(calc(2deg + var(--py, 0deg))) !important;
-  border: 2.5px solid var(--share3d-green) !important;
+  transform: perspective(850px) rotateY(calc(-14deg + var(--px, 0deg))) rotateX(calc(3deg + var(--py, 0deg))) !important;
+  border: 2px solid var(--share3d-green) !important;
   box-shadow:
-    inset 0 0 0 1px rgba(57, 255, 138, 0.4),
-    inset 0 0 12px rgba(57, 255, 138, 0.1),
-    0 0 0 1px rgba(57, 255, 138, 0.35),
-    0 0 8px 1px rgba(57, 255, 138, 0.7),
-    0 0 20px 3px rgba(57, 255, 138, 0.35),
-    0 0 40px 5px rgba(57, 255, 138, 0.14),
-    5px 8px 18px rgba(0, 0, 0, 0.5) !important;
+    inset 0 0 0 1px rgba(57, 255, 138, 0.25),
+    0 0 10px rgba(57, 255, 138, 0.55),
+    0 0 28px rgba(57, 255, 138, 0.22),
+    4px 8px 18px rgba(0, 0, 0, 0.55) !important;
 }
 
 .forge-counter.rejected,
 #forgeStage .forge-counter.rejected {
-  right: 36px !important;
+  right: 40px !important;
   left: auto !important;
   top: 128px !important;
   bottom: auto !important;
-  transform: perspective(900px) rotateY(calc(-12deg + var(--px, 0deg))) rotateX(calc(1.5deg + var(--py, 0deg))) !important;
-  border: 2.5px solid var(--share3d-red) !important;
+  transform: perspective(850px) rotateY(calc(-14deg + var(--px, 0deg))) rotateX(calc(2.5deg + var(--py, 0deg))) !important;
+  border: 2px solid var(--share3d-red) !important;
   box-shadow:
-    inset 0 0 0 1px rgba(255, 68, 85, 0.4),
-    inset 0 0 12px rgba(255, 68, 85, 0.1),
-    0 0 0 1px rgba(255, 68, 85, 0.35),
-    0 0 8px 1px rgba(255, 68, 85, 0.7),
-    0 0 20px 3px rgba(255, 68, 85, 0.35),
-    0 0 40px 5px rgba(255, 68, 85, 0.14),
-    5px 8px 18px rgba(0, 0, 0, 0.5) !important;
+    inset 0 0 0 1px rgba(255, 68, 85, 0.25),
+    0 0 10px rgba(255, 68, 85, 0.55),
+    0 0 28px rgba(255, 68, 85, 0.22),
+    4px 8px 18px rgba(0, 0, 0, 0.55) !important;
 }
 
 .forge-counter::before {
   content: "" !important;
   display: block !important;
   position: absolute !important;
-  top: -1px !important;
-  left: -1px !important;
-  right: -1px !important;
-  bottom: -1px !important;
-  border-radius: 15px !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  border-radius: 14px !important;
+  background: #020608 !important;
   z-index: -1 !important;
   pointer-events: none !important;
-  transform: translate3d(10px, 2px, -16px) !important;
+  transform: translate3d(11px, 2px, -20px) !important;
+  transform-style: preserve-3d !important;
 }
 
 .forge-counter.accepted::before {
-  background: linear-gradient(145deg,
-    rgba(57, 255, 138, 0.95) 0%,
-    rgba(26, 140, 80, 0.9) 40%,
-    rgba(8, 50, 32, 0.95) 100%) !important;
+  border: 2px solid var(--share3d-green) !important;
   box-shadow:
-    0 0 0 2px rgba(57, 255, 138, 0.8),
-    0 0 14px rgba(57, 255, 138, 0.5) !important;
+    0 0 8px rgba(57, 255, 138, 0.45),
+    0 0 20px rgba(57, 255, 138, 0.18) !important;
 }
 
 .forge-counter.rejected::before {
-  background: linear-gradient(145deg,
-    rgba(255, 68, 85, 0.95) 0%,
-    rgba(160, 32, 48, 0.9) 40%,
-    rgba(60, 12, 18, 0.95) 100%) !important;
+  border: 2px solid var(--share3d-red) !important;
   box-shadow:
-    0 0 0 2px rgba(255, 68, 85, 0.8),
-    0 0 14px rgba(255, 68, 85, 0.5) !important;
+    0 0 8px rgba(255, 68, 85, 0.45),
+    0 0 20px rgba(255, 68, 85, 0.18) !important;
 }
 
 .forge-counter::after {
   content: "" !important;
   display: block !important;
   position: absolute !important;
-  inset: 0 !important;
-  border-radius: 14px !important;
+  top: 2px !important;
+  bottom: 2px !important;
+  right: -11px !important;
+  width: 14px !important;
+  border-radius: 0 12px 12px 0 !important;
+  background: #010406 !important;
   z-index: -2 !important;
   pointer-events: none !important;
-  opacity: 0.5 !important;
-  transform: translate3d(5px, 1px, -8px) !important;
+  transform: translateZ(-10px) !important;
+  box-shadow: none !important;
+  opacity: 1 !important;
+  filter: none !important;
 }
 
 .forge-counter.accepted::after {
-  background: linear-gradient(90deg, #1a8a4e, #39ff8a 50%, #0d5a35) !important;
-  box-shadow: 0 0 8px rgba(57, 255, 138, 0.35) !important;
+  background: linear-gradient(90deg, #010406 0%, #010406 70%, #0a1a12 100%) !important;
+  border-right: 1.5px solid rgba(57, 255, 138, 0.35) !important;
 }
-
 .forge-counter.rejected::after {
-  background: linear-gradient(90deg, #8a1a28, #ff4455 50%, #5a1018) !important;
-  box-shadow: 0 0 8px rgba(255, 68, 85, 0.35) !important;
+  background: linear-gradient(90deg, #010406 0%, #010406 70%, #1a080a 100%) !important;
+  border-right: 1.5px solid rgba(255, 68, 85, 0.35) !important;
 }
 
 .forge-counter > span:not(.event-dot) {
@@ -212,14 +207,14 @@
 }
 
 @keyframes shareCardHitAccept {
-  0% { filter: none; transform: perspective(900px) rotateY(calc(-12deg + var(--px, 0deg))) rotateX(calc(2deg + var(--py, 0deg))) scale(1); }
-  22% { filter: brightness(1.35); transform: perspective(900px) rotateY(calc(-12deg + var(--px, 0deg))) rotateX(calc(2deg + var(--py, 0deg))) scale(1.04); }
-  100% { filter: none; transform: perspective(900px) rotateY(calc(-12deg + var(--px, 0deg))) rotateX(calc(2deg + var(--py, 0deg))) scale(1); }
+  0% { filter: none; transform: perspective(850px) rotateY(calc(-14deg + var(--px, 0deg))) rotateX(calc(3deg + var(--py, 0deg))) scale(1); }
+  22% { filter: brightness(1.3); transform: perspective(850px) rotateY(calc(-14deg + var(--px, 0deg))) rotateX(calc(3deg + var(--py, 0deg))) scale(1.04); }
+  100% { filter: none; transform: perspective(850px) rotateY(calc(-14deg + var(--px, 0deg))) rotateX(calc(3deg + var(--py, 0deg))) scale(1); }
 }
 @keyframes shareCardHitReject {
-  0% { filter: none; transform: perspective(900px) rotateY(calc(-12deg + var(--px, 0deg))) rotateX(calc(1.5deg + var(--py, 0deg))) scale(1); }
-  22% { filter: brightness(1.35); transform: perspective(900px) rotateY(calc(-12deg + var(--px, 0deg))) rotateX(calc(1.5deg + var(--py, 0deg))) scale(1.04); }
-  100% { filter: none; transform: perspective(900px) rotateY(calc(-12deg + var(--px, 0deg))) rotateX(calc(1.5deg + var(--py, 0deg))) scale(1); }
+  0% { filter: none; transform: perspective(850px) rotateY(calc(-14deg + var(--px, 0deg))) rotateX(calc(2.5deg + var(--py, 0deg))) scale(1); }
+  22% { filter: brightness(1.3); transform: perspective(850px) rotateY(calc(-14deg + var(--px, 0deg))) rotateX(calc(2.5deg + var(--py, 0deg))) scale(1.04); }
+  100% { filter: none; transform: perspective(850px) rotateY(calc(-14deg + var(--px, 0deg))) rotateX(calc(2.5deg + var(--py, 0deg))) scale(1); }
 }
 .forge-counter.accepted.share-smash {
   animation: shareCardHitAccept 0.38s cubic-bezier(0.2, 0.8, 0.2, 1) both !important;
@@ -230,17 +225,17 @@
 
 @media (max-width: 620px) {
   .forge-counter {
-    width: min(200px, calc(100% - 48px)) !important;
+    width: min(200px, calc(100% - 52px)) !important;
     min-width: 0 !important;
   }
   .forge-counter.accepted,
   #forgeStage .forge-counter.accepted {
-    right: 20px !important;
+    right: 24px !important;
     top: 28px !important;
   }
   .forge-counter.rejected,
   #forgeStage .forge-counter.rejected {
-    right: 20px !important;
+    right: 24px !important;
     top: 120px !important;
     bottom: auto !important;
   }
