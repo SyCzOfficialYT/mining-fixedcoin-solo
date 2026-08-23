@@ -50,16 +50,17 @@ def api_stream():
                             event_type = "block"; break
                     sig = (mtime, event_type)
                     if sig != last_sig:
-                        yield f"data: {json.dumps({'type': event_type, 'ts': int(time.time())})}\\n\\n"
+                        payload = json.dumps({'type': event_type, 'ts': int(time.time())})
+                        yield "data: " + payload + chr(10) + chr(10)
                         last_sig = sig
                     last_mtime = mtime
                 else:
-                    yield ": heartbeat\\n\\n"
+                    yield ": heartbeat" + chr(10) + chr(10)
                 time.sleep(0.5)
             except GeneratorExit:
                 return
             except Exception:
-                yield ": heartbeat\\n\\n"
+                yield ": heartbeat" + chr(10) + chr(10)
                 time.sleep(1)
 
     return Response(
