@@ -44,7 +44,9 @@ function spawnCoreParticle(){
   if(coreParticles.length>1500) coreParticles.splice(0,coreParticles.length-1500);
 }
 function seedCoreParticles(progress){
-  const target=Math.min(1500,Math.round(progress*5));
+  // One visible charge particle per 0.001% of already-known progress,
+  // capped only to keep the canvas bounded at 100%.
+  const target=Math.min(1500,Math.round(progress*1000));
   while(coreParticles.length<target) spawnCoreParticle();
 }
 function drawCoreParticles(dt,now){
