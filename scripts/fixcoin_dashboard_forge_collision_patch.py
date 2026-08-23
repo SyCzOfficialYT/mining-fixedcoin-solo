@@ -8,11 +8,27 @@ html = HTML.read_text()
 VERSION = '20260823-1'
 CSS = f'<link rel="stylesheet" href="/static/dashboard_v4_forge_collision.css?v={VERSION}">'
 
+# Remove any previous collision include, regardless of its cache-buster.
 html = re.sub(r'<link rel="stylesheet" href="/static/dashboard_v4_forge_collision\.css\?v=[^"]+">', '', html)
-anchor = '<link rel="stylesheet" href="/static/dashboard_v4_forge_transparency.css?v=20260823-7">'
-if anchor not in html:
-    raise RuntimeError('forge transparency stylesheet anchor missing')
-html = html.replace(anchor, anchor + CSS, 1)
+
+# The Forge upgrade patch owns the transparency stylesheet version. Do not hard-code
+# that version here: the two patches are intentionally independent and may bump their
+# cache-busters at different times.
+transparency_match = re.search(r'<link rel="stylesheet" href="/static/dashboard_v4_forge_transparency\.css\?v=[^"]+">', html)
+if transparency_match:
+    anchor = transparency_match.group(0)
+    html = html.replace(anchor, anchor + CSS, 1)
+else:
+    # Safe fallback for builds where the transparency layer is absent: load the
+    # collision layer after the forge metrics stylesheet so it still wins over
+    # the legacy share-impact rules.
+    metrics = re.search(r'<link rel="stylesheet" href="/static/dashboard_v4_forge_metrics_layout\.css\?v=[^"]+">', html)
+    if not metrics:
+        raise RuntimeError('forge metrics stylesheet anchor missing')
+    anchor = metrics.group(0)
+    html = html.replace(anchor, anchor + CSS, 1)
+
+# Make the central collision layer the last share-impact JS version.
 html = re.sub(r'/static/dashboard_v4_share_impact\.js\?v=[0-9-]+', f'/static/dashboard_v4_share_impact.js?v={VERSION}', html)
 
 required = [
