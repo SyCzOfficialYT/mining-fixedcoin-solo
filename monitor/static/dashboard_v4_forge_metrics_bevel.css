@@ -1,0 +1,237 @@
+/*
+ * Forge metric cards — exact soft-bevel visual language used by the share cards.
+ *
+ * Data/DOM bindings stay untouched. This stylesheet only replaces the visual
+ * treatment of HASHRATE and SHARES / MIN so they read as the same physical
+ * neon-glass plates as ACCEPTED / REJECTED SHARES.
+ */
+
+.forge-stage .hashrate-card,
+.forge-stage .forge-shares-min {
+  position: absolute !important;
+  left: 30px !important;
+  right: auto !important;
+  width: 184px !important;
+  min-width: 184px !important;
+  height: 126px !important;
+  min-height: 126px !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  padding: 14px 14px 11px 16px !important;
+  border: 2px solid #19d9ff !important;
+  border-radius: 14px !important;
+  background: #060c10 !important;
+  overflow: visible !important;
+  transform-style: preserve-3d !important;
+  backface-visibility: hidden !important;
+  transform-origin: center center !important;
+  will-change: transform !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  justify-content: flex-start !important;
+  text-align: left !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(25, 217, 255, 0.30),
+    inset 0 0 12px rgba(25, 217, 255, 0.07),
+    0 0 0 1px rgba(25, 217, 255, 0.35),
+    0 0 6px 1px rgba(25, 217, 255, 0.65),
+    0 0 16px 2px rgba(25, 217, 255, 0.35),
+    0 0 30px 4px rgba(25, 217, 255, 0.15),
+    3px 6px 16px rgba(0, 0, 0, 0.50) !important;
+  transform: perspective(700px) rotateY(-18deg) rotateX(2deg) !important;
+}
+
+.forge-stage .forge-shares-min {
+  transform: perspective(700px) rotateY(-18deg) rotateX(1.5deg) !important;
+}
+
+/* Soft right-side thickness — one rounded plate, not a second polygon/cube. */
+.forge-stage .hashrate-card::before,
+.forge-stage .forge-shares-min::before {
+  content: "" !important;
+  position: absolute !important;
+  top: 6px !important;
+  bottom: 6px !important;
+  right: -7px !important;
+  width: 14px !important;
+  border: 0 !important;
+  border-radius: 0 12px 12px 0 !important;
+  z-index: -1 !important;
+  pointer-events: none !important;
+  filter: blur(0.3px) !important;
+  opacity: 0.95 !important;
+  background: linear-gradient(90deg, #19d9ff 0%, #08758a 55%, transparent 100%) !important;
+  box-shadow:
+    2px 0 8px rgba(25, 217, 255, 0.55),
+    4px 0 16px rgba(25, 217, 255, 0.25) !important;
+  transform: none !important;
+}
+
+.forge-stage .hashrate-card::after,
+.forge-stage .forge-shares-min::after {
+  content: "" !important;
+  position: absolute !important;
+  top: 10px !important;
+  bottom: 10px !important;
+  right: -11px !important;
+  width: 10px !important;
+  border-radius: 0 10px 10px 0 !important;
+  z-index: -2 !important;
+  pointer-events: none !important;
+  opacity: 0.42 !important;
+  filter: blur(1.5px) !important;
+  background: #19d9ff !important;
+  box-shadow: 0 0 12px rgba(25, 217, 255, 0.50) !important;
+  transform: none !important;
+}
+
+.forge-stage .hashrate-card > span,
+.forge-stage .forge-shares-min > span {
+  display: block !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  flex: 0 0 auto !important;
+  margin: 0 0 5px !important;
+  padding: 0 !important;
+  align-self: stretch !important;
+  color: #8aa0aa !important;
+  font: 600 9px/1.15 "JetBrains Mono", monospace !important;
+  letter-spacing: 0.16em !important;
+  text-align: left !important;
+  white-space: nowrap !important;
+}
+
+.forge-stage .hashrate-card > strong,
+.forge-stage .forge-shares-min > strong {
+  display: block !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  flex: 0 0 auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  align-self: stretch !important;
+  color: #e9f8fa !important;
+  font: 700 22px/1.05 "JetBrains Mono", monospace !important;
+  letter-spacing: -0.025em !important;
+  text-align: left !important;
+  white-space: nowrap !important;
+  text-shadow: 0 0 10px rgba(220, 250, 255, 0.12) !important;
+  transform: translateZ(3px) !important;
+}
+
+.forge-stage .hashrate-card > small,
+.forge-stage .forge-shares-min > small {
+  display: block !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  flex: 0 0 auto !important;
+  margin: 5px 0 0 !important;
+  padding: 0 !important;
+  align-self: stretch !important;
+  color: #5e777e !important;
+  font: 500 7px/1.15 "JetBrains Mono", monospace !important;
+  letter-spacing: 0.10em !important;
+  text-align: left !important;
+  text-transform: uppercase !important;
+  white-space: nowrap !important;
+}
+
+.forge-stage .hashrate-card > svg,
+.forge-stage .forge-shares-min > svg {
+  display: block !important;
+  flex: 1 1 auto !important;
+  align-self: stretch !important;
+  width: 100% !important;
+  min-height: 34px !important;
+  height: 34px !important;
+  margin: 8px 0 0 !important;
+  padding: 2px 0 0 !important;
+  overflow: visible !important;
+  transform: translateZ(2px) !important;
+}
+
+.forge-stage .hashrate-card polyline,
+.forge-stage .forge-shares-min polyline {
+  fill: none !important;
+  stroke: #58ef6d !important;
+  stroke-width: 2.1 !important;
+  filter: drop-shadow(0 0 4px rgba(84, 239, 108, 0.5)) !important;
+}
+
+/* Same compact stack rhythm as the accepted/rejected pair. */
+.forge-stage .hashrate-card {
+  top: 42px !important;
+}
+
+.forge-stage .forge-shares-min {
+  top: 203px !important;
+}
+
+@media (max-width: 700px) {
+  .forge-stage .hashrate-card,
+  .forge-stage .forge-shares-min {
+    left: 22px !important;
+    width: 174px !important;
+    min-width: 174px !important;
+    height: 120px !important;
+    min-height: 120px !important;
+  }
+
+  .forge-stage .hashrate-card {
+    top: 42px !important;
+  }
+
+  .forge-stage .forge-shares-min {
+    top: 197px !important;
+  }
+}
+
+@media (max-width: 520px) {
+  .forge-stage .hashrate-card,
+  .forge-stage .forge-shares-min {
+    left: 14px !important;
+    width: 162px !important;
+    min-width: 162px !important;
+    height: 116px !important;
+    min-height: 116px !important;
+    padding: 13px 12px 10px 14px !important;
+  }
+
+  .forge-stage .hashrate-card {
+    top: 36px !important;
+  }
+
+  .forge-stage .forge-shares-min {
+    top: 187px !important;
+  }
+
+  .forge-stage .hashrate-card > span,
+  .forge-stage .forge-shares-min > span {
+    font-size: 8px !important;
+  }
+
+  .forge-stage .hashrate-card > strong,
+  .forge-stage .forge-shares-min > strong {
+    font-size: 20px !important;
+  }
+
+  .forge-stage .hashrate-card > small,
+  .forge-stage .forge-shares-min > small {
+    font-size: 6.5px !important;
+  }
+
+  .forge-stage .hashrate-card > svg,
+  .forge-stage .forge-shares-min > svg {
+    min-height: 30px !important;
+    height: 30px !important;
+    margin-top: 7px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .forge-stage .hashrate-card,
+  .forge-stage .forge-shares-min {
+    will-change: auto !important;
+  }
+}
