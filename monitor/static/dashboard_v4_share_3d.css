@@ -1,6 +1,7 @@
 :root {
   --share3d-green: #39ff8a;
   --share3d-red: #ff4455;
+  --share-card-gap: 88px;
 }
 
 .accept-stream,
@@ -55,7 +56,7 @@
 #forgeStage .forge-counter.rejected {
   right: 36px !important;
   left: auto !important;
-  top: 198px !important;
+  top: calc(52px + 80px + var(--share-card-gap)) !important;
   bottom: auto !important;
   transform: perspective(700px) rotateY(calc(-18deg + var(--px, 0deg))) rotateX(calc(3deg + var(--py, 0deg))) !important;
   border: 2px solid var(--share3d-red) !important;
@@ -229,7 +230,7 @@
   .forge-counter.rejected,
   #forgeStage .forge-counter.rejected {
     right: 22px !important;
-    top: 188px !important;
+    top: calc(44px + 80px + var(--share-card-gap)) !important;
     bottom: auto !important;
   }
 }
