@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Apply the final central particle-collision/neon layer after the Forge visual patch."""
+"""Apply the final per-particle collision/neon layer after the Forge visual patch."""
 from pathlib import Path
 import re
 
@@ -9,12 +9,13 @@ VERSION = '20260823-9'
 CSS = f'<link rel="stylesheet" href="/static/dashboard_v4_forge_collision.css?v={VERSION}">'
 JS = f'<script defer src="/static/dashboard_v4_forge_collision.js?v={VERSION}"></script>'
 
+# The legacy share-impact client owns a single burst-level glow and therefore
+# fundamentally conflicts with the per-particle OFF/ON model. Remove the old
+# client include completely; the CSS remains harmless, but the JS must not run.
+html = re.sub(r'<script[^>]+/static/dashboard_v4_share_impact\.js\?v=[^>]+></script>', '', html)
+# Remove any previous collision includes, regardless of cache-buster.
 html = re.sub(r'<link rel="stylesheet" href="/static/dashboard_v4_forge_collision\.css\?v=[^"]+">', '', html)
 html = re.sub(r'<script[^>]+dashboard_v4_forge_collision\.js\?v=[^>]+></script>', '', html)
-
-# Bust the legacy share-impact asset. It remains as a compatibility stub, but
-# an old browser-cached copy must never bring back the shared long glow.
-html = re.sub(r'/static/dashboard_v4_share_impact\.js\?v=[0-9-]+', f'/static/dashboard_v4_share_impact.js?v={VERSION}', html)
 
 transparency_match = re.search(r'<link rel="stylesheet" href="/static/dashboard_v4_forge_transparency\.css\?v=[^"]+">', html)
 if transparency_match:
@@ -27,19 +28,17 @@ else:
     anchor = metrics.group(0)
     html = html.replace(anchor, anchor + CSS, 1)
 
-share_match = re.search(r'(<script defer src="/static/dashboard_v4_share_impact\.js\?v=[^"]+"></script>)', html)
-if share_match:
-    html = html.replace(share_match.group(1), share_match.group(1) + JS, 1)
-else:
-    parallax = re.search(r'(<script defer src="/static/dashboard_v4_share_parallax\.js\?v=[^"]+"></script>)', html)
-    if not parallax:
-        raise RuntimeError('dashboard share script anchor missing')
-    html = html.replace(parallax.group(1), parallax.group(1) + JS, 1)
+# The collision engine is the only source of share-event particles. Load it
+# immediately after parallax so all geometry has settled before coordinates are read.
+parallax = re.search(r'(<script defer src="/static/dashboard_v4_share_parallax\.js\?v=[^"]+"></script>)', html)
+if not parallax:
+    raise RuntimeError('dashboard share parallax script anchor missing')
+html = html.replace(parallax.group(1), parallax.group(1) + JS, 1)
 
 required = [
     'dashboard_v4_forge_collision.css',
     'dashboard_v4_forge_collision.js',
-    f'/static/dashboard_v4_share_impact.js?v={VERSION}',
+    'dashboard_v4_share_parallax.js',
     'class="forge-rock rock-left"',
     'class="forge-rock rock-right"',
     'id="acceptedCounter"',
@@ -49,5 +48,8 @@ missing = [x for x in required if x not in html]
 if missing:
     raise RuntimeError('forge collision patch verification failed: ' + ', '.join(missing))
 
+if '/static/dashboard_v4_share_impact.js?' in html:
+    raise RuntimeError('legacy share-impact JS is still included; refusing to build conflicting particle engines')
+
 HTML.write_text(html)
-print('dashboard collision layer applied: legacy shared glow disabled; each particle owns its own counter pulse; centered progress field orbits smoothly')
+print('dashboard collision layer applied: legacy share-impact JS removed; each arriving particle owns its own OFF/ON neon pulse; centered progress field preserved')
