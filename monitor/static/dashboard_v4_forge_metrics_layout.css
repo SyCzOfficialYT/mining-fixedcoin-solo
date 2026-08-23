@@ -1,11 +1,16 @@
-/* v4.5: mirrored forge metrics — the cards face the FIXCORE in the center.
-   The live graphs remain untouched; only geometry, bevel direction and polish change. */
+/* v4.6: mirrored forge metrics — the cards face the FIXCORE in the center.
+   Keep the live graphs intact; improve internal typography hierarchy and spacing. */
 .forge-stage .hashrate-card,
 .forge-stage .forge-shares-min {
   left: 32px !important;
   right: auto !important;
   width: 176px !important;
   min-height: 145px !important;
+  padding: 13px 13px 10px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  justify-content: flex-start !important;
   border: 1px solid rgba(25,217,255,.42) !important;
   background: linear-gradient(135deg, rgba(5,15,19,.96), rgba(2,9,12,.92)) !important;
   box-shadow:
@@ -17,6 +22,62 @@
   transform: perspective(760px) rotateY(18deg) rotateX(2deg) !important;
   transform-origin: center center !important;
   transform-style: preserve-3d !important;
+}
+
+/* Typography hierarchy: label → value → source/context → graph. */
+.forge-stage .hashrate-card > span,
+.forge-stage .forge-shares-min > span {
+  display: block !important;
+  flex: 0 0 auto !important;
+  margin: 0 0 5px !important;
+  line-height: 1.15 !important;
+  font-size: 9px !important;
+  letter-spacing: .16em !important;
+  color: #89a4aa !important;
+}
+
+.forge-stage .hashrate-card > strong,
+.forge-stage .forge-shares-min > strong {
+  display: block !important;
+  flex: 0 0 auto !important;
+  margin: 0 !important;
+  line-height: 1.05 !important;
+  font-size: 21px !important;
+  letter-spacing: -.025em !important;
+  color: #e7f7f8 !important;
+}
+
+.forge-stage .hashrate-card > small,
+.forge-stage .forge-shares-min > small {
+  display: block !important;
+  flex: 0 0 auto !important;
+  margin: 7px 0 0 !important;
+  line-height: 1.1 !important;
+  font-size: 7px !important;
+  letter-spacing: .12em !important;
+  color: #5e777e !important;
+  text-transform: uppercase !important;
+}
+
+/* The graph owns the lower portion of the card instead of competing with text. */
+.forge-stage .hashrate-card > svg,
+.forge-stage .forge-shares-min > svg {
+  display: block !important;
+  flex: 1 1 auto !important;
+  width: 100% !important;
+  min-height: 38px !important;
+  height: 38px !important;
+  margin: auto 0 0 !important;
+  padding-top: 6px !important;
+  overflow: visible !important;
+}
+
+.forge-stage .hashrate-card polyline,
+.forge-stage .forge-shares-min polyline {
+  fill: none !important;
+  stroke: #58ef6d !important;
+  stroke-width: 2.1 !important;
+  filter: drop-shadow(0 0 4px rgba(84,239,108,.5)) !important;
 }
 
 .forge-stage .hashrate-card {
@@ -62,4 +123,10 @@
   .forge-stage .forge-shares-min { left: 18px !important; width: 154px !important; }
   .forge-stage .hashrate-card { top: calc(50% - 136px) !important; }
   .forge-stage .forge-shares-min { top: calc(50% + 24px) !important; }
+  .forge-stage .hashrate-card,
+  .forge-stage .forge-shares-min { min-height: 145px !important; padding: 11px 10px 9px !important; }
+  .forge-stage .hashrate-card > strong,
+  .forge-stage .forge-shares-min > strong { font-size: 18px !important; }
+  .forge-stage .hashrate-card > svg,
+  .forge-stage .forge-shares-min > svg { min-height: 34px !important; height: 34px !important; }
 }
