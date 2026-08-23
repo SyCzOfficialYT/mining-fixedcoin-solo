@@ -5,14 +5,13 @@ import re
 
 HTML = Path('/app/monitor/templates/dashboard_v4.html')
 html = HTML.read_text()
-VERSION = '20260823-3'
+VERSION = '20260823-4'
 CSS = f'<link rel="stylesheet" href="/static/dashboard_v4_forge_collision.css?v={VERSION}">'
 JS = f'<script defer src="/static/dashboard_v4_forge_collision.js?v={VERSION}"></script>'
 
 html = re.sub(r'<link rel="stylesheet" href="/static/dashboard_v4_forge_collision\.css\?v=[^"]+">', '', html)
 html = re.sub(r'<script[^>]+dashboard_v4_forge_collision\.js\?v=[^>]+></script>', '', html)
 
-# The Forge upgrade patch owns the transparency stylesheet version. Never hard-code it.
 transparency_match = re.search(r'<link rel="stylesheet" href="/static/dashboard_v4_forge_transparency\.css\?v=[^"]+">', html)
 if transparency_match:
     anchor = transparency_match.group(0)
@@ -24,7 +23,6 @@ else:
     anchor = metrics.group(0)
     html = html.replace(anchor, anchor + CSS, 1)
 
-# Load the collision engine after the existing share/realtime client.
 share_match = re.search(r'(<script defer src="/static/dashboard_v4_share_impact\.js\?v=[^"]+"></script>)', html)
 if share_match:
     html = html.replace(share_match.group(1), share_match.group(1) + JS, 1)
@@ -47,4 +45,4 @@ if missing:
     raise RuntimeError('forge collision patch verification failed: ' + ', '.join(missing))
 
 HTML.write_text(html)
-print('dashboard collision layer applied: persistent center field preserved, real share particles route FIXCORE -> matching counter, per-particle impact neon, mountains lowered')
+print('dashboard collision layer applied: slow per-particle FIXCORE-to-counter flight, strict OFF/ON neon pulses, center progress field preserved, mountains lowered')
