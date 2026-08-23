@@ -5,7 +5,7 @@ import re
 
 HTML = Path('/app/monitor/templates/dashboard_v4.html')
 html = HTML.read_text()
-VERSION = '20260823-6'
+VERSION = '20260823-7'
 REF = f'<link rel="stylesheet" href="/static/dashboard_v4_forge_reference.css?v={VERSION}">'
 UP = f'<link rel="stylesheet" href="/static/dashboard_v4_forge_upgrade.css?v={VERSION}">'
 TRAN = f'<link rel="stylesheet" href="/static/dashboard_v4_forge_transparency.css?v={VERSION}">'
@@ -43,4 +43,4 @@ candidate_end = html.find('</section>', candidate_pos)
 forge_close = html.find('</section>', candidate_end + len('</section>'))
 if not (forge_start < candidate_pos < candidate_end < forge_close): raise RuntimeError('dashboard forge upgrade verification failed: candidate is not inside forge outer section')
 HTML.write_text(html)
-print('dashboard forge upgrade applied: fully transparent candidate HUD with inherited Forge atmosphere')
+print('dashboard forge upgrade applied: fully transparent candidate HUD with inherited Forge atmosphere and unclipped Forge artwork')
