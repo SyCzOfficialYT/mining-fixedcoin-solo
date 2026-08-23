@@ -1,0 +1,179 @@
+:root {
+  --forge-mirror-cyan: #19d9ff;
+  --forge-mirror-green: #39ff8a;
+  --forge-mirror-bg: #050a0e;
+}
+
+/* Mirrored metric cards: same visual language as the share counters,
+   but with the depth/bevel reversed because these cards live on the left. */
+.hashrate-card,
+.forge-shares-min {
+  position: absolute !important;
+  box-sizing: border-box !important;
+  width: 176px !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 12px 13px !important;
+  border: 2px solid rgba(25, 217, 255, .82) !important;
+  border-radius: 14px !important;
+  background: var(--forge-mirror-bg) !important;
+  overflow: visible !important;
+  transform-style: preserve-3d !important;
+  backface-visibility: hidden !important;
+  transform-origin: center center !important;
+  will-change: transform !important;
+  z-index: 45 !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(25, 217, 255, .20),
+    inset 0 0 12px rgba(25, 217, 255, .055),
+    0 0 6px 0 rgba(25, 217, 255, .58),
+    0 0 14px 1px rgba(25, 217, 255, .28),
+    0 0 30px 2px rgba(25, 217, 255, .12),
+    -3px 6px 16px rgba(0, 0, 0, .52) !important;
+}
+
+.hashrate-card {
+  left: 32px !important;
+  top: 29px !important;
+  transform: perspective(700px) rotateY(18deg) rotateX(4deg) !important;
+}
+
+.forge-shares-min {
+  left: 32px !important;
+  top: 183px !important;
+  transform: perspective(700px) rotateY(18deg) rotateX(3deg) !important;
+}
+
+.hashrate-card::before,
+.forge-shares-min::before {
+  content: "";
+  display: block;
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+  background: #03070a;
+  border: 2px solid rgba(25, 217, 255, .72);
+  box-shadow: 0 0 6px rgba(25, 217, 255, .30), 0 0 14px rgba(25, 217, 255, .12);
+  transform: translate3d(12px, 3px, -28px);
+  transform-style: preserve-3d;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.hashrate-card > span,
+.forge-shares-min > span {
+  position: relative !important;
+  z-index: 3 !important;
+}
+
+.hashrate-card strong,
+.forge-shares-min strong,
+.hashrate-card small,
+.forge-shares-min small,
+.hashrate-card svg,
+.forge-shares-min svg {
+  position: relative;
+  z-index: 3;
+}
+
+.hashrate-card strong,
+.forge-shares-min strong {
+  text-shadow: 0 0 10px rgba(25, 217, 255, .18);
+}
+
+.hashrate-card polyline,
+.forge-shares-min polyline {
+  filter: drop-shadow(0 0 5px rgba(84, 239, 108, .55));
+}
+
+/* Keep the graph exactly as-is while giving the cards the same depth language. */
+.hashrate-card svg,
+.forge-shares-min svg {
+  display: block !important;
+  width: 100% !important;
+}
+
+/* Real share-event particle layer. It is clipped to the forge stage so no
+   event particle can escape the dashboard viewport. */
+.share-event-layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 38;
+  contain: layout paint;
+}
+
+.share-flight,
+.share-spark {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: block;
+  pointer-events: none;
+  border-radius: 999px;
+  will-change: transform, opacity;
+}
+
+.share-flight {
+  width: 8px;
+  height: 8px;
+  margin: -4px 0 0 -4px;
+}
+
+.share-flight.accept,
+.share-spark.accept {
+  background: #72ff9a;
+  box-shadow: 0 0 7px #39ff8a, 0 0 18px rgba(57,255,138,.85), 0 0 38px rgba(57,255,138,.45);
+}
+
+.share-flight.reject,
+.share-spark.reject {
+  background: #ff777f;
+  box-shadow: 0 0 7px #ff4455, 0 0 18px rgba(255,68,85,.85), 0 0 38px rgba(255,68,85,.45);
+}
+
+.share-flight::after {
+  content: "";
+  position: absolute;
+  width: 34px;
+  height: 5px;
+  left: -30px;
+  top: 1.5px;
+  border-radius: 999px;
+  background: currentColor;
+  filter: blur(1px);
+  opacity: .65;
+}
+
+.share-flight.accept { color: #39ff8a; }
+.share-flight.reject { color: #ff4455; }
+
+.share-spark {
+  width: 4px;
+  height: 4px;
+  margin: -2px 0 0 -2px;
+}
+
+@media (max-width: 700px) {
+  .hashrate-card,
+  .forge-shares-min {
+    width: 176px !important;
+  }
+  .hashrate-card {
+    left: 32px !important;
+    top: 29px !important;
+  }
+  .forge-shares-min {
+    left: 32px !important;
+    top: 183px !important;
+  }
+}
+
+@media (max-width: 520px) {
+  .hashrate-card,
+  .forge-shares-min {
+    width: 150px !important;
+    padding: 10px 11px !important;
+  }
+}
