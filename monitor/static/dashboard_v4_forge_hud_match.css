@@ -1,30 +1,59 @@
-/* FIXCOIN forge HUD harmonization — candidate-style metrics/counters */
-.forge#forge{overflow:hidden!important;isolation:isolate!important}
+/* FIXCOIN Forge HUD harmonization — approved concept pass */
+:root{--hud-cyan:#19d9ff;--hud-green:#4dff70;--hud-red:#ff5050;--hud-line:rgba(24,75,86,.88)}
+
+/* Forge is one contained visual instrument. Background assets can never leak outside it. */
+.forge#forge{position:relative!important;overflow:hidden!important;isolation:isolate!important}
 .forge#forge .forge-stage{overflow:hidden!important}
-.forge#forge .forge-rock{clip-path:inset(0 0 34px 0)!important;overflow:hidden!important}
-.forge#forge .forge-rock.rock-left,.forge#forge .forge-rock.rock-right{transform:translate3d(0,76px,0)!important}
+.forge#forge .forge-rock{top:auto!important;bottom:-48px!important;transform:translate3d(0,82px,0)!important;clip-path:inset(0 0 58px 0)!important;opacity:.26!important;filter:blur(.2px)!important;z-index:1!important}
+.forge#forge .forge-rock.rock-left,.forge#forge .forge-rock.rock-right{transform:translate3d(0,82px,0)!important}
 
-.forge-stage .hashrate-card,.forge-stage .forge-shares-min{width:184px!important;min-height:150px!important;padding:18px 15px 12px!important;border:1px solid rgba(18,58,69,.92)!important;border-radius:12px!important;background:linear-gradient(145deg,rgba(4,17,23,.84),rgba(1,8,12,.72))!important;box-shadow:inset 0 0 0 1px rgba(25,228,255,.035),0 14px 30px rgba(0,0,0,.28)!important;transform:perspective(760px) rotateY(12deg) rotateX(2deg)!important;transform-origin:center center!important;text-align:left!important;overflow:hidden!important}
-.forge-stage .forge-shares-min{transform:perspective(760px) rotateY(12deg) rotateX(1.5deg)!important}
-.forge-stage .hashrate-card::before,.forge-stage .forge-shares-min::before{content:""!important;position:absolute!important;inset:0!important;border:1px solid rgba(25,228,255,.035)!important;border-radius:12px!important;box-shadow:none!important;transform:none!important;pointer-events:none!important}
-.forge-stage .hashrate-card::after,.forge-stage .forge-shares-min::after{content:""!important;position:absolute!important;left:10px!important;right:10px!important;bottom:8px!important;top:auto!important;height:1px!important;width:auto!important;border-radius:0!important;background:linear-gradient(90deg,transparent,rgba(25,228,255,.18),transparent)!important;box-shadow:none!important;pointer-events:none!important}
-.forge-stage .hashrate-card>span,.forge-stage .forge-shares-min>span{margin:0 0 7px!important;color:#718a90!important;font:600 9px/1.1 var(--mono)!important;letter-spacing:.18em!important;text-align:left!important}
-.forge-stage .hashrate-card>strong,.forge-stage .forge-shares-min>strong{margin:0!important;color:#cfe3e6!important;font:800 24px/.98 var(--mono)!important;letter-spacing:-.035em!important;text-align:left!important;text-shadow:0 0 12px rgba(207,227,230,.06)!important}
-.forge-stage .hashrate-card>small,.forge-stage .forge-shares-min>small{margin:7px 0 0!important;color:#536f77!important;font:500 8px/1.15 var(--mono)!important;letter-spacing:.1em!important;text-transform:uppercase!important;text-align:left!important}
-.forge-stage .hashrate-card>svg,.forge-stage .forge-shares-min>svg{margin:12px 0 0!important;width:100%!important;height:40px!important;min-height:40px!important;padding:0!important;opacity:.9!important}
-.forge-stage .hashrate-card polyline,.forge-stage .forge-shares-min polyline{fill:none!important;stroke:#58ef6d!important;stroke-width:1.8!important;filter:drop-shadow(0 0 3px rgba(84,239,108,.28))!important}
+/* Shared technical instrument shell. */
+.forge-stage .hashrate-card,.forge-stage .forge-shares-min,.forge-stage .forge-counter.accepted,.forge-stage .forge-counter.rejected{
+ box-sizing:border-box!important;border:1px solid var(--hud-line)!important;border-radius:14px!important;
+ background:linear-gradient(145deg,rgba(5,18,24,.90),rgba(1,8,12,.74))!important;
+ box-shadow:inset 0 0 0 1px rgba(25,228,255,.026),0 16px 32px rgba(0,0,0,.30)!important;
+ backdrop-filter:blur(3px)!important;overflow:hidden!important;transform-style:preserve-3d!important
+}
+.forge-stage .hashrate-card::before,.forge-stage .forge-shares-min::before,.forge-stage .forge-counter.accepted::before,.forge-stage .forge-counter.rejected::before{content:""!important;position:absolute!important;inset:0!important;border:1px solid rgba(25,228,255,.025)!important;border-radius:14px!important;box-shadow:none!important;transform:none!important;pointer-events:none!important}
+.forge-stage .hashrate-card::after,.forge-stage .forge-shares-min::after,.forge-stage .forge-counter.accepted::after,.forge-stage .forge-counter.rejected::after{content:""!important;position:absolute!important;left:10px!important;right:10px!important;top:8px!important;height:1px!important;background:linear-gradient(90deg,transparent,rgba(25,228,255,.24) 16%,rgba(25,228,255,.07) 84%,transparent)!important;box-shadow:none!important;pointer-events:none!important}
 
-.forge-stage .forge-counter.accepted,.forge-stage .forge-counter.rejected{width:240px!important;min-height:124px!important;padding:20px 20px 18px!important;border:1px solid rgba(18,58,69,.92)!important;border-radius:12px!important;background:linear-gradient(145deg,rgba(4,17,23,.84),rgba(1,8,12,.72))!important;box-shadow:inset 0 0 0 1px rgba(25,228,255,.035),0 14px 30px rgba(0,0,0,.28)!important;transform:perspective(760px) rotateY(-12deg) rotateX(2deg)!important;transform-origin:center center!important}
-.forge-stage .forge-counter.rejected{transform:perspective(760px) rotateY(-12deg) rotateX(1.5deg)!important}
-.forge-stage .forge-counter.accepted:before,.forge-stage .forge-counter.rejected:before{content:""!important;position:absolute!important;inset:0!important;border:1px solid rgba(25,228,255,.035)!important;border-radius:12px!important;box-shadow:none!important;transform:none!important;pointer-events:none!important}
-.forge-stage .forge-counter.accepted>span:first-child,.forge-stage .forge-counter.rejected>span:first-child{color:#718a90!important;font:600 9px/1.1 var(--mono)!important;letter-spacing:.16em!important}
-.forge-stage .forge-counter.accepted>strong,.forge-stage .forge-counter.rejected>strong{color:#cfe3e6!important;font:800 34px/.95 var(--mono)!important;letter-spacing:-.045em!important;text-shadow:none!important}
+/* Left metrics: same hierarchy and restraint as the Block Candidate HUD. */
+.forge-stage .hashrate-card,.forge-stage .forge-shares-min{left:32px!important;right:auto!important;width:220px!important;min-height:152px!important;padding:18px 18px 14px!important;display:flex!important;flex-direction:column!important;align-items:flex-start!important;text-align:left!important}
+.forge-stage .hashrate-card{top:calc(50% - 154px)!important;transform:perspective(900px) rotateY(10deg) rotateX(2deg)!important}
+.forge-stage .forge-shares-min{top:calc(50% + 24px)!important;transform:perspective(900px) rotateY(10deg) rotateX(1.5deg)!important}
+.forge-stage .hashrate-card>span,.forge-stage .forge-shares-min>span{margin:0 0 8px!important;color:#778f95!important;font:600 9px/1.1 var(--mono)!important;letter-spacing:.18em!important;text-align:left!important}
+.forge-stage .hashrate-card>strong,.forge-stage .forge-shares-min>strong{margin:0!important;color:#d7e8eb!important;font:800 25px/.98 var(--mono)!important;letter-spacing:-.035em!important;text-align:left!important;text-shadow:none!important}
+.forge-stage .hashrate-card>small,.forge-stage .forge-shares-min>small{margin:8px 0 0!important;color:#536f77!important;font:500 8px/1.15 var(--mono)!important;letter-spacing:.11em!important;text-transform:uppercase!important;text-align:left!important}
+.forge-stage .hashrate-card>svg,.forge-stage .forge-shares-min>svg{display:block!important;width:100%!important;height:43px!important;min-height:43px!important;margin:12px 0 0!important;opacity:.92!important}
+.forge-stage .hashrate-card polyline,.forge-stage .forge-shares-min polyline{fill:none!important;stroke:#58ef6d!important;stroke-width:1.9!important;filter:drop-shadow(0 0 3px rgba(84,239,108,.28))!important}
+
+/* Right metrics: same shell, semantic color only in content/impact state. */
+.forge-stage .forge-counter.accepted,.forge-stage .forge-counter.rejected{width:248px!important;min-height:126px!important;padding:18px 20px 17px!important;right:32px!important;left:auto!important}
+.forge-stage .forge-counter.accepted{top:29px!important;bottom:auto!important;transform:perspective(900px) rotateY(-10deg) rotateX(2deg)!important}
+.forge-stage .forge-counter.rejected{bottom:29px!important;top:auto!important;transform:perspective(900px) rotateY(-10deg) rotateX(1.5deg)!important}
+.forge-stage .forge-counter.accepted>span:first-child,.forge-stage .forge-counter.rejected>span:first-child{color:#748c92!important;font:600 9px/1.1 var(--mono)!important;letter-spacing:.16em!important}
+.forge-stage .forge-counter.accepted>strong,.forge-stage .forge-counter.rejected>strong{color:#d7e8eb!important;font:800 36px/.95 var(--mono)!important;letter-spacing:-.045em!important;text-shadow:none!important}
 .forge-stage .forge-counter.accepted>b,.forge-stage .forge-counter.rejected>b{color:#536f77!important;font:600 9px/1 var(--mono)!important;letter-spacing:.08em!important}
-.forge-stage .forge-counter.accepted>i,.forge-stage .forge-counter.rejected>i{width:40px!important;height:40px!important;right:18px!important;top:50%!important;transform:translateY(-50%)!important;color:#718a90!important;border:1px solid rgba(18,58,69,.9)!important;box-shadow:none!important}
-.forge-stage .forge-counter.accepted>i{color:#70c888!important}.forge-stage .forge-counter.rejected>i{color:#d27d7d!important}
-.forge-stage .forge-counter.accepted{--hud-accent:rgba(77,255,112,.28)}.forge-stage .forge-counter.rejected{--hud-accent:rgba(255,78,78,.28)}
-.forge-stage .forge-counter.collision-pulse.accepted,.forge-stage .forge-counter.collision-active.accepted{box-shadow:inset 0 0 0 1px rgba(77,255,112,.18),0 0 14px rgba(77,255,112,.22),0 0 34px rgba(77,255,112,.12),0 14px 30px rgba(0,0,0,.32)!important;border-color:rgba(77,255,112,.52)!important}
-.forge-stage .forge-counter.collision-pulse.rejected,.forge-stage .forge-counter.collision-active.rejected{box-shadow:inset 0 0 0 1px rgba(255,78,78,.18),0 0 14px rgba(255,78,78,.22),0 0 34px rgba(255,78,78,.12),0 14px 30px rgba(0,0,0,.32)!important;border-color:rgba(255,78,78,.52)!important}
+.forge-stage .forge-counter.accepted>i,.forge-stage .forge-counter.rejected>i{width:42px!important;height:42px!important;right:18px!important;top:50%!important;transform:translateY(-50%)!important;color:#789095!important;border:1px solid rgba(28,68,78,.9)!important;box-shadow:none!important}
+.forge-stage .forge-counter.accepted>i{color:#7bd28c!important}.forge-stage .forge-counter.rejected>i{color:#d07f7f!important}
 
-@media(max-width:700px){.forge-stage .hashrate-card,.forge-stage .forge-shares-min{width:174px!important;min-height:146px!important}.forge-stage .forge-counter.accepted,.forge-stage .forge-counter.rejected{width:205px!important;min-height:112px!important;padding:16px 17px!important}}
-@media(max-width:520px){.forge-stage .hashrate-card,.forge-stage .forge-shares-min{width:162px!important;min-height:140px!important}.forge-stage .forge-counter.accepted,.forge-stage .forge-counter.rejected{width:182px!important}}
+/* Quiet idle, intense event impact. */
+.forge-stage .forge-counter.accepted.collision-active,.forge-stage .forge-counter.accepted.collision-pulse{border-color:rgba(77,255,112,.86)!important;box-shadow:inset 0 0 0 1px rgba(77,255,112,.22),0 0 10px rgba(77,255,112,.80),0 0 30px rgba(77,255,112,.36),0 18px 32px rgba(0,0,0,.30)!important}
+.forge-stage .forge-counter.rejected.collision-active,.forge-stage .forge-counter.rejected.collision-pulse{border-color:rgba(255,78,78,.86)!important;box-shadow:inset 0 0 0 1px rgba(255,78,78,.22),0 0 10px rgba(255,78,78,.80),0 0 30px rgba(255,78,78,.36),0 18px 32px rgba(0,0,0,.30)!important}
+
+/* Approved concept: the candidate becomes a lower command deck that overlaps the Forge instead of appearing as an unrelated next card. */
+#candidate.candidate{position:relative!important;z-index:30!important;margin-top:-108px!important;margin-left:18%!important;margin-right:8%!important;min-height:300px!important;border:1px solid rgba(25,75,86,.84)!important;border-radius:14px!important;background:linear-gradient(145deg,rgba(3,14,19,.78),rgba(1,8,12,.52))!important;box-shadow:inset 0 0 0 1px rgba(25,228,255,.025),0 18px 48px rgba(0,0,0,.34)!important;backdrop-filter:blur(3px)!important;overflow:hidden!important}
+#candidate.candidate:before{content:""!important;position:absolute!important;inset:0!important;pointer-events:none!important;background:linear-gradient(90deg,transparent 0 68%,rgba(25,228,255,.035) 68% 68.2%,transparent 68.2%),radial-gradient(circle at 74% 46%,rgba(55,255,112,.065),transparent 28%)!important}
+#candidate .candidate-left{padding:26px 28px 22px!important}
+#candidate .candidate-core{background:transparent!important;border-left:1px solid rgba(18,56,66,.62)!important}
+#candidate .candidate-pct{font-size:clamp(58px,5.7vw,76px)!important}
+#candidate .candidate-track i{box-shadow:0 0 8px rgba(98,255,122,.70),0 0 22px rgba(98,255,122,.28)!important}
+
+/* Combo reads as a small secondary instrument, matching candidate language. */
+.forge-stage .combo{left:38px!important;top:calc(50% + 190px)!important;width:220px!important;transform:none!important;padding:7px 10px 2px!important}
+.forge-stage .combo::before{background:linear-gradient(90deg,transparent,rgba(25,217,255,.28),transparent)!important}
+.forge-stage .combo>span{color:#7b9398!important;font:600 8px/1.1 var(--mono)!important;letter-spacing:.18em!important}.forge-stage .combo>strong{color:#ffb62e!important;font:800 27px/1 var(--mono)!important;text-shadow:0 0 10px rgba(255,182,46,.18)!important}
+
+@media(max-width:900px){.forge-stage .hashrate-card,.forge-stage .forge-shares-min{left:24px!important;width:192px!important}.forge-stage .forge-counter.accepted,.forge-stage .forge-counter.rejected{width:214px!important;right:24px!important}#candidate.candidate{margin-left:12%!important;margin-right:4%!important}}
+@media(max-width:700px){.forge-stage .hashrate-card,.forge-stage .forge-shares-min{left:18px!important;width:176px!important}.forge-stage .forge-counter.accepted,.forge-stage .forge-counter.rejected{width:190px!important;right:18px!important}#candidate.candidate{margin-top:-72px!important;margin-left:4%!important;margin-right:3%!important}}
+@media(prefers-reduced-motion:reduce){#candidate.candidate{backdrop-filter:none}}
