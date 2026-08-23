@@ -3,106 +3,122 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#01070b">
+<meta name="theme-color" content="#01060a">
 <title>FixedCoin · Solo Mining</title>
-<link rel="stylesheet" href="/static/dashboard_v4.css?v=20260823-2">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/dashboard_v4.css?v=20260823-3">
 </head>
 <body>
-<div class="scanlines"></div><div class="ambient ambient-a"></div><div class="ambient ambient-b"></div>
+<div class="ambient ambient-cyan"></div><div class="ambient ambient-green"></div><div class="grid-noise"></div>
 <main class="dashboard">
+
 <section class="hero panel">
-<div class="hero-main">
-<div class="eyebrow accent">BEST SHARE <span>→</span> NETWORK BLOCK TARGET</div>
-<p class="muted">Your best submitted share versus the actual network difficulty.</p>
-<div class="versus">
-<div class="value-block best"><span>BEST SHARE DIFFICULTY</span><strong id="bestShare">—</strong><small id="bestRaw">≈ —</small></div>
-<div class="vs">VS</div>
-<div class="value-block target"><span>NETWORK TARGET</span><strong id="networkTarget">—</strong><small id="networkRaw">≈ —</small><em id="remaining">— remaining</em></div>
-</div>
-<div class="target-meter"><i id="targetMeter"></i><b id="targetMarker"></b></div>
-<div class="meter-labels"><span>0</span><strong id="targetPct">0.000%</strong><span>100% · Block Target</span></div>
-</div>
-<aside class="round-panel">
-<span class="tiny">CURRENT ROUND</span><strong class="round-id" id="roundId">#—</strong>
-<div class="divider"></div><span class="tiny">ESTIMATED BLOCK TIME</span>
-<strong class="time-big">10:00</strong><div class="clock-icon">◷</div>
-<div class="divider"></div><span class="tiny cyan">TIME REMAINING</span>
-<strong class="time-remain" id="timeRemain">—:—</strong><small id="timePct">—</small>
-<span class="tiny status-title">ROUND STATUS</span><b class="status active" id="roundStatus">ACTIVE</b>
-</aside>
+  <div class="hero-main">
+    <div class="eyebrow">BEST SHARE <b>→</b> NETWORK BLOCK TARGET</div>
+    <p class="subtitle">Your best submitted share versus the actual network difficulty.</p>
+    <div class="hero-values">
+      <div class="hero-value best"><span>BEST SHARE DIFFICULTY</span><strong id="bestShare">—</strong><small id="bestRaw">≈ —</small></div>
+      <div class="versus">VS</div>
+      <div class="hero-value network"><span>NETWORK TARGET</span><strong id="networkTarget">—</strong><small id="networkRaw">≈ —</small><em id="remaining">— remaining</em></div>
+    </div>
+    <div class="target-track"><i id="targetMeter"></i><b id="targetMarker"></b></div>
+    <div class="track-labels"><span>0</span><strong id="targetPct">0.000%</strong><span>100% (Block Target)</span></div>
+  </div>
+  <aside class="round-panel">
+    <span>CURRENT ROUND</span><strong class="round-id" id="roundId">#—</strong>
+    <div class="round-sep"></div>
+    <span>ESTIMATED BLOCK TIME</span><strong class="estimate">◷&nbsp; 10:00</strong>
+    <div class="round-sep"></div>
+    <span class="cyan">TIME REMAINING</span><strong class="remaining" id="timeRemain">00:00</strong><small id="timePct">0.0%</small>
+    <span class="status-label">ROUND STATUS</span><b class="status active" id="roundStatus">ACTIVE</b>
+  </aside>
 </section>
 
 <section class="forge panel" id="forge">
-<div class="forge-head"><div><span class="eyebrow">LIVE SHARE FORGE <i>•</i> REALTIME PROOF OF WORK</span></div><div class="live"><i></i> STRATUM LIVE</div></div>
-<div class="forge-stage">
-<div class="mine-metric"><span>HASHRATE</span><strong id="forgeHashrate">—</strong><small>5M WINDOW</small><svg viewBox="0 0 180 45"><polyline id="hashSpark" points="0,38 18,30 36,34 54,18 72,28 90,14 108,24 126,10 144,20 162,12 180,16"/></svg></div>
+  <header class="forge-head">
+    <div class="eyebrow">LIVE SHARE FORGE <i>•</i> REALTIME PROOF OF WORK</div>
+    <div class="live"><i></i> STRATUM LIVE</div>
+  </header>
+  <div class="forge-stage" id="forgeStage">
+    <div class="forge-vignette"></div>
+    <div class="hashrate-card glass-card">
+      <span>HASHRATE</span><strong id="forgeHashrate">—</strong><small>5M WINDOW</small>
+      <svg viewBox="0 0 180 44" preserveAspectRatio="none"><polyline id="hashSpark" points="0,34 18,27 35,31 52,19 69,26 86,14 103,24 120,12 138,19 155,10 180,16"/></svg>
+    </div>
 
-<div class="forge-scene" id="forgeScene" aria-label="Live FIX-ASIC share forge">
-<svg class="scene-art" viewBox="0 0 760 520" role="img" aria-label="FIX-ASIC miner forging shares">
-<defs>
-<linearGradient id="rock" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#152d39"/><stop offset=".5" stop-color="#071219"/><stop offset="1" stop-color="#02070a"/></linearGradient>
-<linearGradient id="armor" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#486b76"/><stop offset=".42" stop-color="#142d37"/><stop offset="1" stop-color="#061014"/></linearGradient>
-<linearGradient id="hammer" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#d7edf1"/><stop offset=".45" stop-color="#718d96"/><stop offset="1" stop-color="#293b41"/></linearGradient>
-<radialGradient id="lamp"><stop stop-color="#fff9bf"/><stop offset=".18" stop-color="#74f7ff"/><stop offset="1" stop-color="#0c7181"/></radialGradient>
-<filter id="glow"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-<filter id="soft"><feGaussianBlur stdDeviation="12"/></filter>
-</defs>
-<g class="scene-rocks" opacity=".95">
-<path d="M0 330 72 245 118 300 174 210 238 332 300 276 356 340 0 430Z" fill="url(#rock)"/>
-<path d="M500 345 555 252 606 300 660 205 760 330 760 455 510 438Z" fill="url(#rock)"/>
-<path d="M78 160 113 90 146 157 116 204Z" fill="#123743" opacity=".8"/>
-<path d="M628 170 668 96 710 178 670 214Z" fill="#0d3944" opacity=".8"/>
-</g>
-<g class="ore" filter="url(#glow)">
-<path d="M78 330 101 283 130 319 109 362Z" fill="#1de8ff" opacity=".35"/>
-<path d="M647 350 672 292 707 328 688 371Z" fill="#55f477" opacity=".35"/>
-<path d="M705 264 727 222 750 267 730 291Z" fill="#28dfff" opacity=".3"/>
-</g>
-<g class="svg-miner">
-<ellipse cx="258" cy="448" rx="105" ry="20" fill="#000" opacity=".6" filter="url(#soft)"/>
-<g class="backpack"><path d="M112 255Q80 275 96 370L135 386 157 275Z" fill="#07151b" stroke="#315965" stroke-width="4"/><path d="M105 286h40M102 312h42M101 338h40" stroke="#123c48" stroke-width="8"/></g>
-<g class="legs"><path d="M192 356 231 357 226 424 181 424Z" fill="#142b33" stroke="#4d6971" stroke-width="3"/><path d="M264 357 302 353 321 421 276 426Z" fill="#142b33" stroke="#4d6971" stroke-width="3"/><path d="M175 419h57l-9 24h-67Z" fill="#081318" stroke="#526b72" stroke-width="3"/><path d="M279 419h49l17 22-67 1Z" fill="#081318" stroke="#526b72" stroke-width="3"/></g>
-<g class="body"><path d="M156 229Q218 198 292 229L314 362Q250 391 154 358Z" fill="url(#armor)" stroke="#6d9098" stroke-width="4"/><path d="M174 260 300 256M168 287 305 286M164 318 309 319" stroke="#214c58" stroke-width="4"/><path d="M199 343h73" stroke="#19dff1" stroke-width="7" stroke-linecap="round" filter="url(#glow)"/><text x="235" y="296" text-anchor="middle" fill="#d9f5f6" font-family="monospace" font-size="18" letter-spacing="3">FIX-ASIC</text></g>
-<g class="head"><path d="M172 211Q185 139 247 134Q306 139 320 205L296 244 195 242Z" fill="#0a171d" stroke="#698790" stroke-width="4"/><path d="M163 190Q180 119 251 119Q320 126 329 190L309 208Q254 180 177 209Z" fill="#1d3a43" stroke="#6d8e95" stroke-width="5"/><path d="M201 155Q247 130 294 157L286 181Q244 164 207 181Z" fill="#34545e"/><circle cx="251" cy="153" r="15" fill="url(#lamp)" filter="url(#glow)"/><path d="M197 204Q248 184 300 205L294 229Q247 216 202 230Z" fill="#071015"/><path d="M207 215h78" stroke="#20e4ff" stroke-width="4" opacity=".8"/></g>
-<g class="arm hammer-arm"><path d="M287 249Q331 265 358 301L337 328Q301 301 270 287Z" fill="url(#armor)" stroke="#62838b" stroke-width="4"/></g>
-<g class="hammer"><rect x="334" y="280" width="160" height="15" rx="7" fill="#4b87a0" transform="rotate(18 334 280)"/><path d="M466 246h65v72h-65Z" fill="url(#hammer)" stroke="#a3bec4" stroke-width="4" transform="rotate(18 466 246)"/></g>
-<g class="arm arm-back"><path d="M167 254Q137 279 145 324L175 318Q177 286 193 271Z" fill="url(#armor)" stroke="#62838b" stroke-width="4"/></g>
-</g>
-<g class="anvil-svg"><ellipse cx="470" cy="444" rx="145" ry="19" fill="#000" opacity=".55" filter="url(#soft)"/><path d="M380 360h180l-16 42H396Z" fill="url(#hammer)" stroke="#839ca2" stroke-width="4"/><path d="M412 402h115l-19 45H430Z" fill="#344b52" stroke="#6c858b" stroke-width="3"/><path d="M383 443h176l28 18H355Z" fill="#182b31" stroke="#637b82" stroke-width="4"/><text x="470" y="390" text-anchor="middle" fill="#15282e" font-family="monospace" font-size="28" font-weight="900">F</text><text x="470" y="455" text-anchor="middle" fill="#8ca3a8" font-family="monospace" font-size="10" letter-spacing="4">FIXCOIN</text></g>
-<g class="impact-svg"><circle cx="414" cy="365" r="35" fill="#ffd85b" opacity=".18"/><circle cx="414" cy="365" r="10" fill="#fff6bf" filter="url(#glow)"/></g>
-</svg>
-</div>
+    <div class="forge-art" id="forgeScene">
+      <div class="forge-rock rock-left"></div><div class="forge-rock rock-right"></div>
+      <div class="ore-glow ore-a"></div><div class="ore-glow ore-b"></div>
+      <div class="miner-figure" aria-label="FIX-ASIC mining forge">
+        <div class="backpack"></div><div class="miner-body"><span>FIX-ASIC</span><i></i></div>
+        <div class="miner-head"><i></i><b></b></div>
+        <div class="miner-arm back"></div><div class="miner-arm front"></div>
+        <div class="hammer"><b></b></div>
+        <div class="leg leg-a"></div><div class="leg leg-b"></div>
+        <div class="boot boot-a"></div><div class="boot boot-b"></div>
+      </div>
+      <div class="anvil">
+        <div class="anvil-top"><span>F</span></div><div class="anvil-body"></div><small>FIXCOIN</small>
+      </div>
+      <div class="impact"><i></i><b></b><em></em></div>
+      <div class="floor"></div>
+    </div>
 
-<div class="share-particle-layer" id="particleLayer"></div>
-<div class="accept-lane"><div class="lane-core"></div><div class="lane-orbit"></div><div class="lane-label">ACCEPT STREAM</div></div>
-<div class="reject-wall" id="rejectWall"><span>REJECT WALL</span><div></div></div>
-<div class="forge-counter accepted" id="acceptedCounter"><span>ACCEPTED SHARES</span><strong id="acceptedCount">0</strong><b>+1</b><i>✓</i></div>
-<div class="forge-counter rejected" id="rejectedCounter"><span>REJECTED SHARES</span><strong id="rejectedCount">0</strong><b>-1</b><i>×</i></div>
-<div class="combo" id="combo"><span>COMBO</span><strong id="comboValue">×0</strong><small id="comboBonus">STREAK READY</small></div>
-</div>
+    <div class="particle-layer" id="particleLayer"></div>
+    <div class="accept-stream">
+      <div class="orbit orbit-1"></div><div class="orbit orbit-2"></div><div class="stream-core"></div>
+      <span>ACCEPT STREAM</span>
+    </div>
+    <div class="reject-wall" id="rejectWall"><span>REJECT WALL</span><i></i></div>
+
+    <div class="forge-counter accepted" id="acceptedCounter"><span>ACCEPTED SHARES</span><strong id="acceptedCount">0</strong><b>+1</b><i>✓</i></div>
+    <div class="forge-counter rejected" id="rejectedCounter"><span>REJECTED SHARES</span><strong id="rejectedCount">0</strong><b>-1</b><i>×</i></div>
+    <div class="combo" id="combo"><span>COMBO</span><strong id="comboValue">×0</strong><small id="comboBonus">STREAK READY</small></div>
+  </div>
 </section>
 
 <section class="candidate panel" id="candidate">
-<div class="candidate-left">
-<div class="section-title"><span class="target-icon">◎</span><div><h2>BLOCK CANDIDATE</h2><p>Best Share vs Network Difficulty</p></div></div>
-<strong class="candidate-pct" id="candidatePct">0.000%</strong><span class="candidate-caption">PROGRESS TO BLOCK</span>
-<div class="candidate-meter"><i id="candidateMeter"></i></div>
-<div class="candidate-height"><span>BLOCK HEIGHT (NEXT)</span><strong id="nextHeight">#—</strong></div>
-</div>
-<div class="candidate-core" id="candidateCore"><div class="core-ring r1"></div><div class="core-ring r2"></div><div class="core-ring r3"></div><div class="cube">F</div><span>BLOCK</span><small>VERY LOW</small></div>
-<div class="activity"><div class="section-title compact"><h2>RECENT ACTIVITY</h2></div><div id="activityList"><div class="activity-row empty">Waiting for live shares…</div></div></div>
+  <div class="candidate-left">
+    <div class="section-heading"><span class="target-icon">◎</span><div><h2>BLOCK CANDIDATE</h2><p>Best Share vs Network Difficulty</p></div></div>
+    <strong class="candidate-pct" id="candidatePct">0.000%</strong>
+    <span class="caption">PROGRESS TO BLOCK</span>
+    <div class="candidate-track"><i id="candidateMeter"></i></div>
+    <div class="next-height"><span>BLOCK HEIGHT (NEXT)</span><strong id="nextHeight">#—</strong></div>
+  </div>
+  <div class="candidate-core" id="candidateCore">
+    <div class="core-grid"></div><div class="core-ring ring-a"></div><div class="core-ring ring-b"></div><div class="core-ring ring-c"></div>
+    <div class="core-cube"><span>F</span></div><small>BLOCK</small><b>VERY LOW</b>
+  </div>
+  <div class="activity-panel">
+    <div class="activity-title">RECENT ACTIVITY</div>
+    <div id="activityList"><div class="activity-empty">Waiting for live shares…</div></div>
+  </div>
 </section>
 
 <section class="stats-grid">
-<div class="stat panel"><span>AVG. SHARE DIFFICULTY</span><strong id="avgDiff">—</strong><small>(Last 10 min)</small><svg viewBox="0 0 180 36"><polyline id="avgSpark" points="0,28 20,24 40,26 60,18 80,22 100,12 120,19 140,11 160,16 180,8"/></svg></div>
-<div class="stat panel"><span>SHARES / MIN</span><strong id="sharesMin">—</strong><small>(Last 10 min)</small><svg viewBox="0 0 180 36"><polyline id="shareSpark" points="0,29 20,28 40,25 60,27 80,19 100,21 120,15 140,17 160,10 180,13"/></svg></div>
-<div class="stat panel"><span>VALID SHARES</span><strong id="validShares">0</strong><small id="validPct">0.0%</small></div>
-<div class="stat panel"><span>INVALID SHARES</span><strong class="red" id="invalidShares">0</strong><small id="invalidPct">0.0%</small></div>
-<div class="stat panel"><span>EST. TIME TO BLOCK</span><strong id="eta">—</strong><small>(At current rate)</small></div>
+  <div class="stat panel"><span>AVG. SHARE DIFFICULTY</span><strong id="avgDiff">—</strong><small>(Last 10 min)</small><svg viewBox="0 0 180 38"><polyline id="avgSpark" points="0,31 20,27 40,29 60,21 80,25 100,15 120,21 140,12 160,18 180,8"/></svg></div>
+  <div class="stat panel"><span>SHARES / MIN</span><strong id="sharesMin">—</strong><small>(Last 10 min)</small><svg viewBox="0 0 180 38"><polyline id="shareSpark" points="0,31 20,29 40,26 60,28 80,21 100,23 120,16 140,18 160,11 180,14"/></svg></div>
+  <div class="stat panel"><span>VALID SHARES</span><strong id="validShares">0</strong><small id="validPct">0.0%</small></div>
+  <div class="stat panel"><span>INVALID SHARES</span><strong class="red" id="invalidShares">0</strong><small id="invalidPct">0.0%</small></div>
+  <div class="stat panel"><span>EST. TIME TO BLOCK</span><strong id="eta">—</strong><small>(At current rate)</small></div>
 </section>
 
-<footer class="footer"><strong>FIXEDCOIN SOLO MINER</strong><span>UP TIME <b id="uptime">—</b></span><span>CONNECTED PEERS <b id="peers">—</b></span><span>NETWORK DIFFICULTY <b id="footerDiff">—</b></span><span>VERSION <b>v29.1.3</b></span></footer>
+<section class="block-history panel" id="blockHistory">
+  <div class="history-head"><div class="section-heading"><span class="target-icon">◆</span><div><h2>BLOCK HISTORY</h2><p>Solo candidates and chain validity</p></div></div><span class="history-count" id="historyCount">0 RECORDS</span></div>
+  <div class="history-table">
+    <div class="history-row history-labels"><span>HEIGHT</span><span>VALIDITY</span><span>CONFIRMATIONS</span><span>REWARD</span><span>BLOCK HASH</span></div>
+    <div id="blockHistoryList"><div class="history-empty">No block candidates recorded yet.</div></div>
+  </div>
+</section>
+
+<footer class="footer">
+  <strong>FIXEDCOIN SOLO MINER</strong>
+  <span>UP TIME <b id="uptime">—</b></span><span>CONNECTED PEERS <b id="peers">—</b></span>
+  <span>NETWORK DIFFICULTY <b id="footerDiff">—</b></span><span>VERSION <b>v29.1.3</b></span>
+</footer>
 </main>
-<script defer src="/static/dashboard_v4.js?v=20260823-2"></script>
+<script defer src="/static/dashboard_v4.js?v=20260823-3"></script>
 </body>
 </html>
