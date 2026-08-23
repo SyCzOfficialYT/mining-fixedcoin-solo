@@ -5,119 +5,83 @@ APP = Path('/app/monitor/app.py')
 text = APP.read_text()
 changed = False
 
-old = 'render_template("dashboard_v3.html",payout=config().get("payout_address",""),maturity=MATURITY)'
-new = 'render_template("dashboard_v4.html",payout=config().get("payout_address",""),maturity=MATURITY)'
-if 'render_template("dashboard_v4.html"' in text:
-    print('dashboard v4 route already active')
-elif old in text:
+def replace_once(old, new, label, required=True):
+    global text, changed
+    if new in text:
+        return
+    if old not in text:
+        if required:
+            raise RuntimeError(label)
+        return
     text = text.replace(old, new, 1)
     changed = True
-    print('patched dashboard route: dashboard_v4.html')
-else:
-    raise RuntimeError('dashboard render route not found')
+    print(label)
+
+replace_once(
+    'render_template("dashboard_v3.html",payout=config().get("payout_address",""),maturity=MATURITY)',
+    'render_template("dashboard_v4.html",payout=config().get("payout_address",""),maturity=MATURITY)',
+    'patched dashboard route: dashboard_v4.html',
+    required=False,
+)
+
+replace_once(
+    'BLOCKS = DATA / "blocks.json"\n',
+    'BLOCKS = DATA / "blocks.json"\nLEDGER = Path(os.getenv("BLOCK_LEDGER_PATH", str(DATADIR / "solo-blocks.json")))\n',
+    'patched dashboard block ledger path',
+    required=False,
+)
+replace_once(
+    'def read_ledger():\n    try:\n        rows=json.loads(BLOCKS.read_text()) if BLOCKS.exists() else []\n        return rows if isinstance(rows,list) else []\n    except Exception:\n        return []\n',
+    '''def read_ledger():
+    try:
+        source = LEDGER if LEDGER.exists() else BLOCKS
+        rows=json.loads(source.read_text()) if source.exists() else []
+        return rows if isinstance(rows,list) else []
+    except Exception:
+        return []
+''',
+    'patched dashboard ledger reader',
+    required=False,
+)
+
+replace_once(
+    'if m: job["height"]=int(m.group(1)); job["network_diff"]=float(m.group(2))',
+    'if m: job["height"]=int(m.group(1)); job["network_diff"]=float(m.group(2)); job["round_started_at"]=line[:19]',
+    'patched dashboard round timestamp telemetry',
+    required=False,
+)
+replace_once(
+    '"started_at":stats.get("round_started_at"),"target_seconds":ROUND_SECONDS',
+    '"started_at":stats.get("round_started_at") or log_job.get("round_started_at"),"target_seconds":ROUND_SECONDS',
+    'patched dashboard timer source',
+    required=False,
+)
+replace_once(
+    'rejected=int(stats.get("shares_bad") or log_rejected or 0); accepted=int(stats.get("shares_ok") or len(shares));',
+    'rejected=max(int(stats.get("shares_bad") or 0),int(log_rejected or 0)); accepted=max(int(stats.get("shares_ok") or 0),int(len(shares)),int(log_job.get("accepted") or 0));',
+    'patched dashboard live share counters',
+    required=False,
+)
+replace_once(
+    'return accepted[-200:],rejected,blocks[-100:],workers,job',
+    'job["accepted"]=len(accepted); return accepted[-200:],rejected,blocks[-100:],workers,job',
+    'patched dashboard parsed share count',
+    required=False,
+)
 
 if 'FIX_DASH_APP_STARTED' not in text:
-    marker = 'WORKER_ACTIVE_SECONDS = int(os.getenv("WORKER_ACTIVE_SECONDS", "180"))\n'
-    inject = marker + 'FIX_DASH_APP_STARTED = time.time()\n'
-    if marker not in text:
-        raise RuntimeError('dashboard uptime anchor not found')
-    text = text.replace(marker, inject, 1)
-    changed = True
-    print('patched dashboard uptime telemetry')
+    marker='WORKER_ACTIVE_SECONDS = int(os.getenv("WORKER_ACTIVE_SECONDS", "180"))\n'
+    if marker in text:
+        text=text.replace(marker,marker+'FIX_DASH_APP_STARTED = time.time()\n',1); changed=True
+        print('patched dashboard app uptime marker')
 
-# If stats.json does not persist the round start, derive it from the most recent
-# NEW ROUND log entry so the visible 10-minute countdown remains functional.
-if 'dashboard round-start log fallback' not in text:
-    marker = '    pool=config(); fixed_diff=as_number(pool.get("fixed_difficulty",13354),13354);'
-    inject = '''    # dashboard round-start log fallback
-    if not stats.get("round_started_at"):
-        for recent_line in reversed(lines(LOG, 400)):
-            if "NEW ROUND" in recent_line:
-                round_ts = recent_line[:19]
-                if parse_ts(round_ts):
-                    stats["round_started_at"] = round_ts
-                    break
-    pool=config(); fixed_diff=as_number(pool.get("fixed_difficulty",13354),13354);'''
-    if marker not in text:
-        raise RuntimeError('dashboard status pool anchor not found')
-    text = text.replace(marker, inject, 1)
-    text = text.replace('    # dashboard round-start log fallback', '    # dashboard round-start log fallback', 1)
-    changed = True
-    print('patched dashboard timer: NEW ROUND fallback')
-
-if '@app.get("/api/stream")' not in text:
-    marker = '@app.get("/api/logs")\n'
-    stream = """
-@app.get("/api/stream")
-def api_stream():
-    def generate():
-        last_mtime = 0
-        last_sig = None
-        while True:
-            try:
-                mtime = LOG.stat().st_mtime_ns if LOG.exists() else 0
-                if mtime != last_mtime:
-                    recent = lines(LOG, 40)
-                    event_type = "state"
-                    for line in reversed(recent):
-                        if "ACCEPT" in line:
-                            event_type = "accept"; break
-                        if "REJECT" in line or "low difficulty" in line.lower():
-                            event_type = "reject"; break
-                        if "NEW ROUND" in line:
-                            event_type = "round"; break
-                        if "BLOCK" in line:
-                            event_type = "block"; break
-                    sig = (mtime, event_type)
-                    if sig != last_sig:
-                        payload = json.dumps({'type': event_type, 'ts': int(time.time())})
-                        yield "data: " + payload + chr(10) + chr(10)
-                        last_sig = sig
-                    last_mtime = mtime
-                else:
-                    yield ": heartbeat" + chr(10) + chr(10)
-                time.sleep(0.5)
-            except GeneratorExit:
-                return
-            except Exception:
-                yield ": heartbeat" + chr(10) + chr(10)
-                time.sleep(1)
-
-    return Response(
-        generate(),
-        mimetype="text/event-stream",
-        headers={
-            "Cache-Control": "no-cache",
-            "X-Accel-Buffering": "no",
-            "Connection": "keep-alive",
-        },
-    )
-
-"""
-    if marker not in text:
-        raise RuntimeError('dashboard log endpoint anchor not found')
-    text = text.replace(marker, stream + marker, 1)
-    changed = True
-    print('patched dashboard realtime SSE endpoint')
-
-if 'from flask import Flask, jsonify, render_template, Response' not in text:
-    text = text.replace(
-        'from flask import Flask, jsonify, render_template',
-        'from flask import Flask, jsonify, render_template, Response',
-        1,
-    )
-    changed = True
-    print('patched dashboard Response import')
-
-needle = '"ts":int(time.time())}'
-replacement = '"ts":int(time.time()),"uptime_seconds":int(time.time()-FIX_DASH_APP_STARTED)}'
 if '"uptime_seconds"' not in text:
-    if needle not in text:
-        raise RuntimeError('dashboard status return anchor not found')
-    text = text.replace(needle, replacement, 1)
-    changed = True
-    print('patched dashboard status uptime field')
+    needle='"ts":int(time.time())}'
+    replacement='"ts":int(time.time()),"uptime_seconds":int(time.time()-FIX_DASH_APP_STARTED)}'
+    if needle in text:
+        text=text.replace(needle,replacement,1); changed=True
+        print('patched dashboard status uptime field')
 
 if changed:
     APP.write_text(text)
-print('dashboard backend patch complete')
+print('dashboard v4 backend repair complete')
