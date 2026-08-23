@@ -1,0 +1,21 @@
+.miner-reference-wrap{left:15%!important;bottom:24px!important;width:min(48%,480px)!important;aspect-ratio:180/202!important;z-index:20!important;filter:drop-shadow(0 18px 30px rgba(0,0,0,.52))!important;overflow:visible!important}
+.miner-reference{display:none!important}
+.miner-puppet{display:block;width:100%;height:100%;overflow:visible;filter:drop-shadow(0 0 9px rgba(28,215,238,.08))}
+.miner-body-rig{transform-box:view-box;transform-origin:50% 86%}
+.miner-arm-rig{transform-box:view-box;transform-origin:94px 84px}
+.miner-impact-flash{transform-box:view-box;transform-origin:154px 132px}
+.miner-reference-wrap.is-hitting{animation:none!important}
+.puppet-impact .miner-puppet{filter:drop-shadow(0 0 14px rgba(255,183,68,.4)) drop-shadow(0 0 32px rgba(255,103,42,.18))}
+.puppet-block .miner-puppet{animation:puppetBlock .9s cubic-bezier(.1,.9,.2,1)}
+@keyframes puppetBlock{0%{transform:scale(1)}28%{transform:scale(1.045) translateY(-4px);filter:brightness(1.5)}100%{transform:scale(1);filter:none}}
+.accept-stream,.reject-stream,.impact{display:none!important}
+.forge-stage.is-accepting .miner-reference-wrap,.forge-stage.is-rejecting .miner-reference-wrap{animation:none!important}
+.forge-stage.is-accepting .miner-reference,.forge-stage.is-rejecting .miner-reference{animation:none!important}
+.particle-canvas{display:none!important}
+.miner-particle-canvas{position:absolute!important;inset:0!important;width:100%;height:100%;z-index:36!important;pointer-events:none!important}
+.forge-counter{z-index:42!important}
+.block-history{overflow:visible!important}
+.history-table{max-height:320px!important;overflow-y:auto!important;overflow-x:auto!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior:contain}
+@media(max-width:900px){.miner-reference-wrap{left:7%!important;width:55%!important;bottom:20px!important}}
+@media(max-width:620px){.miner-reference-wrap{left:2%!important;width:59%!important;bottom:18px!important}.forge-stage{height:380px}.forge-counter{transform:scale(.72)}}
+@media(prefers-reduced-motion:reduce){.miner-body-rig,.miner-arm-rig,.miner-puppet{animation:none!important}.miner-particle-canvas{display:none!important}}
