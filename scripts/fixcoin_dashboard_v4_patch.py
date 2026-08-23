@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Harden the v4 dashboard backend around authoritative Stratum round state."""
 from pathlib import Path
-import re
 
 APP = Path('/app/monitor/app.py')
 text = APP.read_text()
@@ -19,12 +18,10 @@ def once(old, new, label, required=False):
     changed = True
     print(label)
 
-# v4 route
 once('render_template("dashboard_v3.html",payout=config().get("payout_address",""),maturity=MATURITY)',
      'render_template("dashboard_v4.html",payout=config().get("payout_address",""),maturity=MATURITY)',
      'patched dashboard route: dashboard_v4.html')
 
-# Persistent block ledger: prefer the dedicated solo ledger, then legacy blocks.json.
 once('BLOCKS = DATA / "blocks.json"\n',
      'BLOCKS = DATA / "blocks.json"\nLEDGER = Path(os.getenv("BLOCK_LEDGER_PATH", str(DATADIR / "solo-blocks.json")))\n',
      'patched dashboard block ledger path')
@@ -44,14 +41,13 @@ once('''def read_ledger():
         return []
 ''', 'patched dashboard ledger reader')
 
-# IMPORTANT: only a real "NEW ROUND height=..." log line starts a dashboard round.
-# Job notifications may carry the same height, but they are not round boundaries.
+# Only a real NEW ROUND log line starts a dashboard round. Job notifications do not.
 once('accepted, rejected, blocks, workers, job = [], 0, [], {}, {}',
      'accepted, rejected, blocks, workers, job = [], 0, [], {}, {}\n    round_height=0; round_started_at=None; round_started_epoch=0',
      'patched authoritative round telemetry state')
-once('''m=re.search(r"NEW ROUND\\s+height=(\\d+)\\s+netdiff=([0-9.eE+\\-]+)",line,re.I)
+once('''m=re.search(r"NEW ROUND\\s+height=(\\d+)\\s+netdiff=([0-9.eE+-]+)",line,re.I)
         if m: job["height"]=int(m.group(1)); job["network_diff"]=float(m.group(2))''',
-'''m=re.search(r"NEW ROUND\\s+height=(\\d+)\\s+netdiff=([0-9.eE+\\-]+)",line,re.I)
+'''m=re.search(r"NEW ROUND\\s+height=(\\d+)\\s+netdiff=([0-9.eE+-]+)",line,re.I)
         if m:
             round_height=int(m.group(1)); round_started_at=line[:19]; round_started_epoch=ts
             job["round_height"]=round_height; job["round_started_at"]=round_started_at; job["round_started_epoch"]=round_started_epoch; job["network_diff"]=float(m.group(2))''',
@@ -67,22 +63,15 @@ once('return accepted[-200:],rejected,blocks[-100:],workers,job',
      'job["round_height"]=round_height; job["round_started_at"]=round_started_at; job["round_started_epoch"]=round_started_epoch; return accepted[-200:],rejected,blocks[-100:],workers,job',
      'patched authoritative round return')
 
-# Dashboard process uptime.
 if 'FIX_DASH_APP_STARTED' not in text:
     marker='WORKER_ACTIVE_SECONDS = int(os.getenv("WORKER_ACTIVE_SECONDS", "180"))\n'
     if marker in text:
         text=text.replace(marker,marker+'FIX_DASH_APP_STARTED = time.time()\n',1); changed=True; print('patched dashboard app uptime marker')
 
-# Keep counters monotonic when stats.json lags the live log parser.
 once('rejected=int(stats.get("shares_bad") or log_rejected or 0); accepted=int(stats.get("shares_ok") or len(shares));',
      'rejected=max(int(stats.get("shares_bad") or 0),int(log_rejected or 0)); accepted=max(int(stats.get("shares_ok") or 0),int(len(shares)),int(log_job.get("accepted") or 0));',
      'patched dashboard live share counters')
-once('return accepted[-200:],rejected,blocks[-100:],workers,job',
-     'job["accepted"]=len(accepted); job["rejected"]=rejected; return accepted[-200:],rejected,blocks[-100:],workers,job',
-     'patched dashboard parsed share counts')
 
-# Authoritative round object: height may be current chain height, but started_at/epoch
-# must come from the actual NEW ROUND parser above. The frontend timer consumes epoch.
 once('job={"job_id":log_job.get("job_id"),"height":stats.get("round_height") or log_job.get("height") or height,"network_diff":network_diff}; job.update(log_job)',
      'job={"job_id":log_job.get("job_id"),"height":stats.get("round_height") or log_job.get("round_height") or height,"network_diff":network_diff}; job.update(log_job)',
      'patched dashboard authoritative job height')
@@ -90,7 +79,6 @@ once('"started_at":stats.get("round_started_at"),"target_seconds":ROUND_SECONDS'
      '"started_at":log_job.get("round_started_at") or stats.get("round_started_at"),"started_epoch":log_job.get("round_started_epoch") or stats.get("round_started_epoch"),"target_seconds":ROUND_SECONDS',
      'patched dashboard authoritative timer source')
 
-# Status endpoint uptime.
 if '"uptime_seconds"' not in text:
     needle='"ts":int(time.time())}'
     if needle in text:
