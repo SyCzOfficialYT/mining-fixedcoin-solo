@@ -1,0 +1,26 @@
+:root{--hud-green:#57ff72;--hud-red:#ff4f4f;--hud-bg:rgba(0,5,9,.96)}
+
+/* Reference HUD: VarDiff is a live pool-difficulty readout, not decorative text. */
+.forge-vardiff-hud{position:absolute;left:50%;top:28px;transform:translateX(-50%);width:192px;height:69px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:7px 12px;border:1px solid rgba(230,246,248,.86);border-radius:2px;background:var(--hud-bg);box-shadow:0 0 0 1px rgba(255,255,255,.04) inset,0 14px 34px rgba(0,0,0,.34),0 0 24px rgba(20,225,255,.035);z-index:58;pointer-events:none;text-align:center}
+.forge-vardiff-hud span{font:700 8px/1 var(--mono);letter-spacing:.18em;color:#8fa9af;text-transform:uppercase}
+.forge-vardiff-hud strong{font:700 28px/.98 var(--mono);letter-spacing:-.045em;color:#f4f8fa;text-shadow:0 0 18px rgba(255,255,255,.08);font-variant-numeric:tabular-nums}
+.forge-vardiff-hud small{font:600 7px/1 var(--mono);letter-spacing:.16em;color:#4e6970;text-transform:uppercase}
+
+/* The stream markers belong INSIDE the accepted/rejected cards. */
+.accept-stream,.reject-stream{display:none!important}
+.forge-counter{isolation:isolate}
+.forge-counter.accepted::before,.forge-counter.rejected::before{content:"";position:absolute;width:9px;height:9px;border-radius:50%;right:52px;top:50%;transform:translateY(-50%);z-index:3}
+.forge-counter.accepted::before{background:#61ff78;box-shadow:0 0 5px #61ff78,0 0 13px rgba(97,255,120,.92),0 0 25px rgba(97,255,120,.45);animation:forgeStatusDotGreen 1.7s ease-in-out infinite}
+.forge-counter.rejected::before{background:#ff4d4d;box-shadow:0 0 5px #ff4d4d,0 0 13px rgba(255,77,77,.92),0 0 25px rgba(255,77,77,.42);animation:forgeStatusDotRed 1.7s ease-in-out infinite}
+.forge-counter.accepted i,.forge-counter.rejected i{z-index:4;transition:box-shadow .2s ease,filter .2s ease,text-shadow .2s ease}
+.forge-counter.accepted i{color:#8dff9c;text-shadow:0 0 8px #58ff73,0 0 18px rgba(88,255,115,.9);box-shadow:0 0 7px rgba(88,255,115,.42),inset 0 0 8px rgba(88,255,115,.10)}
+.forge-counter.rejected i{color:#ff8989;text-shadow:0 0 8px #ff4d4d,0 0 18px rgba(255,77,77,.9);box-shadow:0 0 7px rgba(255,77,77,.42),inset 0 0 8px rgba(255,77,77,.10)}
+.forge-counter.accepted.value-pulse i{filter:brightness(1.45);box-shadow:0 0 12px rgba(88,255,115,.95),0 0 28px rgba(88,255,115,.7),inset 0 0 10px rgba(88,255,115,.2)}
+.forge-counter.rejected.value-pulse-red i{filter:brightness(1.5);box-shadow:0 0 12px rgba(255,77,77,.95),0 0 28px rgba(255,77,77,.7),inset 0 0 10px rgba(255,77,77,.2)}
+
+@keyframes forgeStatusDotGreen{0%,100%{transform:translateY(-50%) scale(.9);opacity:.78}50%{transform:translateY(-50%) scale(1.18);opacity:1}}
+@keyframes forgeStatusDotRed{0%,100%{transform:translateY(-50%) scale(.9);opacity:.78}50%{transform:translateY(-50%) scale(1.18);opacity:1}}
+
+@media(max-width:900px){.forge-vardiff-hud{top:28px;width:192px;height:69px}.forge-counter.accepted::before,.forge-counter.rejected::before{right:49px}}
+@media(max-width:620px){.forge-vardiff-hud{top:28px;width:192px;height:69px}.forge-vardiff-hud strong{font-size:27px}.forge-counter.accepted::before,.forge-counter.rejected::before{right:48px;width:8px;height:8px}}
+@media(prefers-reduced-motion:reduce){.forge-counter.accepted::before,.forge-counter.rejected::before{animation:none}.forge-counter.accepted i,.forge-counter.rejected i{transition:none}}
