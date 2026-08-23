@@ -9,79 +9,43 @@
 .reject-wall{right:24%;bottom:78px;z-index:32}
 .forge-counter{z-index:48}
 .combo{z-index:48}
-
-/* Richer forge depth: cave walls, warm impact pool, floor perspective and ore glow. */
-.forge-stage{background:
- radial-gradient(ellipse at 42% 58%,rgba(16,113,135,.22),transparent 28%),
- radial-gradient(ellipse at 77% 54%,rgba(42,255,108,.10),transparent 24%),
- radial-gradient(ellipse at 49% 82%,rgba(255,161,35,.13),transparent 15%),
- linear-gradient(180deg,#020a10 0%,#02080c 65%,#010507 100%)}
+.forge-stage{background: radial-gradient(ellipse at 42% 58%,rgba(16,113,135,.22),transparent 28%),radial-gradient(ellipse at 77% 54%,rgba(42,255,108,.10),transparent 24%),radial-gradient(ellipse at 49% 82%,rgba(255,161,35,.13),transparent 15%),linear-gradient(180deg,#020a10 0%,#02080c 65%,#010507 100%)}
 .forge-stage:before{opacity:.58}
-.forge-stage:after{background:
- radial-gradient(circle at 48% 72%,rgba(255,178,43,.18),transparent 10%),
- radial-gradient(circle at 75% 55%,rgba(58,255,113,.10),transparent 18%),
- linear-gradient(90deg,rgba(0,0,0,.55),transparent 22%,transparent 78%,rgba(0,0,0,.52))}
+.forge-stage:after{background:radial-gradient(circle at 48% 72%,rgba(255,178,43,.18),transparent 10%),radial-gradient(circle at 75% 55%,rgba(58,255,113,.10),transparent 18%),linear-gradient(90deg,rgba(0,0,0,.55),transparent 22%,transparent 78%,rgba(0,0,0,.52))}
 .forge-art:before,.forge-art:after{content:"";position:absolute;pointer-events:none}
 .forge-art:before{left:-18%;right:-18%;bottom:0;height:46%;background:linear-gradient(160deg,transparent 0 24%,rgba(14,46,55,.45) 25%,transparent 42%),linear-gradient(20deg,transparent 0 35%,rgba(7,27,34,.72) 36%,transparent 58%);clip-path:polygon(0 100%,0 44%,13% 57%,22% 31%,33% 53%,46% 18%,57% 48%,68% 28%,78% 56%,89% 36%,100% 54%,100% 100%);opacity:.72;z-index:2}
 .forge-art:after{left:18%;right:4%;bottom:30px;height:2px;background:linear-gradient(90deg,transparent,#24535d 12%,#2b6570 48%,#24535d 88%,transparent);box-shadow:0 0 28px rgba(25,225,255,.18);z-index:10}
-
-/* Keep the hash-rate HUD outside the miner silhouette. */
 @media (min-width:901px){.hashrate-card{max-width:176px}.forge-art{left:205px;right:300px}.reference-miner{width:min(500px,52vw)}}
-
-/* Tablet/mobile: this follows the reference image's hierarchy instead of shrinking every element into one pile. */
-@media(max-width:900px){
-  .forge{min-height:0}
-  .forge-stage{height:610px;min-height:610px}
-  .forge-art{left:0;right:0;inset-block:0}
-  .reference-miner{width:min(470px,82vw);height:auto;max-height:500px;bottom:28px}
-  .hashrate-card{left:18px;top:18px;width:145px}
-  .accept-stream{right:-2%;top:34%;transform:scale(.82);transform-origin:center right}
-  .reject-wall{right:14%;bottom:80px;height:190px}
-  .forge-counter{right:12px;width:165px}
-  .combo{left:18px;bottom:24px}
-}
-@media(max-width:620px){
-  .dashboard{width:calc(100% - 14px);gap:8px}
-  .hero{border-radius:15px}
-  .hero-main{padding:20px 16px 15px}
-  .hero-values{grid-template-columns:1fr 30px 1fr;gap:4px}
-  .hero-value strong{font-size:clamp(31px,9.4vw,48px)}
-  .round-panel{grid-template-columns:1fr 1fr;padding:13px 14px}
-  .round-id{font-size:21px;padding:6px 10px}
-  .estimate{font-size:22px}.remaining{font-size:31px}
-  .forge-stage{height:545px;min-height:545px}
-  .forge-head{padding:12px 13px}
-  .forge-head .eyebrow{font-size:9px}
-  .live{font-size:7px}
-  .hashrate-card{left:12px;top:14px;width:132px;padding:9px 10px;transform:none}
-  .hashrate-card strong{font-size:15px}
-  .reference-miner{width:min(430px,92vw);max-width:92vw;bottom:26px}
-  .accept-stream{right:-11%;top:37%;transform:scale(.68);transform-origin:center right}
-  .reject-wall{right:16%;bottom:58px;height:165px}
-  .reject-wall span{font-size:8px}
-  .forge-counter{width:143px;padding:9px 11px}
-  .forge-counter strong{font-size:28px}
-  .forge-counter span{font-size:7px}
-  .forge-counter i{width:30px;height:30px;top:21px}
-  .accepted{top:21px}.rejected{bottom:19px}
-  .combo{left:13px;bottom:18px}.combo strong{font-size:27px}
-  .candidate{display:grid}
-  .candidate-left{padding:20px 16px}
-  .candidate-pct{font-size:48px;margin-top:22px}
-  .candidate-core{min-height:245px}
-  .activity-panel{padding:17px 14px}
-  .activity-row{grid-template-columns:22px 1fr auto;padding:7px 0}
-  .stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .stat{min-height:120px;padding:13px}
-  .block-history{padding:17px 12px 6px}
-  .history-table{max-height:330px;overflow-y:auto}
-}
-
-/* Block history must be a real scroll container, not a clipped card. */
-.block-history{overflow:visible}
-.history-table{max-height:420px;overflow-y:auto;overflow-x:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#2a7d88 #02070a}
-.history-table::-webkit-scrollbar{width:8px;height:8px}.history-table::-webkit-scrollbar-track{background:#02070a}.history-table::-webkit-scrollbar-thumb{background:#2a7d88;border-radius:8px;border:2px solid #02070a}
-.history-labels,.history-row{min-width:920px}
-@media(max-width:620px){.history-labels{display:none}.history-row{min-width:0;grid-template-columns:1fr 1fr;min-height:74px}.history-row>span:nth-child(5){grid-column:1/-1}}
-
+@media(max-width:900px){.forge{min-height:0}.forge-stage{height:610px;min-height:610px}.forge-art{left:0;right:0;inset-block:0}.reference-miner{width:min(470px,82vw);height:auto;max-height:500px;bottom:28px}.hashrate-card{left:18px;top:18px;width:145px}.accept-stream{right:-2%;top:34%;transform:scale(.82);transform-origin:center right}.reject-wall{right:14%;bottom:80px;height:190px}.forge-counter{right:12px;width:165px}.combo{left:18px;bottom:24px}}
+@media(max-width:620px){.dashboard{width:calc(100% - 14px);gap:8px}.hero{border-radius:15px}.hero-main{padding:20px 16px 15px}.hero-values{grid-template-columns:1fr 30px 1fr;gap:4px}.hero-value strong{font-size:clamp(31px,9.4vw,48px)}.round-panel{grid-template-columns:1fr 1fr;padding:13px 14px}.round-id{font-size:21px;padding:6px 10px}.estimate{font-size:22px}.remaining{font-size:31px}.forge-stage{height:545px;min-height:545px}.forge-head{padding:12px 13px}.forge-head .eyebrow{font-size:9px}.live{font-size:7px}.hashrate-card{left:12px;top:14px;width:132px;padding:9px 10px;transform:none}.hashrate-card strong{font-size:15px}.reference-miner{width:min(430px,92vw);max-width:92vw;bottom:26px}.accept-stream{right:-11%;top:37%;transform:scale(.68);transform-origin:center right}.reject-wall{right:16%;bottom:58px;height:165px}.reject-wall span{font-size:8px}.forge-counter{width:143px;padding:9px 11px}.forge-counter strong{font-size:28px}.forge-counter span{font-size:7px}.forge-counter i{width:30px;height:30px;top:21px}.accepted{top:21px}.rejected{bottom:19px}.combo{left:13px;bottom:18px}.combo strong{font-size:27px}.candidate{display:grid}.candidate-left{padding:20px 16px}.candidate-pct{font-size:48px;margin-top:22px}.candidate-core{min-height:245px}.activity-panel{padding:17px 14px}.activity-row{grid-template-columns:22px 1fr auto;padding:7px 0}.stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.stat{min-height:120px;padding:13px}.block-history{padding:17px 12px 6px}.history-table{max-height:330px;overflow-y:auto}}
+.block-history{overflow:visible}.history-table{max-height:420px;overflow-y:auto;overflow-x:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#2a7d88 #02070a}.history-table::-webkit-scrollbar{width:8px;height:8px}.history-table::-webkit-scrollbar-track{background:#02070a}.history-table::-webkit-scrollbar-thumb{background:#2a7d88;border-radius:8px;border:2px solid #02070a}.history-labels,.history-row{min-width:920px}@media(max-width:620px){.history-labels{display:none}.history-row{min-width:0;grid-template-columns:1fr 1fr;min-height:74px}.history-row>span:nth-child(5){grid-column:1/-1}}
 @media(prefers-reduced-motion:reduce){.reference-miner{animation:none!important}}
+
+/* Block-candidate HUD upgrade: clearer hierarchy, explicit semantics, and the same FIXCORE visual language as the forge. */
+.candidate{min-height:354px;display:grid;grid-template-columns:minmax(0,1.35fr) minmax(280px,.65fr);grid-template-rows:1fr auto;background:linear-gradient(145deg,rgba(4,17,23,.98),rgba(1,7,11,.99));}
+.candidate-left{padding:28px 30px 24px;position:relative;z-index:3;display:flex;flex-direction:column;justify-content:center}
+.candidate .section-heading{display:flex;align-items:center;gap:14px;margin-bottom:4px}
+.candidate .section-heading .target-icon{width:32px;height:32px;display:grid;place-items:center;border:1px solid rgba(98,245,109,.78);border-radius:50%;color:var(--green);font:700 18px var(--mono);box-shadow:0 0 18px rgba(98,245,109,.12),inset 0 0 12px rgba(98,245,109,.06)}
+.candidate .section-heading h2{margin:0;color:#b9d0d4;font:700 17px/1.1 var(--mono);letter-spacing:.16em}
+.candidate .section-heading p{margin:6px 0 0;color:#607a82;font:500 11px/1.35 var(--sans);letter-spacing:.02em}
+.candidate-pct{display:block;margin:27px 0 0;color:var(--green);font:800 clamp(58px,6vw,78px)/.92 var(--mono);letter-spacing:-.07em;text-shadow:0 0 32px rgba(98,245,109,.16)}
+.candidate .caption{display:block;margin-top:9px;color:#6c878e;font-size:9px;letter-spacing:.2em}
+.candidate-track{margin-top:14px;height:14px;border-color:#18515e;background:linear-gradient(180deg,#01080b,#020507);box-shadow:inset 0 2px 7px #000,0 0 14px rgba(24,224,255,.04)}
+.candidate-track:after{content:"NETWORK BLOCK TARGET";position:absolute;right:0;top:21px;color:#4d6971;font:600 8px var(--mono);letter-spacing:.13em}
+.candidate .next-height{display:flex;justify-content:space-between;align-items:center;margin-top:42px;padding-top:13px;border-top:1px solid rgba(23,63,74,.75)}
+.candidate .next-height>span{font-size:9px;color:#718a90}
+.candidate .next-height strong{font:800 22px var(--mono);color:#cfe3e6}
+.candidate-core{position:relative;min-height:0;display:grid;place-items:center;align-content:center;border-left:1px solid rgba(18,56,66,.9);background:radial-gradient(circle at 50% 44%,rgba(55,255,112,.08),transparent 36%),linear-gradient(180deg,rgba(3,17,22,.55),rgba(1,8,12,.25));overflow:hidden}
+.candidate-core:before{content:"";position:absolute;width:250px;height:250px;border:1px solid rgba(25,228,255,.14);border-radius:50%;box-shadow:0 0 0 22px rgba(25,228,255,.018),0 0 0 48px rgba(25,228,255,.012);animation:candidateHalo 9s linear infinite}
+.candidate-core small{position:relative;margin-top:8px;color:#58f16b;font:700 9px var(--mono);letter-spacing:.2em}
+.candidate-core b{position:relative;margin-top:6px;color:#8df69a;font:700 8px var(--mono);letter-spacing:.18em}
+.candidate-core .core-cube{position:relative;z-index:2;width:112px;height:112px;display:grid;place-items:center;transform:rotate(45deg);border:1px solid rgba(77,255,112,.68);background:rgba(6,39,26,.25);box-shadow:0 0 24px rgba(77,255,112,.10),inset 0 0 22px rgba(77,255,112,.05)}
+.candidate-core .core-cube:before,.candidate-core .core-cube:after{content:"";position:absolute;inset:15px;border:1px solid rgba(77,255,112,.32)}
+.candidate-core .core-cube:after{inset:29px;border-color:rgba(25,228,255,.25)}
+.candidate-core .core-cube span{transform:rotate(-45deg);color:#72ff8b;font:800 36px var(--mono);text-shadow:0 0 18px rgba(98,245,109,.55)}
+.candidate-core .core-grid{position:absolute;inset:12%;opacity:.35;background:linear-gradient(rgba(25,228,255,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(25,228,255,.08) 1px,transparent 1px);background-size:28px 28px;mask-image:radial-gradient(circle,#000 0 45%,transparent 72%)}
+.candidate-core .core-ring{position:absolute;border:1px solid rgba(72,255,123,.2);border-radius:50%;aspect-ratio:1}.candidate-core .ring-a{width:190px}.candidate-core .ring-b{width:225px;border-style:dashed}.candidate-core .ring-c{width:260px;border-color:rgba(25,228,255,.12)}
+.activity-panel{grid-column:1/-1;border-top:1px solid rgba(18,58,69,.7);padding:10px 30px;display:none}
+@keyframes candidateHalo{to{transform:rotate(360deg)}}
+@media(max-width:900px){.candidate{grid-template-columns:1fr;grid-template-rows:auto auto}.candidate-core{min-height:280px;border-left:0;border-top:1px solid rgba(18,56,66,.9)}.candidate-left{padding:25px 24px}.candidate-pct{font-size:clamp(54px,11vw,74px)}}
+@media(max-width:620px){.candidate .section-heading h2{font-size:14px}.candidate .section-heading p{font-size:10px}.candidate-pct{margin-top:22px}.candidate .next-height{margin-top:36px}.candidate-core:before{width:210px;height:210px}.candidate-core .ring-a{width:160px}.candidate-core .ring-b{width:190px}.candidate-core .ring-c{width:220px}.candidate-core .core-cube{width:92px;height:92px}.candidate-core .core-cube span{font-size:30px}}
