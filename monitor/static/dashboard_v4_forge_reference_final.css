@@ -1,0 +1,83 @@
+/* Final reference geometry — intentionally loaded after every previous Forge layer. */
+
+/* Forge is a bounded instrument; only the HUD elements that belong below it may visually overlap. */
+.forge#forge{position:relative!important;overflow:visible!important;isolation:isolate!important}
+.forge#forge .forge-stage{position:relative!important;overflow:visible!important}
+
+/* Mountains are strictly background atmosphere and can never escape the Forge viewport. */
+.forge#forge .forge-rock{top:auto!important;bottom:-46px!important;clip-path:inset(0 0 34px 0)!important;opacity:.28!important;filter:blur(.2px)!important;pointer-events:none!important;z-index:1!important}
+
+/* Left metric instruments — reference proportions, same technical language as Candidate. */
+.forge-stage .hashrate-card,.forge-stage .forge-shares-min{
+  left:54px!important;right:auto!important;width:340px!important;min-height:220px!important;padding:22px 20px 16px!important;
+  border:1px solid rgba(24,75,86,.92)!important;border-radius:14px!important;
+  background:linear-gradient(145deg,rgba(3,14,19,.90),rgba(1,7,11,.78))!important;
+  box-shadow:inset 0 0 0 1px rgba(25,228,255,.03),0 18px 36px rgba(0,0,0,.28)!important;
+  transform:perspective(900px) rotateY(10deg) rotateX(2deg)!important;transform-origin:center!important;
+  text-align:left!important;overflow:hidden!important
+}
+.forge-stage .hashrate-card{top:18px!important}
+.forge-stage .forge-shares-min{top:260px!important;transform:perspective(900px) rotateY(10deg) rotateX(1.5deg)!important}
+.forge-stage .hashrate-card>span,.forge-stage .forge-shares-min>span{font-size:10px!important;letter-spacing:.18em!important;color:#7f969b!important;margin:0 0 10px!important}
+.forge-stage .hashrate-card>strong,.forge-stage .forge-shares-min>strong{font-size:32px!important;line-height:1!important;color:#d8e9ec!important;text-shadow:none!important}
+.forge-stage .hashrate-card>small,.forge-stage .forge-shares-min>small{font-size:8px!important;letter-spacing:.11em!important;color:#536f77!important;margin-top:9px!important}
+.forge-stage .hashrate-card>svg,.forge-stage .forge-shares-min>svg{height:54px!important;min-height:54px!important;margin-top:18px!important}
+.forge-stage .hashrate-card polyline,.forge-stage .forge-shares-min polyline{stroke-width:2!important}
+
+/* Right share instruments — wider, taller, quieter idle state. */
+.forge-stage .forge-counter.accepted,.forge-stage .forge-counter.rejected{
+  right:58px!important;left:auto!important;width:342px!important;min-height:192px!important;padding:22px 22px 18px!important;
+  border:1px solid rgba(24,75,86,.92)!important;border-radius:14px!important;
+  background:linear-gradient(145deg,rgba(3,14,19,.90),rgba(1,7,11,.78))!important;
+  box-shadow:inset 0 0 0 1px rgba(25,228,255,.03),0 18px 36px rgba(0,0,0,.28)!important;
+  transform:perspective(900px) rotateY(-10deg) rotateX(2deg)!important;transform-origin:center!important
+}
+.forge-stage .forge-counter.accepted{top:57px!important;bottom:auto!important}
+.forge-stage .forge-counter.rejected{bottom:48px!important;top:auto!important;transform:perspective(900px) rotateY(-10deg) rotateX(1.5deg)!important}
+.forge-stage .forge-counter.accepted>span:first-child,.forge-stage .forge-counter.rejected>span:first-child{font-size:10px!important;letter-spacing:.16em!important;color:#7f969b!important}
+.forge-stage .forge-counter.accepted>strong,.forge-stage .forge-counter.rejected>strong{font-size:42px!important;line-height:1!important;color:#d8e9ec!important;text-shadow:none!important}
+.forge-stage .forge-counter.accepted>b,.forge-stage .forge-counter.rejected>b{color:#536f77!important;font-size:9px!important}
+.forge-stage .forge-counter.accepted>i,.forge-stage .forge-counter.rejected>i{width:48px!important;height:48px!important;right:22px!important;top:50%!important;transform:translateY(-50%)!important;border-color:rgba(28,68,78,.9)!important;box-shadow:none!important}
+
+/* VarDiff is a central technical instrument, not a floating foreign card. */
+.forge-stage .vardiff-card{width:280px!important;min-height:92px!important;left:50%!important;top:8px!important;transform:translateX(-50%)!important;border:1px solid rgba(24,75,86,.92)!important;border-radius:12px!important;background:linear-gradient(145deg,rgba(3,14,19,.90),rgba(1,7,11,.78))!important;box-shadow:inset 0 0 0 1px rgba(25,228,255,.03),0 18px 36px rgba(0,0,0,.26)!important}
+
+/* Keep COMBO as a small left command label, visually attached to the lower deck. */
+.forge-stage .combo{left:82px!important;right:auto!important;top:auto!important;bottom:-64px!important;width:210px!important;transform:none!important;z-index:40!important}
+
+/* The Candidate is a separate lower command deck in the reference, not an overlay on top of the Forge. */
+#candidate.candidate{
+  position:relative!important;z-index:30!important;margin-top:0!important;margin-left:18.3%!important;margin-right:24.0%!important;
+  min-height:300px!important;display:grid!important;grid-template-columns:minmax(0,1fr) 280px!important;grid-template-rows:1fr auto!important;
+  border:1px solid rgba(24,75,86,.92)!important;border-radius:14px!important;
+  background:linear-gradient(145deg,rgba(3,14,19,.88),rgba(1,7,11,.78))!important;
+  box-shadow:inset 0 0 0 1px rgba(25,228,255,.028),0 18px 48px rgba(0,0,0,.34)!important;
+  overflow:hidden!important
+}
+#candidate .candidate-left{padding:26px 28px 22px!important}
+#candidate .candidate-core{min-height:300px!important;border-left:1px solid rgba(18,56,66,.7)!important;background:radial-gradient(circle at 50% 44%,rgba(55,255,112,.06),transparent 38%),transparent!important}
+#candidate .candidate-pct{font-size:clamp(58px,5.7vw,78px)!important}
+
+/* Remove the old oversized lower-card overlap rules. */
+#candidate.candidate:before{content:""!important;position:absolute!important;inset:0!important;pointer-events:none!important;background:linear-gradient(90deg,transparent 0 70%,rgba(25,228,255,.025) 70% 70.2%,transparent 70.2%),radial-gradient(circle at 77% 46%,rgba(55,255,112,.05),transparent 30%)!important}
+
+@media(max-width:1100px){
+  .forge-stage .hashrate-card,.forge-stage .forge-shares-min{left:32px!important;width:300px!important}
+  .forge-stage .forge-counter.accepted,.forge-stage .forge-counter.rejected{right:32px!important;width:300px!important}
+  #candidate.candidate{margin-left:17%!important;margin-right:17%!important}
+}
+@media(max-width:900px){
+  .forge-stage .hashrate-card,.forge-stage .forge-shares-min{left:24px!important;width:250px!important;min-height:190px!important}
+  .forge-stage .forge-shares-min{top:230px!important}
+  .forge-stage .forge-counter.accepted,.forge-stage .forge-counter.rejected{right:24px!important;width:250px!important;min-height:166px!important}
+  .forge-stage .forge-counter.rejected{bottom:24px!important}
+  #candidate.candidate{margin-left:8%!important;margin-right:8%!important;grid-template-columns:1fr 240px!important}
+}
+@media(max-width:700px){
+  .forge-stage .hashrate-card,.forge-stage .forge-shares-min{left:16px!important;width:205px!important;min-height:156px!important;padding:16px 14px!important}
+  .forge-stage .hashrate-card{top:18px!important}.forge-stage .forge-shares-min{top:192px!important}
+  .forge-stage .forge-counter.accepted,.forge-stage .forge-counter.rejected{right:16px!important;width:205px!important;min-height:142px!important;padding:16px 14px!important}
+  .forge-stage .forge-counter.accepted{top:32px!important}.forge-stage .forge-counter.rejected{bottom:24px!important}
+  #candidate.candidate{margin-left:4%!important;margin-right:4%!important;grid-template-columns:1fr!important;grid-template-rows:auto auto!important}
+  #candidate .candidate-core{border-left:0!important;border-top:1px solid rgba(18,56,66,.7)!important;min-height:240px!important}
+}
