@@ -5,7 +5,7 @@ import re
 
 HTML = Path('/app/monitor/templates/dashboard_v4.html')
 html = HTML.read_text()
-VERSION = '20260823-7'
+VERSION = '20260823-8'
 CSS = f'<link rel="stylesheet" href="/static/dashboard_v4_forge_collision.css?v={VERSION}">'
 JS = f'<script defer src="/static/dashboard_v4_forge_collision.js?v={VERSION}"></script>'
 
@@ -45,4 +45,4 @@ if missing:
     raise RuntimeError('forge collision patch verification failed: ' + ', '.join(missing))
 
 HTML.write_text(html)
-print('dashboard collision layer applied: comet share particles, tight OFF/ON impact strobe, smooth centered orbital progress field, lowered mountains')
+print('dashboard collision layer applied: each particle owns an isolated neon pulse; centered progress field orbits smoothly')
