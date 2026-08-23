@@ -1,12 +1,19 @@
-/* FIXCORE forge metric cards — exact physical shell of the Accepted/Rejected cards. */
+/* FIXCORE forge metric cards — mirrored 3D shell of the right-side share cards.
+   Left metrics intentionally mirror the Accepted/Rejected geometry:
+   - same physical card footprint
+   - opposite Y rotation so the top edge falls toward the right
+   - mirrored rear plate / thumb thickness
+   - real preserve-3d depth
+   - same parallax variables as the share cards
+*/
 .forge-stage .hashrate-card,
 .forge-stage .forge-shares-min {
   position:absolute!important;
   box-sizing:border-box!important;
   width:210px!important;
   min-width:210px!important;
-  height:126px!important;
-  min-height:126px!important;
+  height:118px!important;
+  min-height:118px!important;
   margin:0!important;
   padding:.65rem .8rem .7rem .95rem!important;
   border-radius:14px!important;
@@ -22,20 +29,25 @@
   justify-content:flex-start!important;
   text-align:left!important;
   z-index:48!important;
-  border:2px solid #39ff8a!important;
-  transform:perspective(700px) rotateY(calc(-18deg + var(--metric-px,0deg))) rotateX(calc(4deg + var(--metric-py,0deg)))!important;
+  border:1px solid #174954!important;
+  transform:perspective(700px) rotateY(calc(18deg + var(--metric-px,0deg))) rotateX(calc(4deg + var(--metric-py,0deg)))!important;
   box-shadow:
-    inset 0 0 0 1px rgba(57,255,138,.2),
-    0 0 6px 0 rgba(57,255,138,.65),
-    0 0 14px 1px rgba(57,255,138,.35),
-    0 0 30px 2px rgba(57,255,138,.15),
-    3px 6px 16px rgba(0,0,0,.5)!important;
+    inset 0 0 0 1px rgba(23,73,84,.38),
+    inset 0 0 12px rgba(20,183,205,.035),
+    0 0 0 1px rgba(22,101,115,.22),
+    0 8px 18px rgba(0,0,0,.48)!important;
 }
 
 .forge-stage .hashrate-card{left:30px!important;right:auto!important;top:42px!important}
-.forge-stage .forge-shares-min{left:30px!important;right:auto!important;top:203px!important;transform:perspective(700px) rotateY(calc(-18deg + var(--metric-px,0deg))) rotateX(calc(3deg + var(--metric-py,0deg)))!important}
+.forge-stage .forge-shares-min{
+  left:30px!important;
+  right:auto!important;
+  top:195px!important;
+  transform:perspective(700px) rotateY(calc(18deg + var(--metric-px,0deg))) rotateX(calc(3deg + var(--metric-py,0deg)))!important;
+}
 
-/* IDENTICAL rear/depth plate to the right-side Accepted/Rejected cards. */
+/* Mirrored rear plate: the right-side cards push their depth to the right;
+   the left-side cards push their depth to the left. */
 .forge-stage .hashrate-card::before,
 .forge-stage .forge-shares-min::before{
   content:""!important;
@@ -44,16 +56,30 @@
   inset:0!important;
   border-radius:14px!important;
   background:#03070a!important;
-  z-index:-1!important;
+  z-index:-2!important;
   pointer-events:none!important;
-  transform:translate3d(-12px,3px,-28px)!important;
+  transform:translate3d(12px,3px,-28px)!important;
   transform-style:preserve-3d!important;
-  border:2px solid rgba(57,255,138,.95)!important;
-  box-shadow:0 0 6px rgba(57,255,138,.4),0 0 14px rgba(57,255,138,.15)!important;
+  border:1px solid rgba(23,73,84,.9)!important;
+  box-shadow:4px 6px 12px rgba(0,0,0,.5),0 0 12px rgba(20,183,205,.06)!important;
 }
 
+/* Physical side wall on the left edge, mirrored from the right share-card rim. */
 .forge-stage .hashrate-card::after,
-.forge-stage .forge-shares-min::after{content:none!important;display:none!important}
+.forge-stage .forge-shares-min::after{
+  content:""!important;
+  position:absolute!important;
+  top:7px!important;
+  bottom:7px!important;
+  left:-8px!important;
+  width:10px!important;
+  border-radius:10px 0 0 10px!important;
+  background:linear-gradient(270deg,rgba(25,109,123,.72),rgba(10,49,58,.62),transparent)!important;
+  box-shadow:-2px 0 10px rgba(22,210,231,.13)!important;
+  transform:translateZ(-4px)!important;
+  z-index:-1!important;
+  pointer-events:none!important;
+}
 
 .forge-stage .hashrate-card>span,
 .forge-stage .forge-shares-min>span{
@@ -79,7 +105,7 @@
 .forge-stage .hashrate-card>svg,
 .forge-stage .forge-shares-min>svg{
   display:block!important;position:relative!important;flex:1 1 auto!important;align-self:stretch!important;width:100%!important;
-  min-height:30px!important;height:30px!important;margin:7px 0 0!important;padding:0!important;overflow:visible!important;z-index:4!important;
+  min-height:27px!important;height:27px!important;margin:6px 0 0!important;padding:0!important;overflow:visible!important;z-index:4!important;
   transform:translateZ(9px)!important;
 }
 .forge-stage .hashrate-card polyline,
@@ -89,21 +115,21 @@
 
 @media(max-width:700px){
   .forge-stage .hashrate-card,.forge-stage .forge-shares-min{
-    left:22px!important;width:200px!important;min-width:200px!important;height:120px!important;min-height:120px!important;
+    left:22px!important;width:200px!important;min-width:200px!important;height:112px!important;min-height:112px!important;
   }
   .forge-stage .hashrate-card{top:42px!important}
-  .forge-stage .forge-shares-min{top:197px!important}
+  .forge-stage .forge-shares-min{top:189px!important}
 }
 @media(max-width:520px){
   .forge-stage .hashrate-card,.forge-stage .forge-shares-min{
-    left:14px!important;width:190px!important;min-width:190px!important;height:116px!important;min-height:116px!important;
+    left:14px!important;width:190px!important;min-width:190px!important;height:108px!important;min-height:108px!important;
     padding:.65rem .8rem .7rem .95rem!important;
   }
   .forge-stage .hashrate-card{top:36px!important}
-  .forge-stage .forge-shares-min{top:187px!important}
+  .forge-stage .forge-shares-min{top:179px!important}
   .forge-stage .hashrate-card>span,.forge-stage .forge-shares-min>span{font-size:10px!important}
   .forge-stage .hashrate-card>strong,.forge-stage .forge-shares-min>strong{font-size:1.9rem!important}
-  .forge-stage .hashrate-card>svg,.forge-stage .forge-shares-min>svg{min-height:27px!important;height:27px!important;margin-top:6px!important}
+  .forge-stage .hashrate-card>svg,.forge-stage .forge-shares-min>svg{min-height:24px!important;height:24px!important;margin-top:5px!important}
 }
 @media(prefers-reduced-motion:reduce){
   .forge-stage .hashrate-card,.forge-stage .forge-shares-min{will-change:auto!important}
