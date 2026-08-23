@@ -8,8 +8,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/static/dashboard_v4.css?v=20260823-5">
-<link rel="stylesheet" href="/static/dashboard_v4_fix.css?v=20260823-2">
+<link rel="stylesheet" href="/static/dashboard_v4.css?v=20260823-6">
+<link rel="stylesheet" href="/static/dashboard_v4_fix.css?v=20260823-3">
 </head>
 <body>
 <div class="ambient ambient-cyan"></div><div class="ambient ambient-green"></div><div class="grid-noise"></div>
@@ -31,8 +31,8 @@
     <div class="round-sep"></div>
     <span>ESTIMATED BLOCK TIME</span><strong class="estimate">◷&nbsp; 10:00</strong>
     <div class="round-sep"></div>
-    <span class="cyan">TIME REMAINING</span><strong class="remaining" id="timeRemain">10:00</strong><small id="timePct">100.0%</small>
-    <span class="status-label">ROUND STATUS</span><b class="status active" id="roundStatus">ACTIVE</b>
+    <span class="cyan">TIME REMAINING</span><strong class="remaining" id="timeRemain">00:00</strong><small id="timePct">0.0%</small>
+    <span class="status-label">ROUND STATUS</span><b class="status waiting" id="roundStatus">WAITING</b>
   </aside>
 </section>
 <section class="forge panel" id="forge">
@@ -42,11 +42,27 @@
   </header>
   <div class="forge-stage" id="forgeStage">
     <div class="forge-vignette"></div>
+    <div class="forge-rock rock-left"></div><div class="forge-rock rock-right"></div>
+    <div class="ore-glow ore-a"></div><div class="ore-glow ore-b"></div>
     <div class="hashrate-card glass-card"><span>HASHRATE</span><strong id="forgeHashrate">—</strong><small>5M WINDOW</small><svg viewBox="0 0 180 44" preserveAspectRatio="none"><polyline id="hashSpark" points="0,34 18,27 35,31 52,19 69,26 86,14 103,24 120,12 138,19 155,10 180,16"/></svg></div>
-    <div class="forge-art" id="forgeScene"><img class="reference-miner" src="/static/miner_reference.svg?v=20260823-2" alt="FIX-ASIC mining forge"><div class="impact"><i></i><b></b><em></em></div><div class="floor"></div></div>
+    <div class="forge-art" id="forgeScene">
+      <div class="miner-figure" id="minerFigure">
+        <div class="backpack"></div>
+        <div class="miner-head"><i></i><b></b></div>
+        <div class="miner-body"><span>FIX-ASIC</span><i></i></div>
+        <div class="miner-arm back"></div>
+        <div class="miner-arm front"></div>
+        <div class="hammer" id="hammer"><b></b></div>
+        <div class="leg leg-a"></div><div class="leg leg-b"></div>
+        <div class="boot boot-a"></div><div class="boot boot-b"></div>
+      </div>
+      <div class="anvil" id="anvil"><div class="anvil-top"><b>F</b></div><div class="anvil-body"></div><small>FIXCOIN</small></div>
+      <div class="impact" id="impact"><i></i><b></b><em></em></div>
+      <div class="floor"></div>
+    </div>
     <div class="particle-layer" id="particleLayer"></div>
     <div class="accept-stream"><div class="orbit orbit-1"></div><div class="orbit orbit-2"></div><div class="stream-core"></div><span>ACCEPT STREAM</span></div>
-    <div class="reject-wall" id="rejectWall"><span>REJECT WALL</span><i></i></div>
+    <div class="reject-stream"><div class="reject-orbit orbit-1"></div><div class="reject-orbit orbit-2"></div><div class="reject-core"></div><span>REJECT STREAM</span></div>
     <div class="forge-counter accepted" id="acceptedCounter"><span>ACCEPTED SHARES</span><strong id="acceptedCount">0</strong><b>+1</b><i>✓</i></div>
     <div class="forge-counter rejected" id="rejectedCounter"><span>REJECTED SHARES</span><strong id="rejectedCount">0</strong><b>-1</b><i>×</i></div>
     <div class="combo" id="combo"><span>COMBO</span><strong id="comboValue">×0</strong><small id="comboBonus">STREAK READY</small></div>
@@ -70,7 +86,6 @@
 </section>
 <footer class="footer"><strong>FIXEDCOIN SOLO MINER</strong><span>UP TIME <b id="uptime">—</b></span><span>CONNECTED PEERS <b id="peers">—</b></span><span>NETWORK DIFFICULTY <b id="footerDiff">—</b></span><span>VERSION <b>v29.1.3</b></span></footer>
 </main>
-<script defer src="/static/dashboard_v4.js?v=20260823-5"></script>
-<script defer src="/static/dashboard_v4_fix.js?v=20260823-2"></script>
+<script defer src="/static/dashboard_v4.js?v=20260823-6"></script>
 </body>
 </html>
