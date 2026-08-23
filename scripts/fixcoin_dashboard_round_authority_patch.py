@@ -7,10 +7,12 @@ JS=Path('/app/monitor/static/dashboard_v4.js')
 app=APP.read_text(); js=JS.read_text(); changed_app=False; changed_js=False
 
 def any_replace(text, variants, new, label):
-    if new in text:return text,False
+    if new in text:
+        return text,False
     for old in variants:
         if old in text:
-            print(label);return text.replace(old,new,1),True
+            print(label)
+            return text.replace(old,new,1),True
     raise RuntimeError(f'missing round-authority anchor: {label}')
 
 app,c=any_replace(app,[
@@ -35,11 +37,15 @@ new_activity="/* ROUND STARTED comes only from /api/logs or the authoritative SS
 js,c=any_replace(js,[old_activity],new_activity,'removed synthetic ROUND STARTED activity generator');changed_js|=c
 
 # The SSE round message is authoritative because it is emitted by the real
-# Stratum round transition. It may update the activity list, but no polling
-# state is allowed to manufacture the event.
-old_round_sse="else if(e.type==='round'){window.dispatchEvent(new CustomEvent('fixedcoin:round',{detail:e}));poll(false)}"
+# Stratum round transition. Older dashboard_v4.js used only poll(false), while
+# another revision dispatched a fixedcoin:round event. Support both source
+# forms so this patch remains idempotent across dashboard revisions.
 new_round_sse="else if(e.type==='round'){addActivity('round','ROUND STARTED','#'+Number(e.height||e.round_height||0).toLocaleString(),String(e.ts||e.time||'').slice(11),`sse-round-${e.height||e.round_height||0}-${e.ts||e.time||''}`);window.dispatchEvent(new CustomEvent('fixedcoin:round',{detail:e}));poll(false)}"
-js,c=any_replace(js,[old_round_sse],new_round_sse,'patched realtime round activity from authoritative SSE');changed_js|=c
+old_round_sse_variants=[
+"else if(e.type==='round'){window.dispatchEvent(new CustomEvent('fixedcoin:round',{detail:e}));poll(false)}",
+"else if(e.type==='round'){poll(false)}",
+]
+js,c=any_replace(js,old_round_sse_variants,new_round_sse,'patched realtime round activity from authoritative SSE');changed_js|=c
 
 old_timer="function updateTimer(round){const target=Number(round?.target_seconds)||600,started=parseTime(round?.started_epoch||round?.started_at);if(!started){$('timeRemain').textContent='00:00';$('timePct').textContent='0.0%';$('roundStatus').textContent='WAITING';$('roundStatus').className='status waiting';return}const elapsed=Math.max(0,(Date.now()/1000)-started),remain=Math.max(0,target-elapsed);$('timeRemain').textContent=timeOnly(remain);$('timePct').textContent=(100*remain/target).toFixed(1)+'%';const active=remain>0;$('roundStatus').textContent=active?'ACTIVE':'WAITING';$('roundStatus').className='status '+(active?'active':'waiting')}"
 new_timer="function updateTimer(round){const target=Number(round?.target_seconds)||600,started=parseTime(round?.started_epoch||round?.started_at);if(round?.source!=='stratum-log'||!started||started>Date.now()/1000+2){$('timeRemain').textContent='00:00';$('timePct').textContent='0.0%';$('roundStatus').textContent='WAITING';$('roundStatus').className='status waiting';return}const elapsed=Math.max(0,(Date.now()/1000)-started),remain=Math.max(0,target-elapsed);$('timeRemain').textContent=timeOnly(remain);$('timePct').textContent=(100*remain/target).toFixed(1)+'%';const active=remain>0;$('roundStatus').textContent=active?'ACTIVE':'WAITING';$('roundStatus').className='status '+(active?'active':'waiting')}"
