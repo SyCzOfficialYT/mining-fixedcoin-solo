@@ -10,22 +10,25 @@ html=HTML.read_text()
 # Remove any legacy humanoid/raster miner mount left by older patches.
 html=re.sub(r'\s*<div class="miner-reference-wrap"[^>]*>.*?</div>', '', html, count=1, flags=re.S)
 html=re.sub(r'\s*<script[^>]+dashboard_v4_miner\.js[^>]*></script>', '', html, count=1)
-# Remove the old anvil/impact markup if an older patch inserted it.
 html=re.sub(r'\s*<div class="anvil"[^>]*>.*?</div>\s*<div class="impact"[^>]*>.*?</div>', '', html, count=1, flags=re.S)
 if 'id="forgeCore"' not in html:
     raise RuntimeError('FIXCORE mount missing after legacy miner cleanup')
 if 'dashboard_v4_miner.js' in html or 'miner-reference' in html or '<img' in html or '<image' in html:
     raise RuntimeError('legacy miner markup survived FIXCORE dashboard patch')
 
-# Live VarDiff HUD: show the actual current worker/pool difficulty, never the
-# decorative "VarDiff" placeholder used by the old reference composition.
-css_link='<link rel="stylesheet" href="/static/dashboard_v4_forge_hud.css?v=20260823-2">'
-# Replace an older generated link if the patch has already run in a working tree.
+# Live VarDiff HUD stylesheet: inject it exactly once regardless of the current
+# dashboard forge stylesheet version.
+css_link='<link rel="stylesheet" href="/static/dashboard_v4_forge_hud.css?v=20260823-3">'
 html=re.sub(r'<link rel="stylesheet" href="/static/dashboard_v4_forge_hud\.css\?v=[^"]+">', '', html)
-anchor='<link rel="stylesheet" href="/static/dashboard_v4_shares_min.css?v=20260823-1">'
-if anchor not in html:
-    raise RuntimeError('dashboard v4 shares/min stylesheet anchor missing')
-html=html.replace(anchor,anchor+css_link,1)
+anchor='<link rel="stylesheet" href="/static/dashboard_v4_forge.css?v=20260823-5">'
+if anchor in html:
+    html=html.replace(anchor,anchor+css_link,1)
+elif 'dashboard_v4_forge_hud.css' not in html:
+    # Fall back to the first forge stylesheet if the forge version was bumped.
+    m=re.search(r'(<link rel="stylesheet" href="/static/dashboard_v4_forge(?:_motion)?\.css\?v=[^"]+">)',html)
+    if not m:
+        raise RuntimeError('dashboard v4 forge stylesheet anchor missing')
+    html=html[:m.end()]+css_link+html[m.end():]
 
 hud='<div class="forge-vardiff-hud" id="forgeVarDiff"><span>VARDIFF MODE</span><strong id="poolDiffValue">—</strong><small id="poolDiffLabel">POOL DIFF · LIVE</small></div>'
 if 'id="poolDiffValue"' not in html:
@@ -34,22 +37,18 @@ if 'id="poolDiffValue"' not in html:
         raise RuntimeError('forge vignette anchor missing')
     html=html.replace(anchor,anchor+hud,1)
 
-# Status dots are real children of the counters and are positioned by the
-# forge HUD stylesheet in the bottom-right card corner. The stream markers are
-# implementation-only and remain hidden by CSS.
-html=html.replace('<div class="forge-counter accepted" id="acceptedCounter"><span>ACCEPTED SHARES</span>', '<div class="forge-counter accepted" id="acceptedCounter"><span>ACCEPTED SHARES</span>', 1)
-html=html.replace('</div><div class="forge-counter rejected" id="rejectedCounter"><span>REJECTED SHARES</span>', '</div><div class="forge-counter rejected" id="rejectedCounter"><span>REJECTED SHARES</span>', 1)
-
-script='<script defer src="/static/dashboard_v4_forge_hud.js?v=20260823-1"></script>'
-if script not in html:
-    html=html.replace('<script defer src="/static/dashboard_v4_forge.js?v=20260823-2"></script>', '<script defer src="/static/dashboard_v4_forge.js?v=20260823-2"></script>'+script, 1)
+# Load the HUD client exactly once. Do not depend on an old forge.js version.
+html=re.sub(r'<script[^>]+dashboard_v4_forge_hud\.js\?v=[^>]+></script>', '', html)
+script='<script defer src="/static/dashboard_v4_forge_hud.js?v=20260823-2"></script>'
+forge_script=re.search(r'<script[^>]+dashboard_v4_forge\.js\?v=[^>]+></script>',html)
+if not forge_script:
+    raise RuntimeError('dashboard v4 forge script anchor missing')
+html=html[:forge_script.end()]+script+html[forge_script.end():]
 HTML.write_text(html)
 
 # Expose the real current Stratum worker difficulty to the dashboard. With the
 # solo setup there is normally one active worker; if none is active we fall
-# back to the configured fixed difficulty. This patch intentionally anchors
-# on the stable fixed_difficulty field rather than the complete JSON fragment,
-# because earlier dashboard patches may add fields beside it.
+# back to the configured fixed difficulty.
 text=APP.read_text()
 if 'pool_difficulty=' not in text:
     marker='    active_workers=list(workers.keys())\n'
@@ -58,8 +57,6 @@ if 'pool_difficulty=' not in text:
         raise RuntimeError('dashboard worker authority anchor missing')
     text=text.replace(marker,insert,1)
 
-# Add the live pool difficulty and explicit VarDiff mode without depending on
-# the exact ordering of fields emitted by previous dashboard patches.
 if '"pool_difficulty":pool_difficulty' not in text:
     marker='"fixed_difficulty":fixed_diff,'
     if marker not in text:
@@ -67,4 +64,4 @@ if '"pool_difficulty":pool_difficulty' not in text:
     text=text.replace(marker,marker+'"pool_difficulty":pool_difficulty,"vardiff_mode":True,',1)
 APP.write_text(text)
 
-print('FIXCORE forge enforced: legacy miner removed, live VarDiff HUD wired, and share status dots/icons moved into counters')
+print('FIXCORE forge enforced: live VarDiff HUD hardened, legacy miner removed, and authoritative pool difficulty exposed')
