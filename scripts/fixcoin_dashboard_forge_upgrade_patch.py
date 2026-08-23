@@ -19,10 +19,19 @@ for pattern in (
     r'<script[^>]+dashboard_v4_forge_upgrade\.js\?v=[^>]+></script>',
 ):
     html = re.sub(pattern, '', html)
-anchor = '<link rel="stylesheet" href="/static/dashboard_v4_forge_metrics_layout.css?v=20260823-1">'
-if anchor not in html: raise RuntimeError('dashboard forge metrics stylesheet anchor missing')
+
+# The metrics-layout patch is versioned and may legitimately advance its cache-buster.
+# Match the stylesheet by filename instead of pinning an old version (20260823-1).
+anchor_match = re.search(
+    r'<link rel="stylesheet" href="/static/dashboard_v4_forge_metrics_layout\.css\?v=[^"]+">',
+    html,
+)
+if not anchor_match:
+    raise RuntimeError('dashboard forge metrics stylesheet anchor missing')
+anchor = anchor_match.group(0)
 # Reference -> upgrade -> transparency -> final visual pass. FINAL owns idle share-card and particle behavior.
 html = html.replace(anchor, anchor + REF + UP + TRAN + FINAL, 1)
+
 anchor_js = '<script defer src="/static/dashboard_v4_share_parallax.js?v=20260823-9"></script>'
 if anchor_js not in html: raise RuntimeError('dashboard forge client anchor missing')
 html = html.replace(anchor_js, anchor_js + JS, 1)
