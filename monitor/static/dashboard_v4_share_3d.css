@@ -1,7 +1,8 @@
 :root {
   --share3d-green: #39ff8a;
   --share3d-red: #ff4455;
-  --share-card-gap: 175px;
+  --share-accepted-top: 192px;
+  --share-card-gap: 35px;
 }
 
 .accept-stream,
@@ -40,7 +41,7 @@
 #forgeStage .forge-counter.accepted {
   right: 36px !important;
   left: auto !important;
-  top: 52px !important;
+  top: var(--share-accepted-top) !important;
   bottom: auto !important;
   transform: perspective(700px) rotateY(calc(-18deg + var(--px, 0deg))) rotateX(calc(4deg + var(--py, 0deg))) !important;
   border: 2px solid var(--share3d-green) !important;
@@ -51,7 +52,7 @@
 #forgeStage .forge-counter.rejected {
   right: 36px !important;
   left: auto !important;
-  top: calc(52px + 80px + var(--share-card-gap)) !important;
+  top: calc(var(--share-accepted-top) + 80px + var(--share-card-gap)) !important;
   bottom: auto !important;
   transform: perspective(700px) rotateY(calc(-18deg + var(--px, 0deg))) rotateX(calc(3deg + var(--py, 0deg))) !important;
   border: 2px solid var(--share3d-red) !important;
@@ -97,8 +98,8 @@
 
 @media (max-width: 620px) {
   .forge-counter { width: min(200px, calc(100% - 48px)) !important; min-width: 0 !important; }
-  .forge-counter.accepted, #forgeStage .forge-counter.accepted { right: 22px !important; top: 44px !important; }
-  .forge-counter.rejected, #forgeStage .forge-counter.rejected { right: 22px !important; top: calc(44px + 80px + var(--share-card-gap)) !important; bottom: auto !important; }
+  .forge-counter.accepted, #forgeStage .forge-counter.accepted { right: 22px !important; top: 150px !important; }
+  .forge-counter.rejected, #forgeStage .forge-counter.rejected { right: 22px !important; top: calc(150px + 80px + var(--share-card-gap)) !important; bottom: auto !important; }
 }
 
 @media (prefers-reduced-motion: reduce) {
