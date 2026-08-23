@@ -5,12 +5,12 @@ import re
 
 HTML = Path('/app/monitor/templates/dashboard_v4.html')
 html = HTML.read_text()
-VERSION = '20260823-13'
+VERSION = '20260823-14'
 COLLISION_CSS = f'<link rel="stylesheet" href="/static/dashboard_v4_forge_collision.css?v={VERSION}">'
 COLLISION_JS = f'<script defer src="/static/dashboard_v4_forge_collision.js?v={VERSION}"></script>'
 HUD_CSS = f'<link rel="stylesheet" href="/static/dashboard_v4_forge_hud_match.css?v={VERSION}">'
-REFERENCE_CSS = f'<link rel="stylesheet" href="/static/dashboard_v4_forge_reference_final.css?v={VERSION}">' 
-CANDIDATE_CSS = f'<link rel="stylesheet" href="/static/dashboard_v4_forge_candidate_restore.css?v={VERSION}">' 
+REFERENCE_CSS = f'<link rel="stylesheet" href="/static/dashboard_v4_forge_reference_final.css?v={VERSION}">'
+CANDIDATE_CSS = f'<link rel="stylesheet" href="/static/dashboard_v4_forge_candidate_restore.css?v={VERSION}">'
 
 html = re.sub(r'<script[^>]+/static/dashboard_v4_share_impact\.js\?v=[^>]+></script>', '', html)
 for pattern in (
@@ -52,4 +52,4 @@ if '/static/dashboard_v4_share_impact.js?' in html:
     raise RuntimeError('legacy share-impact JS is still included; refusing to build conflicting particle engines')
 
 HTML.write_text(html)
-print('dashboard Forge reference match applied; pre-reference Block Candidate composition restored; per-particle collision layer loaded')
+print('dashboard Forge reference match applied; integrated Block Candidate composition restored; per-particle collision layer loaded')
