@@ -6,23 +6,6 @@
 .forge-shares-min svg{display:block;width:100%;height:30px;margin-top:5px}
 .forge-shares-min polyline{fill:none;stroke:#58ef6d;stroke-width:2.1;filter:drop-shadow(0 0 4px rgba(84,239,108,.5))}
 
-/* v4.4 reference HUD positioning: match the supplied mobile forge composition. */
-.forge-vignette::after{content:"VarDiff";position:absolute;left:50%;top:7%;transform:translateX(-50%);min-width:192px;width:192px;height:69px;display:grid;place-items:center;padding:8px 14px;border:1px solid rgba(230,246,248,.8);border-radius:2px;background:rgba(0,5,9,.96);color:#f4f8fa;font:500 37px/1 var(--sans);letter-spacing:-.04em;z-index:58;box-shadow:0 0 0 1px rgba(255,255,255,.05) inset,0 12px 28px rgba(0,0,0,.28);pointer-events:none}
-.accept-stream{right:14%;top:53%;z-index:46}
-.reject-stream{right:17%;top:65.5%;z-index:46}
-.accepted{right:12px;top:21px;z-index:48}
-.rejected{right:12px;bottom:19px;z-index:48}
-.forge-shares-min{left:12px;top:172px;z-index:55}
-
-@media(min-width:901px){
-  .forge-vignette::after{width:192px;min-width:192px;height:69px;font-size:38px;top:7%}
-  .accept-stream{right:16.5%;top:53%}
-  .reject-stream{right:19.5%;top:65.5%}
-  .forge-shares-min{left:30px;top:184px}
-}
-@media(min-width:621px) and (max-width:900px){
-  .forge-vignette::after{width:192px;min-width:192px;height:69px;font-size:38px;top:7%}
-  .accept-stream{right:16%;top:53%}
-  .reject-stream{right:19%;top:65.5%}
-  .forge-shares-min{left:18px;top:178px}
-}
+@media(min-width:901px){.forge-shares-min{left:30px;top:184px}}
+@media(min-width:621px) and (max-width:900px){.forge-shares-min{left:18px;top:178px}}
+@media(max-width:620px){.forge-shares-min{left:12px;top:172px;width:132px;padding:9px 10px}.forge-shares-min strong{font-size:15px}}
