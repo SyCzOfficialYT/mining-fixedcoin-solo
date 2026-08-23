@@ -1,0 +1,9 @@
+/* Final transparency pass: candidate HUD inherits the exact Forge surface underneath. */
+.forge.panel{position:relative!important;background:transparent!important;overflow:hidden!important}
+.forge > .candidate,.forge > .candidate.panel,.forge > .candidate .candidate-left,.forge > .candidate .candidate-core{background:transparent!important;background-color:transparent!important}
+.forge > .candidate{border:0!important;outline:0!important;box-shadow:none!important;border-radius:0!important}
+.forge > .candidate::before,.forge > .candidate::after,.forge > .candidate.panel::before,.forge > .candidate.panel::after{content:none!important;display:none!important;background:transparent!important;box-shadow:none!important;border:0!important}
+.forge > .candidate .candidate-core{border:0!important;box-shadow:none!important}
+/* Full Forge atmosphere lives behind the entire instrument, including Candidate. */
+.forge.panel::before{content:""!important;position:absolute!important;inset:0!important;z-index:0!important;pointer-events:none!important;background:linear-gradient(rgba(0,229,255,.028) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,.022) 1px,transparent 1px),radial-gradient(ellipse at 45% 42%,rgba(16,100,121,.20),transparent 34%),radial-gradient(ellipse at 76% 45%,rgba(22,255,113,.10),transparent 28%),radial-gradient(ellipse at 51% 77%,rgba(24,160,122,.08),transparent 31%),linear-gradient(180deg,#020b11 0%,#02090d 58%,#01080b 100%)!important;background-size:48px 48px,48px 48px,auto,auto,auto,auto!important;background-position:center top,center top,center center,center center,center bottom,center!important}
+.forge > .forge-head,.forge > .forge-stage,.forge > .candidate,.forge > .combo{position:relative;z-index:12!important}
