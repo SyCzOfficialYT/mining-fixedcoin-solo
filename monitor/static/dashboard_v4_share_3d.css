@@ -29,7 +29,7 @@
   will-change: transform !important;
   display: grid !important;
   grid-template-columns: 1fr auto !important;
-  grid-template-rows: auto auto !important;
+  grid-template-rows: auto auto auto !important;
   align-items: center !important;
   column-gap: 0.6rem !important;
   z-index: 48 !important;
@@ -39,7 +39,7 @@
 #forgeStage .forge-counter.accepted {
   right: 36px !important;
   left: auto !important;
-  top: 34px !important;
+  top: 52px !important;
   bottom: auto !important;
   transform: perspective(700px) rotateY(calc(-18deg + var(--px, 0deg))) rotateX(calc(4deg + var(--py, 0deg))) !important;
   border: 2px solid var(--share3d-green) !important;
@@ -55,7 +55,7 @@
 #forgeStage .forge-counter.rejected {
   right: 36px !important;
   left: auto !important;
-  top: 128px !important;
+  top: 148px !important;
   bottom: auto !important;
   transform: perspective(700px) rotateY(calc(-18deg + var(--px, 0deg))) rotateX(calc(3deg + var(--py, 0deg))) !important;
   border: 2px solid var(--share3d-red) !important;
@@ -119,12 +119,15 @@
 .forge-counter > strong {
   position: relative !important;
   inset: auto !important;
+  grid-column: 1 !important;
+  grid-row: 2 !important;
   z-index: 4 !important;
   display: block !important;
   margin: 0 !important;
   padding: 0 !important;
   font: 700 1.9rem/1 "JetBrains Mono", ui-monospace, monospace !important;
   letter-spacing: -0.02em !important;
+  transform: none !important;
 }
 .forge-counter.accepted > strong {
   color: #39ff8a !important;
@@ -136,37 +139,47 @@
 }
 
 .forge-counter > b {
-  position: absolute !important;
-  left: 0.95rem !important;
-  top: 52px !important;
+  position: relative !important;
+  inset: auto !important;
+  left: auto !important;
+  top: auto !important;
   right: auto !important;
   bottom: auto !important;
+  grid-column: 1 !important;
+  grid-row: 3 !important;
   z-index: 4 !important;
-  margin: 0 !important;
+  margin: 2px 0 0 !important;
   padding: 0 !important;
-  font: 500 12px/1.2 Inter, ui-sans-serif, system-ui, sans-serif !important;
+  font: 600 11px/1 Inter, ui-sans-serif, system-ui, sans-serif !important;
+  letter-spacing: 0.02em !important;
+  transform: none !important;
+  opacity: 0.95 !important;
 }
 .forge-counter.accepted > b { color: #39ff8a !important; }
 .forge-counter.rejected > b { color: #ff4455 !important; }
 
 .forge-counter > i {
-  grid-row: 2 !important;
+  grid-row: 2 / 4 !important;
   grid-column: 2 !important;
   position: relative !important;
   inset: auto !important;
   align-self: center !important;
   justify-self: end !important;
   z-index: 4 !important;
-  width: 32px !important;
-  height: 32px !important;
+  width: 34px !important;
+  height: 34px !important;
   margin: 0 !important;
   padding: 0 !important;
   border-radius: 50% !important;
   display: grid !important;
   place-items: center !important;
-  font: 600 13px/1 Inter, ui-sans-serif, system-ui, sans-serif !important;
+  font: 700 16px/1 "Segoe UI Symbol", "Noto Sans Symbols", Inter, sans-serif !important;
   font-style: normal !important;
-  background: transparent !important;
+  font-weight: 700 !important;
+  background: rgba(0, 0, 0, 0.35) !important;
+  transform: none !important;
+  text-align: center !important;
+  line-height: 1 !important;
 }
 .forge-counter.accepted > i {
   border: 1.5px solid #39ff8a !important;
@@ -211,12 +224,12 @@
   .forge-counter.accepted,
   #forgeStage .forge-counter.accepted {
     right: 22px !important;
-    top: 28px !important;
+    top: 44px !important;
   }
   .forge-counter.rejected,
   #forgeStage .forge-counter.rejected {
     right: 22px !important;
-    top: 120px !important;
+    top: 138px !important;
     bottom: auto !important;
   }
 }
