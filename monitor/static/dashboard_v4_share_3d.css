@@ -1,7 +1,7 @@
 :root {
   --share3d-green: #39ff8a;
   --share3d-red: #ff4455;
-  --share-card-gap: 88px;
+  --share-card-gap: 125px;
 }
 
 .accept-stream,
@@ -44,12 +44,7 @@
   bottom: auto !important;
   transform: perspective(700px) rotateY(calc(-18deg + var(--px, 0deg))) rotateX(calc(4deg + var(--py, 0deg))) !important;
   border: 2px solid var(--share3d-green) !important;
-  box-shadow:
-    inset 0 0 0 1px rgba(57, 255, 138, 0.2),
-    0 0 6px 0 rgba(57, 255, 138, 0.65),
-    0 0 14px 1px rgba(57, 255, 138, 0.35),
-    0 0 30px 2px rgba(57, 255, 138, 0.15),
-    3px 6px 16px rgba(0, 0, 0, 0.5) !important;
+  box-shadow: inset 0 0 0 1px rgba(57, 255, 138, 0.2), 0 0 6px 0 rgba(57, 255, 138, 0.65), 0 0 14px 1px rgba(57, 255, 138, 0.35), 0 0 30px 2px rgba(57, 255, 138, 0.15), 3px 6px 16px rgba(0, 0, 0, 0.5) !important;
 }
 
 .forge-counter.rejected,
@@ -60,12 +55,7 @@
   bottom: auto !important;
   transform: perspective(700px) rotateY(calc(-18deg + var(--px, 0deg))) rotateX(calc(3deg + var(--py, 0deg))) !important;
   border: 2px solid var(--share3d-red) !important;
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 68, 85, 0.2),
-    0 0 6px 0 rgba(255, 68, 85, 0.65),
-    0 0 14px 1px rgba(255, 68, 85, 0.35),
-    0 0 30px 2px rgba(255, 68, 85, 0.15),
-    3px 6px 16px rgba(0, 0, 0, 0.5) !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 68, 85, 0.2), 0 0 6px 0 rgba(255, 68, 85, 0.65), 0 0 14px 1px rgba(255, 68, 85, 0.35), 0 0 30px 2px rgba(255, 68, 85, 0.15), 3px 6px 16px rgba(0, 0, 0, 0.5) !important;
 }
 
 .forge-counter::before {
@@ -84,161 +74,34 @@
   transform-style: preserve-3d !important;
 }
 
-.forge-counter.accepted::before {
-  border: 2px solid rgba(57, 255, 138, 0.95) !important;
-  box-shadow:
-    0 0 6px rgba(57, 255, 138, 0.4),
-    0 0 14px rgba(57, 255, 138, 0.15) !important;
-}
+.forge-counter.accepted::before { border: 2px solid rgba(57, 255, 138, 0.95) !important; box-shadow: 0 0 6px rgba(57, 255, 138, 0.4), 0 0 14px rgba(57, 255, 138, 0.15) !important; }
+.forge-counter.rejected::before { border: 2px solid rgba(255, 68, 85, 0.95) !important; box-shadow: 0 0 6px rgba(255, 68, 85, 0.4), 0 0 14px rgba(255, 68, 85, 0.15) !important; }
+.forge-counter::after { content: none !important; display: none !important; }
 
-.forge-counter.rejected::before {
-  border: 2px solid rgba(255, 68, 85, 0.95) !important;
-  box-shadow:
-    0 0 6px rgba(255, 68, 85, 0.4),
-    0 0 14px rgba(255, 68, 85, 0.15) !important;
-}
-
-.forge-counter::after {
-  content: none !important;
-  display: none !important;
-}
-
-.forge-counter > span:not(.event-dot) {
-  grid-column: 1 / -1 !important;
-  position: relative !important;
-  inset: auto !important;
-  z-index: 4 !important;
-  margin: 0 0 1px !important;
-  padding: 0 !important;
-  font: 600 10px/1 Inter, ui-sans-serif, system-ui, sans-serif !important;
-  letter-spacing: 0.12em !important;
-  text-transform: uppercase !important;
-  color: #8aa0aa !important;
-  white-space: nowrap !important;
-}
-
-.forge-counter > strong {
-  position: relative !important;
-  inset: auto !important;
-  grid-column: 1 !important;
-  grid-row: 2 !important;
-  z-index: 4 !important;
-  display: block !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  font: 700 1.9rem/1 "JetBrains Mono", ui-monospace, monospace !important;
-  letter-spacing: -0.02em !important;
-  transform: none !important;
-}
-.forge-counter.accepted > strong {
-  color: #39ff8a !important;
-  text-shadow: 0 0 10px rgba(57, 255, 138, 0.45) !important;
-}
-.forge-counter.rejected > strong {
-  color: #ff4455 !important;
-  text-shadow: 0 0 10px rgba(255, 68, 85, 0.45) !important;
-}
-
-.forge-counter > b {
-  position: relative !important;
-  inset: auto !important;
-  left: auto !important;
-  top: auto !important;
-  right: auto !important;
-  bottom: auto !important;
-  grid-column: 1 !important;
-  grid-row: 3 !important;
-  z-index: 4 !important;
-  margin: 2px 0 0 !important;
-  padding: 0 !important;
-  font: 600 11px/1 Inter, ui-sans-serif, system-ui, sans-serif !important;
-  letter-spacing: 0.02em !important;
-  transform: none !important;
-  opacity: 0.95 !important;
-}
+.forge-counter > span:not(.event-dot) { grid-column: 1 / -1 !important; position: relative !important; inset: auto !important; z-index: 4 !important; margin: 0 0 1px !important; padding: 0 !important; font: 600 10px/1 Inter, ui-sans-serif, system-ui, sans-serif !important; letter-spacing: 0.12em !important; text-transform: uppercase !important; color: #8aa0aa !important; white-space: nowrap !important; }
+.forge-counter > strong { position: relative !important; inset: auto !important; grid-column: 1 !important; grid-row: 2 !important; z-index: 4 !important; display: block !important; margin: 0 !important; padding: 0 !important; font: 700 1.9rem/1 "JetBrains Mono", ui-monospace, monospace !important; letter-spacing: -0.02em !important; transform: none !important; }
+.forge-counter.accepted > strong { color: #39ff8a !important; text-shadow: 0 0 10px rgba(57, 255, 138, 0.45) !important; }
+.forge-counter.rejected > strong { color: #ff4455 !important; text-shadow: 0 0 10px rgba(255, 68, 85, 0.45) !important; }
+.forge-counter > b { position: relative !important; inset: auto !important; grid-column: 1 !important; grid-row: 3 !important; z-index: 4 !important; margin: 2px 0 0 !important; padding: 0 !important; font: 600 11px/1 Inter, ui-sans-serif, system-ui, sans-serif !important; letter-spacing: 0.02em !important; transform: none !important; opacity: 0.95 !important; }
 .forge-counter.accepted > b { color: #39ff8a !important; }
 .forge-counter.rejected > b { color: #ff4455 !important; }
+.forge-counter > i { grid-row: 2 / 4 !important; grid-column: 2 !important; position: relative !important; inset: auto !important; align-self: center !important; justify-self: end !important; z-index: 4 !important; width: 34px !important; height: 34px !important; margin: 0 !important; padding: 0 !important; border-radius: 50% !important; display: grid !important; place-items: center !important; font: 700 16px/1 "Segoe UI Symbol", "Noto Sans Symbols", Inter, sans-serif !important; font-style: normal !important; background: rgba(0, 0, 0, 0.35) !important; transform: none !important; text-align: center !important; }
+.forge-counter.accepted > i { border: 1.5px solid #39ff8a !important; color: #39ff8a !important; box-shadow: 0 0 8px rgba(57, 255, 138, 0.3) !important; }
+.forge-counter.rejected > i { border: 1.5px solid #ff4455 !important; color: #ff4455 !important; box-shadow: 0 0 8px rgba(255, 68, 85, 0.3) !important; }
+.forge-counter .event-dot { display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; }
 
-.forge-counter > i {
-  grid-row: 2 / 4 !important;
-  grid-column: 2 !important;
-  position: relative !important;
-  inset: auto !important;
-  align-self: center !important;
-  justify-self: end !important;
-  z-index: 4 !important;
-  width: 34px !important;
-  height: 34px !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  border-radius: 50% !important;
-  display: grid !important;
-  place-items: center !important;
-  font: 700 16px/1 "Segoe UI Symbol", "Noto Sans Symbols", Inter, sans-serif !important;
-  font-style: normal !important;
-  font-weight: 700 !important;
-  background: rgba(0, 0, 0, 0.35) !important;
-  transform: none !important;
-  text-align: center !important;
-  line-height: 1 !important;
-}
-.forge-counter.accepted > i {
-  border: 1.5px solid #39ff8a !important;
-  color: #39ff8a !important;
-  box-shadow: 0 0 8px rgba(57, 255, 138, 0.3) !important;
-}
-.forge-counter.rejected > i {
-  border: 1.5px solid #ff4455 !important;
-  color: #ff4455 !important;
-  box-shadow: 0 0 8px rgba(255, 68, 85, 0.3) !important;
-}
-
-.forge-counter .event-dot {
-  display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-}
-
-@keyframes shareCardHitAccept {
-  0% { filter: none; transform: perspective(700px) rotateY(calc(-18deg + var(--px, 0deg))) rotateX(calc(4deg + var(--py, 0deg))) scale(1); }
-  22% { filter: brightness(1.3); transform: perspective(700px) rotateY(calc(-18deg + var(--px, 0deg))) rotateX(calc(4deg + var(--py, 0deg))) scale(1.04); }
-  100% { filter: none; transform: perspective(700px) rotateY(calc(-18deg + var(--px, 0deg))) rotateX(calc(4deg + var(--py, 0deg))) scale(1); }
-}
-@keyframes shareCardHitReject {
-  0% { filter: none; transform: perspective(700px) rotateY(calc(-18deg + var(--px, 0deg))) rotateX(calc(3deg + var(--py, 0deg))) scale(1); }
-  22% { filter: brightness(1.3); transform: perspective(700px) rotateY(calc(-18deg + var(--px, 0deg))) rotateX(calc(3deg + var(--py, 0deg))) scale(1.04); }
-  100% { filter: none; transform: perspective(700px) rotateY(calc(-18deg + var(--px, 0deg))) rotateX(calc(3deg + var(--py, 0deg))) scale(1); }
-}
-.forge-counter.accepted.share-smash {
-  animation: shareCardHitAccept 0.38s cubic-bezier(0.2, 0.8, 0.2, 1) both !important;
-}
-.forge-counter.rejected.share-smash {
-  animation: shareCardHitReject 0.38s cubic-bezier(0.2, 0.8, 0.2, 1) both !important;
-}
+@keyframes shareCardHitAccept { 0% { filter: none; transform: perspective(700px) rotateY(calc(-18deg + var(--px, 0deg))) rotateX(calc(4deg + var(--py, 0deg))) scale(1); } 22% { filter: brightness(1.3); transform: perspective(700px) rotateY(calc(-18deg + var(--px, 0deg))) rotateX(calc(4deg + var(--py, 0deg))) scale(1.04); } 100% { filter: none; transform: perspective(700px) rotateY(calc(-18deg + var(--px, 0deg))) rotateX(calc(4deg + var(--py, 0deg))) scale(1); } }
+@keyframes shareCardHitReject { 0% { filter: none; transform: perspective(700px) rotateY(calc(-18deg + var(--px, 0deg))) rotateX(calc(3deg + var(--py, 0deg))) scale(1); } 22% { filter: brightness(1.3); transform: perspective(700px) rotateY(calc(-18deg + var(--px, 0deg))) rotateX(calc(3deg + var(--py, 0deg))) scale(1.04); } 100% { filter: none; transform: perspective(700px) rotateY(calc(-18deg + var(--px, 0deg))) rotateX(calc(3deg + var(--py, 0deg))) scale(1); } }
+.forge-counter.accepted.share-smash { animation: shareCardHitAccept 0.38s cubic-bezier(0.2, 0.8, 0.2, 1) both !important; }
+.forge-counter.rejected.share-smash { animation: shareCardHitReject 0.38s cubic-bezier(0.2, 0.8, 0.2, 1) both !important; }
 
 @media (max-width: 620px) {
-  .forge-counter {
-    width: min(200px, calc(100% - 48px)) !important;
-    min-width: 0 !important;
-  }
-  .forge-counter.accepted,
-  #forgeStage .forge-counter.accepted {
-    right: 22px !important;
-    top: 44px !important;
-  }
-  .forge-counter.rejected,
-  #forgeStage .forge-counter.rejected {
-    right: 22px !important;
-    top: calc(44px + 80px + var(--share-card-gap)) !important;
-    bottom: auto !important;
-  }
+  .forge-counter { width: min(200px, calc(100% - 48px)) !important; min-width: 0 !important; }
+  .forge-counter.accepted, #forgeStage .forge-counter.accepted { right: 22px !important; top: 44px !important; }
+  .forge-counter.rejected, #forgeStage .forge-counter.rejected { right: 22px !important; top: calc(44px + 80px + var(--share-card-gap)) !important; bottom: auto !important; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .forge-counter {
-    will-change: auto !important;
-    transform: none !important;
-  }
+  .forge-counter { will-change: auto !important; transform: none !important; }
   .forge-counter.share-smash { animation: none !important; }
 }
