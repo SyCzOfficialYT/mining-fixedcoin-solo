@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
-if(window.__FIXEDCOIN_FORGE_COLLISION_V7__) return;
-window.__FIXEDCOIN_FORGE_COLLISION_V7__=true;
+if(window.__FIXEDCOIN_FORGE_COLLISION_V8__) return;
+window.__FIXEDCOIN_FORGE_COLLISION_V8__=true;
 const forge=document.getElementById('forge');
 const stage=document.getElementById('forgeStage');
 const core=document.getElementById('forgeCore');
@@ -16,30 +16,47 @@ const bezier=(a,c,b,t)=>{const u=1-t;return{x:u*u*a.x+2*u*t*c.x+t*t*b.x,y:u*u*a.
 let layer=stage.querySelector('.collision-field');
 if(!layer){layer=document.createElement('div');layer.className='collision-field';layer.setAttribute('aria-hidden','true');stage.appendChild(layer)}
 
-/* Per-particle neon: a hard, short strobe with a real dark interval. */
-const pulseState={accept:{busy:false,queue:0},reject:{busy:false,queue:0}};
+/* Every particle has its own impact pulse. There is NO shared state/queue:
+   arrival #1 flashes the card, then goes dark; arrival #2 flashes it again,
+   and so on. This makes the physical particle contact the source of truth. */
 function pulseCounter(kind){
   const card=stage.querySelector(kind==='accept'?'.forge-counter.accepted':'.forge-counter.rejected');
   if(!card)return;
-  pulseState[kind].queue++;
-  if(pulseState[kind].busy)return;
-  pulseState[kind].busy=true;
-  const step=()=>{
-    if(pulseState[kind].queue<=0){pulseState[kind].busy=false;return}
-    pulseState[kind].queue--;
-    const id=String(Number(card.dataset.collisionPulse||0)+1);
-    card.dataset.collisionPulse=id;
-    card.style.setProperty('--collision-alpha',(0.96+Math.random()*0.04).toFixed(3));
-    card.classList.remove('collision-pulse','collision-active');
-    void card.offsetWidth;
-    card.classList.add('collision-pulse','collision-active');
-    window.setTimeout(()=>{
-      if(card.dataset.collisionPulse===id){card.classList.remove('collision-pulse','collision-active');card.style.removeProperty('--collision-alpha')}
-      /* 38ms true-dark gap before the next impact. */
-      window.setTimeout(step,38);
-    },82);
-  };
-  step();
+
+  const color=kind==='accept'?'77,255,112':'255,78,78';
+  const hot=kind==='accept'?'#baffc7':'#ffd0cc';
+  const darkShadow=kind==='accept'
+    ?'0 14px 30px rgba(0,0,0,.42), inset 0 0 0 1px rgba(255,255,255,.018)'
+    :'0 14px 30px rgba(0,0,0,.42), inset 0 0 0 1px rgba(255,255,255,.018)';
+  const brightShadow=`0 0 8px rgba(${color},.92),0 0 18px rgba(${color},.72),0 0 38px rgba(${color},.45),0 0 64px rgba(${color},.22),0 14px 30px rgba(0,0,0,.42),inset 0 0 22px rgba(${color},.12)`;
+
+  /* Web Animations gives every hit its own animation instance. It therefore
+     cannot get stuck in the old "one long glowing state" behaviour. */
+  const anim=card.animate([
+    {boxShadow:darkShadow,filter:'brightness(1)',borderColor:`rgba(${color},.16)`,offset:0},
+    {boxShadow:brightShadow,filter:'brightness(1.42)',borderColor:`rgba(${color},.98)`,offset:.18},
+    {boxShadow:brightShadow,filter:'brightness(1.26)',borderColor:`rgba(${color},.92)`,offset:.46},
+    {boxShadow:darkShadow,filter:'brightness(1)',borderColor:`rgba(${color},.16)`,offset:.64},
+    {boxShadow:darkShadow,filter:'brightness(1)',borderColor:`rgba(${color},.16)`,offset:1}
+  ],{duration:92,easing:'steps(1,end)',fill:'none'});
+
+  const strong=card.querySelector('strong');
+  const icon=card.querySelector('i');
+  const strongAnim=strong?.animate([
+    {color:'rgba(104,255,134,.82)',textShadow:'none',offset:0},
+    {color:hot,textShadow:`0 0 12px rgba(${color},.8),0 0 24px rgba(${color},.35)`,offset:.18},
+    {color:hot,textShadow:`0 0 8px rgba(${color},.62)`,offset:.5},
+    {color:'rgba(104,255,134,.82)',textShadow:'none',offset:.66},
+    {color:'rgba(104,255,134,.82)',textShadow:'none',offset:1}
+  ],{duration:92,easing:'steps(1,end)',fill:'none'});
+  const iconAnim=icon?.animate([
+    {color:'rgba(104,255,134,.58)',borderColor:`rgba(${color},.28)`,boxShadow:'none',offset:0},
+    {color:hot,borderColor:`rgba(${color},1)`,boxShadow:`0 0 10px rgba(${color},.98),0 0 24px rgba(${color},.62)`,offset:.18},
+    {color:hot,borderColor:`rgba(${color},.9)`,boxShadow:`0 0 7px rgba(${color},.75),0 0 16px rgba(${color},.38)`,offset:.5},
+    {color:'rgba(104,255,134,.58)',borderColor:`rgba(${color},.28)`,boxShadow:'none',offset:.66},
+    {color:'rgba(104,255,134,.58)',borderColor:`rgba(${color},.28)`,boxShadow:'none',offset:1}
+  ],{duration:92,easing:'steps(1,end)',fill:'none'});
+  anim.finished.catch(()=>{});strongAnim?.finished.catch(()=>{});iconAnim?.finished.catch(()=>{});
 }
 function impactRing(kind,x,y){
   const ring=document.createElement('i');ring.className=`collision-hit-ring ${kind}`;ring.style.left=`${x}px`;ring.style.top=`${y}px`;layer.appendChild(ring);
@@ -56,11 +73,10 @@ function addEventParticle(kind,index,total){
   const bend=(kind==='accept'?-58:58)+(Math.random()-.5)*28;
   const control={x:(a.x+b.x)*.5+nx*bend,y:(a.y+b.y)*.5+ny*bend};
   const el=document.createElement('i');el.className=`event-particle ${kind}`;
-  const size=3.4+Math.random()*4.6;el.style.width=`${size}px`;el.style.height=`${size}px`;
-  el.style.setProperty('--tail-size',`${12+Math.random()*15}px`);
+  const size=3.6+Math.random()*4.8;el.style.width=`${size}px`;el.style.height=`${size}px`;
+  el.style.setProperty('--tail-size',`${14+Math.random()*18}px`);
   layer.appendChild(el);
-  /* Readable but brisk flight, with impacts arriving in a tight visible chain. */
-  const duration=(kind==='accept'?1820:1720)*(0.95+Math.random()*.10);
+  const duration=(kind==='accept'?1900:1800)*(0.95+Math.random()*.10);
   const delay=index*92+Math.random()*18;
   const points=[0,.05,.11,.19,.29,.4,.52,.64,.74,.83,.9,.96,1].map(t=>{const p=bezier(a,control,b,t),s=Math.sin(Math.PI*t);return{x:p.x+nx*spread*s,y:p.y+ny*spread*s}});
   const frames=points.map((p,i)=>({transform:`translate3d(${p.x}px,${p.y}px,0) scale(${i===0?.2:i===1?.7:i>=points.length-2?1.45:1})`,opacity:i===0?0:i===1?.82:i>=points.length-2?1:.9}));
