@@ -13,7 +13,8 @@ const center=e=>{
   return r?{x:r.left+r.width/2,y:r.top+r.height/2}:null;
 };
 const card=k=>forge.querySelector(k==='accept'?'.accepted':'.rejected');
-const dot=k=>center(forge.querySelector(k==='accept'?'.accepted .event-dot':'.rejected .event-dot'));
+const dotEl=k=>forge.querySelector(k==='accept'?'.accepted .event-dot':'.rejected .event-dot');
+const dot=k=>center(dotEl(k));
 const source=()=>center(document.getElementById('forgeCore'))||center(forge);
 const remove=e=>e?.remove();
 const stageRect=()=>stage.getBoundingClientRect();
@@ -47,6 +48,21 @@ function smash(k){
   ],{duration:k==='accept'?900:820,easing:'cubic-bezier(.16,.85,.25,1)',fill:'none'});
 }
 
+function flashDot(k){
+  const d=dotEl(k);
+  if(!d)return;
+  d.style.setProperty('display','block','important');
+  d.style.setProperty('visibility','visible','important');
+  d.style.setProperty('opacity','1','important');
+  d.style.setProperty('transform','scale(1.35)','important');
+  window.setTimeout(()=>{
+    d.style.setProperty('display','none','important');
+    d.style.setProperty('visibility','hidden','important');
+    d.style.setProperty('opacity','0','important');
+    d.style.setProperty('transform','scale(.45)','important');
+  },1050);
+}
+
 function bezier(a,c,b,t){
   const u=1-t;
   return {x:u*u*a.x+2*u*t*c.x+t*t*b.x,y:u*u*a.y+2*u*t*c.y+t*t*b.y};
@@ -74,8 +90,7 @@ function launchParticleStream(kind,start,end){
   const main=document.createElement('i');
   main.className=`share-flight ${kind}`;
   layer.appendChild(main);
-  const mainControl={x:mid.x,y:mid.y};
-  const mainPoints=[0,.16,.34,.52,.7,.86,1].map(t=>bezier(a,mainControl,b,t));
+  const mainPoints=[0,.16,.34,.52,.7,.86,1].map(t=>bezier(a,mid,b,t));
   animateParticle(main,mainPoints,kind==='accept'?1450:1320,0);
 
   for(let i=0;i<count;i++){
@@ -116,6 +131,7 @@ async function launch(k){
   if(!a||!b)return;
   launchParticleStream(k,a,b);
   await new Promise(resolve=>window.setTimeout(resolve,k==='accept'?520:470));
+  flashDot(k);
   smash(k);
   pulseAtTarget(k,b);
 }
