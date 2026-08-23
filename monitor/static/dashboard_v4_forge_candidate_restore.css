@@ -1,17 +1,18 @@
-/* Restore BLOCK CANDIDATE to the pre-reference dashboard composition. */
+/* Restore BLOCK CANDIDATE to the exact pre-reference integrated composition. */
 #candidate.candidate{
   position:relative!important;
   z-index:30!important;
-  width:100%!important;
+  width:83.5%!important;
   margin:0!important;
-  min-height:300px!important;
+  margin-left:16.5%!important;
+  min-height:282px!important;
   display:grid!important;
-  grid-template-columns:minmax(0,1.65fr) minmax(260px,.75fr)!important;
+  grid-template-columns:minmax(0,1fr) 280px!important;
   grid-template-rows:1fr!important;
-  border:1px solid rgba(24,75,86,.88)!important;
-  border-radius:14px!important;
-  background:linear-gradient(145deg,rgba(2,13,18,.26),rgba(1,7,11,.14))!important;
-  box-shadow:inset 0 0 0 1px rgba(25,228,255,.012),0 14px 36px rgba(0,0,0,.16)!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
   backdrop-filter:none!important;
   overflow:hidden!important;
 }
@@ -20,30 +21,36 @@
   position:absolute!important;
   inset:0!important;
   pointer-events:none!important;
-  background:radial-gradient(circle at 76% 45%,rgba(55,255,112,.025),transparent 34%)!important;
+  background:radial-gradient(circle at 78% 44%,rgba(55,255,112,.022),transparent 32%)!important;
 }
 #candidate .candidate-left{
-  padding:24px 30px 20px!important;
+  padding:22px 30px 18px 4px!important;
   position:relative!important;
   z-index:2!important;
 }
 #candidate .candidate-core{
-  min-height:300px!important;
+  min-height:282px!important;
   border-left:1px solid rgba(18,56,66,.58)!important;
-  background:radial-gradient(circle at 50% 44%,rgba(55,255,112,.045),transparent 38%),transparent!important;
+  background:radial-gradient(circle at 50% 44%,rgba(55,255,112,.042),transparent 38%),transparent!important;
   overflow:hidden!important;
 }
 #candidate .candidate-pct{
-  margin-top:24px!important;
-  font-size:clamp(56px,5.2vw,74px)!important;
+  margin-top:20px!important;
+  font-size:clamp(58px,5.2vw,74px)!important;
 }
 #candidate .candidate-track{margin-top:13px!important;height:13px!important}
 #candidate .next-height{margin-top:34px!important;padding-top:12px!important}
 
+@media(min-width:1450px){
+  #candidate.candidate{width:83.5%!important;margin-left:16.5%!important;grid-template-columns:minmax(0,1fr) 280px!important;min-height:282px!important}
+}
+@media(max-width:1100px){
+  #candidate.candidate{width:86%!important;margin-left:14%!important;grid-template-columns:minmax(0,1fr) 260px!important}
+}
 @media(max-width:900px){
-  #candidate.candidate{grid-template-columns:1fr 230px!important}
+  #candidate.candidate{width:92%!important;margin-left:8%!important;grid-template-columns:minmax(0,1fr) 230px!important}
 }
 @media(max-width:700px){
-  #candidate.candidate{grid-template-columns:1fr!important;grid-template-rows:auto auto!important}
+  #candidate.candidate{width:100%!important;margin-left:0!important;grid-template-columns:1fr!important;grid-template-rows:auto auto!important}
   #candidate .candidate-core{border-left:0!important;border-top:1px solid rgba(18,56,66,.58)!important;min-height:240px!important}
 }
