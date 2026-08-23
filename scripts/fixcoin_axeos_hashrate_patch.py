@@ -3,6 +3,7 @@
 from pathlib import Path
 
 APP = Path("/app/monitor/app.py")
+JS = Path("/app/monitor/static/dashboard_v4.js")
 text = APP.read_text()
 
 if "AXEOS_URL" not in text:
@@ -17,7 +18,7 @@ if "AXEOS_URL" not in text:
 
 AXE_FN = '''
 def fetch_axeos_hashrate_hs():
-    """AxeOS /api/system/info \u2192 hashRate is GH/s; return H/s or None."""
+    """AxeOS /api/system/info → hashRate is GH/s; return H/s or None."""
     try:
         r = requests.get(f"{AXEOS_URL}/api/system/info", timeout=2.0)
         r.raise_for_status()
@@ -30,7 +31,7 @@ def fetch_axeos_hashrate_hs():
         ghs = float(ghs or 0)
         if ghs <= 0:
             return None
-        return ghs * 1e9  # GH/s \u2192 H/s
+        return ghs * 1e9  # GH/s → H/s
     except Exception:
         return None
 
@@ -68,4 +69,22 @@ if '"hashrate_source"' not in text:
 
 APP.write_text(text)
 compile(text, str(APP), "exec")
-print("axeos hashrate patch applied \u2192", APP)
+print("axeos hashrate patch applied →", APP)
+
+# Dashboard label: AXEOS LIVE vs 5M WINDOW
+if JS.exists():
+    js = JS.read_text()
+    needle = "$('forgeHashrate').textContent=hashRate(m.hashrate_5m);"
+    repl = (
+        "$('forgeHashrate').textContent=hashRate(m.hashrate_5m);"
+        "{const lab=document.querySelector('.hashrate-card small');"
+        "if(lab)lab.textContent=m.hashrate_source==='axeos'?'AXEOS LIVE':'5M WINDOW';}"
+    )
+    if "AXEOS LIVE" not in js:
+        if needle not in js:
+            raise SystemExit("forgeHashrate JS anchor missing")
+        js = js.replace(needle, repl, 1)
+        JS.write_text(js)
+        print("dashboard JS hashrate label patched")
+    else:
+        print("dashboard JS already has AXEOS LIVE label")
