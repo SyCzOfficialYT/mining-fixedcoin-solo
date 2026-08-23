@@ -1,13 +1,17 @@
-/* Left Forge metrics — same instrument family as Accepted / Rejected and Block Candidate. */
+/* LEFT HASHRATE / SHARES-MIN
+ * Exact same shell, depth, bevel, sizing and typography family as Accepted / Rejected.
+ * Only the payload differs: these cards retain their telemetry graph.
+ */
+
 .forge-stage .hashrate-card,
 .forge-stage .forge-shares-min{
-  left:58px!important;
   right:auto!important;
-  width:286px!important;
-  height:202px!important;
-  min-height:202px!important;
+  left:58px!important;
+  width:356px!important;
+  height:194px!important;
+  min-height:194px!important;
+  padding:22px 24px 18px!important;
   box-sizing:border-box!important;
-  padding:20px 20px 14px!important;
   overflow:visible!important;
   border:1px solid rgba(24,75,86,.96)!important;
   border-radius:14px!important;
@@ -18,7 +22,17 @@
   text-align:left!important;
 }
 
-/* Same soft thickness/backplate language as the right-side share instruments. */
+/* Same inward-facing 3D perspective as the right-side cards, mirrored. */
+.forge-stage .hashrate-card{
+  top:52px!important;
+  transform:perspective(900px) rotateY(8deg) rotateX(1.5deg)!important;
+}
+.forge-stage .forge-shares-min{
+  top:300px!important;
+  transform:perspective(900px) rotateY(8deg) rotateX(1deg)!important;
+}
+
+/* Identical soft depth plate used by Accepted / Rejected. */
 .forge-stage .hashrate-card::before,
 .forge-stage .forge-shares-min::before{
   content:""!important;
@@ -27,28 +41,16 @@
   border:1px solid rgba(25,217,255,.06)!important;
   border-radius:14px!important;
   transform:translate3d(10px,8px,-20px)!important;
-  box-shadow:0 0 18px rgba(25,217,255,.045)!important;
   pointer-events:none!important;
-  z-index:-1!important;
 }
 
-/* Slight inward-facing perspective: left instruments visually point toward FIXCORE. */
-.forge-stage .hashrate-card{
-  top:38px!important;
-  transform:perspective(900px) rotateY(8deg) rotateX(1.5deg)!important;
-}
-.forge-stage .forge-shares-min{
-  top:268px!important;
-  transform:perspective(900px) rotateY(8deg) rotateX(1deg)!important;
-}
-
-/* Candidate-like technical typography. */
+/* Identical typography hierarchy. */
 .forge-stage .hashrate-card>span,
 .forge-stage .forge-shares-min>span{
   display:block!important;
-  margin:0 0 7px!important;
+  margin:0 0 8px!important;
   color:#8ca4aa!important;
-  font-size:10px!important;
+  font-size:11px!important;
   font-weight:600!important;
   line-height:1.15!important;
   letter-spacing:.16em!important;
@@ -59,79 +61,108 @@
   display:block!important;
   margin:0!important;
   color:#dbe8eb!important;
-  font-size:31px!important;
+  font-size:42px!important;
   font-weight:700!important;
-  line-height:1!important;
+  line-height:.95!important;
   letter-spacing:-.025em!important;
   text-shadow:none!important;
 }
 .forge-stage .hashrate-card>small,
 .forge-stage .forge-shares-min>small{
   display:block!important;
-  margin-top:8px!important;
+  margin-top:7px!important;
   color:#627b82!important;
-  font-size:8px!important;
+  font-size:10px!important;
+  font-weight:500!important;
   line-height:1.2!important;
   letter-spacing:.11em!important;
   text-transform:uppercase!important;
 }
 
-/* Graph becomes an integrated telemetry strip, not a floating neon element. */
+/* Keep the graph, but embed it into the exact same card surface. */
 .forge-stage .hashrate-card>svg,
 .forge-stage .forge-shares-min>svg{
   position:absolute!important;
-  left:18px!important;
-  right:18px!important;
-  bottom:13px!important;
-  width:calc(100% - 36px)!important;
-  height:56px!important;
-  min-height:56px!important;
+  left:24px!important;
+  right:24px!important;
+  bottom:12px!important;
+  width:calc(100% - 48px)!important;
+  height:47px!important;
+  min-height:47px!important;
   margin:0!important;
-  opacity:.9!important;
+  opacity:.92!important;
 }
 .forge-stage .hashrate-card polyline,
 .forge-stage .forge-shares-min polyline{
-  stroke:#59ed71!important;
+  stroke:#58ef6d!important;
   stroke-width:2.2!important;
-  filter:drop-shadow(0 0 4px rgba(89,237,113,.22))!important;
+  filter:drop-shadow(0 0 5px rgba(84,239,108,.30))!important;
 }
 
-/* Quiet cyan guide line gives the cards the same HUD discipline as Candidate. */
-.forge-stage .hashrate-card::after,
-.forge-stage .forge-shares-min::after{
-  content:""!important;
-  position:absolute!important;
-  left:18px!important;
-  right:18px!important;
-  bottom:76px!important;
-  height:1px!important;
-  background:linear-gradient(90deg,rgba(25,217,255,.18),rgba(25,217,255,.02),transparent)!important;
-  pointer-events:none!important;
+/* Same quiet idle state as the right-side share cards. */
+.forge-stage .hashrate-card:hover,
+.forge-stage .forge-shares-min:hover{
+  box-shadow:inset 0 0 0 1px rgba(25,228,255,.035),0 18px 40px rgba(0,0,0,.38)!important;
 }
 
 @media(min-width:1450px){
   .forge-stage .hashrate-card,
-  .forge-stage .forge-shares-min{left:64px!important;width:294px!important}
-  .forge-stage .hashrate-card{top:38px!important}
-  .forge-stage .forge-shares-min{top:268px!important}
+  .forge-stage .forge-shares-min{
+    left:64px!important;
+    width:366px!important;
+  }
+  .forge-stage .hashrate-card{top:54px!important}
+  .forge-stage .forge-shares-min{top:298px!important}
 }
 
 @media(max-width:1100px){
   .forge-stage .hashrate-card,
-  .forge-stage .forge-shares-min{left:30px!important;width:270px!important;height:188px!important;min-height:188px!important}
-  .forge-stage .hashrate-card{top:28px!important}
-  .forge-stage .forge-shares-min{top:226px!important}
+  .forge-stage .forge-shares-min{
+    left:30px!important;
+    width:270px!important;
+    height:162px!important;
+    min-height:162px!important;
+    padding:18px 20px 14px!important;
+  }
+  .forge-stage .hashrate-card{top:34px!important}
+  .forge-stage .forge-shares-min{top:230px!important}
+  .forge-stage .hashrate-card>strong,
+  .forge-stage .forge-shares-min>strong{font-size:34px!important}
+  .forge-stage .hashrate-card>svg,
+  .forge-stage .forge-shares-min>svg{
+    left:20px!important;
+    right:20px!important;
+    width:calc(100% - 40px)!important;
+    height:34px!important;
+    min-height:34px!important;
+    bottom:10px!important;
+  }
 }
 
 @media(max-width:780px){
   .forge-stage .hashrate-card,
-  .forge-stage .forge-shares-min{left:18px!important;width:210px!important;height:148px!important;min-height:148px!important;padding:15px 14px 12px!important}
-  .forge-stage .hashrate-card{top:16px!important}
+  .forge-stage .forge-shares-min{
+    left:18px!important;
+    width:210px!important;
+    height:140px!important;
+    min-height:140px!important;
+    padding:15px 14px 12px!important;
+  }
+  .forge-stage .hashrate-card{top:18px!important}
   .forge-stage .forge-shares-min{top:176px!important}
   .forge-stage .hashrate-card>strong,
-  .forge-stage .forge-shares-min>strong{font-size:25px!important}
+  .forge-stage .forge-shares-min>strong{font-size:30px!important}
+  .forge-stage .hashrate-card>span,
+  .forge-stage .forge-shares-min>span{font-size:9px!important}
+  .forge-stage .hashrate-card>small,
+  .forge-stage .forge-shares-min>small{font-size:8px!important}
   .forge-stage .hashrate-card>svg,
-  .forge-stage .forge-shares-min>svg{left:14px!important;right:14px!important;width:calc(100% - 28px)!important;height:42px!important;min-height:42px!important;bottom:10px!important}
-  .forge-stage .hashrate-card::after,
-  .forge-stage .forge-shares-min::after{left:14px!important;right:14px!important;bottom:56px!important}
+  .forge-stage .forge-shares-min>svg{
+    left:14px!important;
+    right:14px!important;
+    width:calc(100% - 28px)!important;
+    height:28px!important;
+    min-height:28px!important;
+    bottom:8px!important;
+  }
 }
