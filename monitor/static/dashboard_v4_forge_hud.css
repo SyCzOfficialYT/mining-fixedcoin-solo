@@ -6,21 +6,34 @@
 .forge-vardiff-hud strong{font:700 28px/.98 var(--mono);letter-spacing:-.045em;color:#f4f8fa;text-shadow:0 0 18px rgba(255,255,255,.08);font-variant-numeric:tabular-nums}
 .forge-vardiff-hud small{font:600 7px/1 var(--mono);letter-spacing:.16em;color:#4e6970;text-transform:uppercase}
 
-/* The stream markers belong INSIDE the accepted/rejected cards. */
-.accept-stream,.reject-stream{display:none!important}
-.forge-counter{isolation:isolate}
-.forge-counter.accepted::before,.forge-counter.rejected::before{content:"";position:absolute;width:9px;height:9px;border-radius:50%;right:52px;top:50%;transform:translateY(-50%);z-index:3}
-.forge-counter.accepted::before{background:#61ff78;box-shadow:0 0 5px #61ff78,0 0 13px rgba(97,255,120,.92),0 0 25px rgba(97,255,120,.45);animation:forgeStatusDotGreen 1.7s ease-in-out infinite}
-.forge-counter.rejected::before{background:#ff4d4d;box-shadow:0 0 5px #ff4d4d,0 0 13px rgba(255,77,77,.92),0 0 25px rgba(255,77,77,.42);animation:forgeStatusDotRed 1.7s ease-in-out infinite}
-.forge-counter.accepted i,.forge-counter.rejected i{z-index:4;transition:box-shadow .2s ease,filter .2s ease,text-shadow .2s ease}
-.forge-counter.accepted i{color:#8dff9c;text-shadow:0 0 8px #58ff73,0 0 18px rgba(88,255,115,.9);box-shadow:0 0 7px rgba(88,255,115,.42),inset 0 0 8px rgba(88,255,115,.10)}
-.forge-counter.rejected i{color:#ff8989;text-shadow:0 0 8px #ff4d4d,0 0 18px rgba(255,77,77,.9);box-shadow:0 0 7px rgba(255,77,77,.42),inset 0 0 8px rgba(255,77,77,.10)}
-.forge-counter.accepted.value-pulse i{filter:brightness(1.45);box-shadow:0 0 12px rgba(88,255,115,.95),0 0 28px rgba(88,255,115,.7),inset 0 0 10px rgba(88,255,115,.2)}
-.forge-counter.rejected.value-pulse-red i{filter:brightness(1.5);box-shadow:0 0 12px rgba(255,77,77,.95),0 0 28px rgba(255,77,77,.7),inset 0 0 10px rgba(255,77,77,.2)}
+/* FINAL share-event HUD: the dot is a real child of the counter card. It is
+   always anchored to the card's bottom-right corner and NEVER to the icon. */
+.forge-counter{isolation:isolate;position:absolute!important;box-sizing:border-box;overflow:visible!important}
+.forge-counter::before{content:none!important;display:none!important}
+.forge-counter .event-dot{position:absolute!important;right:7px!important;bottom:7px!important;left:auto!important;top:auto!important;width:6px!important;height:6px!important;margin:0!important;padding:0!important;border-radius:50%!important;display:block!important;opacity:0!important;visibility:hidden!important;transform:scale(.35)!important;transform-origin:center!important;pointer-events:none!important;z-index:30!important}
+.forge-counter.accepted .event-dot{background:#4dff70!important;box-shadow:0 0 5px #4dff70,0 0 12px rgba(77,255,112,.9),0 0 24px rgba(77,255,112,.45)!important}
+.forge-counter.rejected .event-dot{background:#ff4e4e!important;box-shadow:0 0 5px #ff4e4e,0 0 12px rgba(255,78,78,.9),0 0 24px rgba(255,78,78,.45)!important}
 
-@keyframes forgeStatusDotGreen{0%,100%{transform:translateY(-50%) scale(.9);opacity:.78}50%{transform:translateY(-50%) scale(1.18);opacity:1}}
-@keyframes forgeStatusDotRed{0%,100%{transform:translateY(-50%) scale(.9);opacity:.78}50%{transform:translateY(-50%) scale(1.18);opacity:1}}
+/* The card itself gets a short impact/glow hit when the corresponding event
+   arrives. No idle pulse: these animations are driven by .hit-accept/.hit-reject. */
+.forge.hit-accept .forge-counter.accepted{animation:counterBoxAccept .76s cubic-bezier(.16,.85,.25,1) both}
+.forge.hit-reject .forge-counter.rejected{animation:counterBoxReject .62s cubic-bezier(.2,.8,.2,1) both}
+.forge.hit-accept .accepted .event-dot{visibility:visible!important;animation:counterDotAccept .76s cubic-bezier(.16,.85,.25,1) both!important}
+.forge.hit-reject .rejected .event-dot{visibility:visible!important;animation:counterDotReject .62s cubic-bezier(.2,.8,.2,1) both!important}
 
-@media(max-width:900px){.forge-vardiff-hud{top:28px;width:192px;height:69px}.forge-counter.accepted::before,.forge-counter.rejected::before{right:49px}}
-@media(max-width:620px){.forge-vardiff-hud{top:28px;width:192px;height:69px}.forge-vardiff-hud strong{font-size:27px}.forge-counter.accepted::before,.forge-counter.rejected::before{right:48px;width:8px;height:8px}}
-@media(prefers-reduced-motion:reduce){.forge-counter.accepted::before,.forge-counter.rejected::before{animation:none}.forge-counter.accepted i,.forge-counter.rejected i{transition:none}}
+/* Check / cross stay in their original position. They only glow during the
+   same event that lights the card and its corner dot. */
+.forge-counter.accepted i,.forge-counter.rejected i{transition:filter .12s ease,text-shadow .12s ease,box-shadow .12s ease,color .12s ease}
+.forge-counter.accepted i{color:#8dff9c}
+.forge-counter.rejected i{color:#ff8989}
+.forge.hit-accept .accepted>i{color:#baffc7!important;filter:brightness(1.45);text-shadow:0 0 8px #4dff70,0 0 18px rgba(77,255,112,.95);box-shadow:0 0 8px rgba(77,255,112,.95),0 0 22px rgba(77,255,112,.55),inset 0 0 8px rgba(77,255,112,.18)!important}
+.forge.hit-reject .rejected>i{color:#ffd0cc!important;filter:brightness(1.5);text-shadow:0 0 8px #ff4e4e,0 0 18px rgba(255,78,78,.95);box-shadow:0 0 8px rgba(255,78,78,.95),0 0 22px rgba(255,78,78,.55),inset 0 0 8px rgba(255,78,78,.18)!important}
+
+@keyframes counterBoxAccept{0%{box-shadow:0 0 0 rgba(77,255,112,0),inset 0 0 0 rgba(77,255,112,0)}20%{box-shadow:0 0 30px rgba(77,255,112,.72),0 0 62px rgba(77,255,112,.32),inset 0 0 20px rgba(77,255,112,.22)}48%{box-shadow:0 0 18px rgba(77,255,112,.42),0 0 38px rgba(77,255,112,.18),inset 0 0 12px rgba(77,255,112,.12)}100%{box-shadow:0 0 0 rgba(77,255,112,0),inset 0 0 0 rgba(77,255,112,0)}}
+@keyframes counterBoxReject{0%{box-shadow:0 0 0 rgba(255,78,78,0),inset 0 0 0 rgba(255,78,78,0)}20%{box-shadow:0 0 30px rgba(255,78,78,.72),0 0 62px rgba(255,78,78,.32),inset 0 0 20px rgba(255,78,78,.22)}48%{box-shadow:0 0 18px rgba(255,78,78,.42),0 0 38px rgba(255,78,78,.18),inset 0 0 12px rgba(255,78,78,.12)}100%{box-shadow:0 0 0 rgba(255,78,78,0),inset 0 0 0 rgba(255,78,78,0)}}
+@keyframes counterDotAccept{0%{opacity:0;transform:scale(.35)}18%{opacity:1;transform:scale(1.4)}45%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(.82)}}
+@keyframes counterDotReject{0%{opacity:0;transform:scale(.35)}18%{opacity:1;transform:scale(1.4)}45%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(.82)}}
+
+@media(max-width:900px){.forge-vardiff-hud{top:28px;width:192px;height:69px}}
+@media(max-width:620px){.forge-vardiff-hud{top:28px;width:192px;height:69px}.forge-vardiff-hud strong{font-size:27px}.forge-counter .event-dot{right:7px!important;bottom:7px!important;width:6px!important;height:6px!important}}
+@media(prefers-reduced-motion:reduce){.forge.hit-accept .forge-counter.accepted,.forge.hit-reject .forge-counter.rejected{animation:none}.forge.hit-accept .accepted .event-dot,.forge.hit-reject .rejected .event-dot{animation:none!important;opacity:1!important;visibility:visible!important;transform:none!important}.forge.hit-accept .accepted>i,.forge.hit-reject .rejected>i{filter:none}}
