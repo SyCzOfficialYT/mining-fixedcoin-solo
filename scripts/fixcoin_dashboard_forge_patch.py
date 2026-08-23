@@ -45,20 +45,24 @@ HTML.write_text(html)
 
 # Expose the real current Stratum worker difficulty to the dashboard. With the
 # solo setup there is normally one active worker; if none is active we fall
-# back to the configured fixed difficulty.
+# back to the configured fixed difficulty. This patch intentionally anchors
+# on the stable fixed_difficulty field rather than the complete JSON fragment,
+# because earlier dashboard patches may add fields beside it.
 text=APP.read_text()
-marker='    active_workers=list(workers.keys())\n'
-insert='''    active_workers=list(workers.keys())\n    pool_difficulty=fixed_diff\n    for worker_name, worker_state in log_workers.items():\n        if worker_state.get("active") and as_number(worker_state.get("difficulty"),0)>0:\n            pool_difficulty=as_number(worker_state.get("difficulty"),fixed_diff)\n            break\n'''
 if 'pool_difficulty=' not in text:
+    marker='    active_workers=list(workers.keys())\n'
+    insert='''    active_workers=list(workers.keys())\n    pool_difficulty=fixed_diff\n    for worker_name in active_workers:\n        worker_state=workers.get(worker_name,{})\n        worker_diff=as_number(worker_state.get("difficulty"),0)\n        if worker_diff>0:\n            pool_difficulty=worker_diff\n            break\n'''
     if marker not in text:
         raise RuntimeError('dashboard worker authority anchor missing')
     text=text.replace(marker,insert,1)
-old='"fixed_difficulty":fixed_diff,"best_share":round_best,'
-new='"fixed_difficulty":fixed_diff,"pool_difficulty":pool_difficulty,"vardiff_mode":True,"best_share":round_best,'
-if new not in text:
-    if old not in text:
-        raise RuntimeError('dashboard mining payload anchor missing')
-    text=text.replace(old,new,1)
+
+# Add the live pool difficulty and explicit VarDiff mode without depending on
+# the exact ordering of fields emitted by previous dashboard patches.
+if '"pool_difficulty":pool_difficulty' not in text:
+    marker='"fixed_difficulty":fixed_diff,'
+    if marker not in text:
+        raise RuntimeError('dashboard mining fixed_difficulty anchor missing')
+    text=text.replace(marker,marker+'"pool_difficulty":pool_difficulty,"vardiff_mode":True,',1)
 APP.write_text(text)
 
 print('FIXCORE forge enforced: legacy miner removed, live VarDiff HUD wired, and share status dots/icons moved into counters')
