@@ -1,0 +1,138 @@
+/* FIXCOIN Forge final visual pass — v20260823-8 */
+
+/* -------------------------------------------------------------------------
+   ACCEPT / REJECT — quiet by default, explosive only on real events
+   ------------------------------------------------------------------------- */
+.forge-stage .forge-counter.accepted,
+#forgeStage .forge-counter.accepted,
+.forge-stage .forge-counter.rejected,
+#forgeStage .forge-counter.rejected{
+  width:270px!important;
+  min-width:270px!important;
+  min-height:144px!important;
+  height:auto!important;
+  border-radius:15px!important;
+  overflow:visible!important;
+  background:linear-gradient(145deg,rgba(7,14,17,.78),rgba(2,7,10,.62))!important;
+  backdrop-filter:blur(2px)!important;
+  -webkit-backdrop-filter:blur(2px)!important;
+  filter:none!important;
+  transition:border-color .18s ease,box-shadow .18s ease,filter .18s ease,background .18s ease!important;
+}
+
+.forge-stage .forge-counter.accepted,
+#forgeStage .forge-counter.accepted{
+  border:1px solid rgba(86,185,122,.34)!important;
+  box-shadow:inset 0 0 0 1px rgba(117,255,156,.035),0 12px 30px rgba(0,0,0,.30)!important;
+}
+.forge-stage .forge-counter.rejected,
+#forgeStage .forge-counter.rejected{
+  border:1px solid rgba(190,76,87,.34)!important;
+  box-shadow:inset 0 0 0 1px rgba(255,120,131,.028),0 12px 30px rgba(0,0,0,.30)!important;
+}
+
+/* Neutral 3D rear plate: visible depth without an idle neon glow. */
+.forge-stage .forge-counter::before,
+#forgeStage .forge-counter::before{
+  content:""!important;
+  display:block!important;
+  position:absolute!important;
+  inset:0!important;
+  border-radius:15px!important;
+  transform:translate3d(-10px,3px,-22px)!important;
+  background:rgba(1,6,9,.92)!important;
+  z-index:-1!important;
+  pointer-events:none!important;
+  box-shadow:none!important;
+}
+.forge-stage .forge-counter.accepted::before,
+#forgeStage .forge-counter.accepted::before{
+  border:1px solid rgba(71,155,101,.28)!important;
+}
+.forge-stage .forge-counter.rejected::before,
+#forgeStage .forge-counter.rejected::before{
+  border:1px solid rgba(164,66,77,.28)!important;
+}
+.forge-stage .forge-counter::after,
+#forgeStage .forge-counter::after{content:none!important;display:none!important}
+
+/* Quiet typography: readable enough to understand the telemetry. */
+.forge-stage .forge-counter>span:not(.event-dot),
+#forgeStage .forge-counter>span:not(.event-dot){
+  color:#8da1a8!important;
+  text-shadow:none!important;
+}
+.forge-stage .forge-counter.accepted>strong,
+#forgeStage .forge-counter.accepted>strong{
+  color:#5ee58c!important;
+  text-shadow:none!important;
+}
+.forge-stage .forge-counter.rejected>strong,
+#forgeStage .forge-counter.rejected>strong{
+  color:#ef6872!important;
+  text-shadow:none!important;
+}
+.forge-stage .forge-counter.accepted>b,
+#forgeStage .forge-counter.accepted>b{color:#59c97f!important;text-shadow:none!important}
+.forge-stage .forge-counter.rejected>b,
+#forgeStage .forge-counter.rejected>b{color:#d05a64!important;text-shadow:none!important}
+.forge-stage .forge-counter.accepted>i,
+#forgeStage .forge-counter.accepted>i{border-color:rgba(74,203,124,.52)!important;color:#57df8a!important;box-shadow:none!important;background:rgba(4,12,10,.45)!important}
+.forge-stage .forge-counter.rejected>i,
+#forgeStage .forge-counter.rejected>i{border-color:rgba(207,78,90,.52)!important;color:#ec626e!important;box-shadow:none!important;background:rgba(14,5,7,.45)!important}
+
+/* Real hit: only this moment turns the neon on. */
+.forge.hit-accept .forge-counter.accepted,
+.forge.hit-accept #forgeStage .forge-counter.accepted{
+  border-color:#39ff8a!important;
+  background:linear-gradient(145deg,rgba(7,24,15,.78),rgba(2,8,10,.64))!important;
+  box-shadow:inset 0 0 0 1px rgba(57,255,138,.22),0 0 8px rgba(57,255,138,.75),0 0 24px rgba(57,255,138,.38),0 0 52px rgba(57,255,138,.16),0 14px 32px rgba(0,0,0,.35)!important;
+}
+.forge.hit-accept .forge-counter.accepted::before,
+.forge.hit-accept #forgeStage .forge-counter.accepted::before{
+  border-color:rgba(57,255,138,.92)!important;
+  box-shadow:0 0 8px rgba(57,255,138,.42),0 0 18px rgba(57,255,138,.15)!important;
+}
+.forge.hit-accept .forge-counter.accepted>strong,
+.forge.hit-accept #forgeStage .forge-counter.accepted>strong{color:#39ff8a!important;text-shadow:0 0 10px rgba(57,255,138,.62),0 0 25px rgba(57,255,138,.22)!important}
+.forge.hit-accept .forge-counter.accepted>i,
+.forge.hit-accept #forgeStage .forge-counter.accepted>i{border-color:#39ff8a!important;color:#39ff8a!important;box-shadow:0 0 10px rgba(57,255,138,.44)!important;background:rgba(2,15,8,.5)!important}
+
+.forge.hit-reject .forge-counter.rejected,
+.forge.hit-reject #forgeStage .forge-counter.rejected{
+  border-color:#ff4455!important;
+  background:linear-gradient(145deg,rgba(27,8,12,.82),rgba(5,1,4,.68))!important;
+  box-shadow:inset 0 0 0 1px rgba(255,68,85,.22),0 0 8px rgba(255,68,85,.75),0 0 24px rgba(255,68,85,.38),0 0 52px rgba(255,68,85,.16),0 14px 32px rgba(0,0,0,.35)!important;
+}
+.forge.hit-reject .forge-counter.rejected::before,
+.forge.hit-reject #forgeStage .forge-counter.rejected::before{
+  border-color:rgba(255,68,85,.92)!important;
+  box-shadow:0 0 8px rgba(255,68,85,.42),0 0 18px rgba(255,68,85,.15)!important;
+}
+.forge.hit-reject .forge-counter.rejected>strong,
+.forge.hit-reject #forgeStage .forge-counter.rejected>strong{color:#ff4455!important;text-shadow:0 0 10px rgba(255,68,85,.62),0 0 25px rgba(255,68,85,.22)!important}
+.forge.hit-reject .forge-counter.rejected>i,
+.forge.hit-reject #forgeStage .forge-counter.rejected>i{border-color:#ff4455!important;color:#ff4455!important;box-shadow:0 0 10px rgba(255,68,85,.44)!important;background:rgba(20,2,5,.5)!important}
+
+/* -------------------------------------------------------------------------
+   CENTER PARTICLE FIELD — never leaves the FIXCORE zone
+   ------------------------------------------------------------------------- */
+.forge-stage .progress-particle-canvas{
+  clip-path:inset(12% 25% 8% 25% round 22px)!important;
+  -webkit-clip-path:inset(12% 25% 8% 25% round 22px)!important;
+  opacity:1!important;
+  mix-blend-mode:screen!important;
+}
+/* The filled progress track remains clean; no travelling dust outside center. */
+.candidate-track .candidate-particle-canvas{display:none!important}
+
+@media(max-width:900px){
+  .forge-stage .forge-counter.accepted,#forgeStage .forge-counter.accepted{width:220px!important;min-width:220px!important}
+  .forge-stage .forge-counter.rejected,#forgeStage .forge-counter.rejected{width:220px!important;min-width:220px!important}
+  .forge-stage .progress-particle-canvas{clip-path:inset(10% 21% 8% 21% round 18px)!important;-webkit-clip-path:inset(10% 21% 8% 21% round 18px)!important}
+}
+@media(max-width:620px){
+  .forge-stage .forge-counter.accepted,#forgeStage .forge-counter.accepted{width:180px!important;min-width:180px!important}
+  .forge-stage .forge-counter.rejected,#forgeStage .forge-counter.rejected{width:180px!important;min-width:180px!important}
+  .forge-stage .progress-particle-canvas{clip-path:inset(8% 14% 8% 14% round 16px)!important;-webkit-clip-path:inset(8% 14% 8% 14% round 16px)!important}
+}
