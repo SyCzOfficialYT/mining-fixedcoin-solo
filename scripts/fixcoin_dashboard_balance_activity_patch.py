@@ -18,15 +18,18 @@ def once(old, new, label):
     changed = True
     print(label)
 
-# Keep API semantics aligned with the four dashboard values.
+# Keep API semantics aligned with the dashboard's intended four values.
+# Total follows confirmed/trusted balance.
+# The dashboard's UNCONFIRMED card follows the immature Coinbase balance.
+# IMMATURE remains exposed separately as the same underlying immature value.
 app_text = APP.read_text()
 old_semantics = '''    # "total" intentionally means confirmed wallet balance only.\n    return {"confirmed":confirmed,"pending":rpc_pending,"immature":immature,"unconfirmed":rpc_pending+immature,"total":confirmed,"blocks":blocks,"wallet":walletinfo or {},"error":balances_error or walletinfo_error or tx_error}\n'''
-new_semantics = '''    # Keep the wallet components distinct for the dashboard.\n    # unconfirmed is untrusted pending only; immature is coinbase maturity.\n    total=confirmed+rpc_pending+immature\n    return {"confirmed":confirmed,"pending":rpc_pending,"immature":immature,"unconfirmed":rpc_pending,"total":total,"blocks":blocks,"wallet":walletinfo or {},"error":balances_error or walletinfo_error or tx_error}\n'''
+new_semantics = '''    # Dashboard balance semantics:\n    # - confirmed: trusted wallet balance\n    # - total: follows confirmed/trusted balance\n    # - unconfirmed: follows immature Coinbase balance for the dashboard card\n    # - immature: the same underlying immature Coinbase balance, exposed separately\n    total=confirmed\n    unconfirmed=immature\n    return {"confirmed":confirmed,"pending":rpc_pending,"immature":immature,"unconfirmed":unconfirmed,"total":total,"blocks":blocks,"wallet":walletinfo or {},"error":balances_error or walletinfo_error or tx_error}\n'''
 if new_semantics not in app_text:
     if old_semantics not in app_text:
         raise RuntimeError('missing wallet balance semantics anchor')
     APP.write_text(app_text.replace(old_semantics, new_semantics, 1))
-    print('patched wallet balance semantics: unconfirmed excludes immature; total sums all components')
+    print('patched wallet balance semantics: total follows confirmed; unconfirmed follows immature')
 else:
     print('wallet balance semantics already patched')
 
@@ -41,11 +44,11 @@ new_balance = old_balance + (
     '<div class="stat panel balance-stat balance-confirmed"><span>CONFIRMED BALANCE</span>'
     '<strong id="balanceConfirmed">—</strong><small>confirmed / trusted</small></div>'
     '<div class="stat panel balance-stat balance-unconfirmed"><span>UNCONFIRMED BALANCE</span>'
-    '<strong id="balanceUnconfirmed">—</strong><small>untrusted pending</small></div>'
+    '<strong id="balanceUnconfirmed">—</strong><small>follows immature balance</small></div>'
     '<div class="stat panel balance-stat balance-immature"><span>IMMATURE BALANCE</span>'
     '<strong id="balanceImmature">—</strong><small>coinbase maturity</small></div>'
     '<div class="stat panel balance-stat balance-total"><span>TOTAL BALANCE</span>'
-    '<strong id="balanceTotal">—</strong><small>confirmed + unconfirmed + immature</small></div>'
+    '<strong id="balanceTotal">—</strong><small>follows confirmed balance</small></div>'
 )
 once(old_balance, new_balance, 'restored confirmed/unconfirmed/immature/total balance cards')
 
