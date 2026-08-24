@@ -1,0 +1,219 @@
+/* FIXEDCOIN // CYBERPUNK REFERENCE V2
+   Visual-only override for dashboard_v4.html.
+   No data, layout logic, Stratum or JS behavior is changed here.
+*/
+:root{
+  --cp-bg:#01070b;
+  --cp-panel:#030d13;
+  --cp-cyan:#1be4ff;
+  --cp-green:#39ff8a;
+  --cp-green2:#62f56d;
+  --cp-red:#ff4f61;
+  --cp-amber:#ffb52f;
+  --cp-line:rgba(23,91,105,.9);
+  --cp-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Consolas,monospace;
+}
+
+/* ===== GLOBAL REFERENCE SURFACE ===== */
+.dashboard{gap:12px!important}
+.panel{
+  border:1px solid rgba(23,91,105,.9)!important;
+  border-radius:16px!important;
+  background:linear-gradient(145deg,rgba(3,15,21,.985),rgba(1,6,10,.995))!important;
+  box-shadow:0 0 0 1px rgba(0,255,255,.035) inset,0 18px 55px rgba(0,0,0,.48),0 0 30px rgba(0,170,190,.025)!important;
+}
+.panel:before{
+  content:"";position:absolute;inset:0;pointer-events:none;z-index:49;
+  background:linear-gradient(90deg,transparent 0 14%,rgba(27,228,255,.035) 14.1%,transparent 14.25%,transparent 85.7%,rgba(57,255,138,.025) 85.8%,transparent 86%),
+             repeating-linear-gradient(0deg,rgba(255,255,255,.012) 0 1px,transparent 1px 5px);
+}
+
+/* ===== HERO: SHARP HUD / DEPTH ===== */
+.hero{overflow:hidden!important}
+.hero-main,.round-panel{position:relative!important}
+.hero-main:after,.round-panel:after{
+  content:"";position:absolute;pointer-events:none;z-index:0;
+  border:1px solid rgba(27,228,255,.22);
+}
+.hero-main:after{inset:9px 0 9px 9px;clip-path:polygon(0 0,98% 0,100% 4%,100% 96%,98% 100%,0 100%)}
+.round-panel:after{inset:9px;clip-path:polygon(0 0,94% 0,100% 8%,100% 92%,94% 100%,0 100%)}
+.hero-main>*{position:relative;z-index:2}.round-panel>*{position:relative;z-index:2}
+.round-id{box-shadow:0 0 18px rgba(25,228,255,.14),inset 0 0 18px rgba(25,228,255,.035)!important}
+
+/* ===== FORGE STAGE ===== */
+.forge{min-height:0!important}
+.forge-stage{
+  height:562px!important;
+  background:
+    radial-gradient(ellipse at 50% 53%,rgba(15,110,126,.24),transparent 31%),
+    radial-gradient(ellipse at 78% 55%,rgba(22,255,113,.10),transparent 24%),
+    linear-gradient(180deg,#020b11 0%,#02080c 72%,#010507 100%)!important;
+}
+.forge-stage:before{
+  opacity:.7!important;
+  background:linear-gradient(rgba(0,229,255,.055) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,.045) 1px,transparent 1px)!important;
+  background-size:44px 44px!important;
+}
+.forge-stage:after{
+  background:radial-gradient(circle at 50% 55%,rgba(57,255,138,.12),transparent 24%),linear-gradient(90deg,rgba(0,0,0,.22),transparent 23%,transparent 77%,rgba(0,0,0,.22))!important;
+}
+
+/* ===== CENTER CORE: ACTUAL SVG, NO FAKE HEX ===== */
+.forge-art{inset:0!important;transform:none!important;filter:none!important;z-index:8!important}
+.forge-core-wrap{
+  position:absolute!important;
+  left:50%!important;top:53%!important;right:auto!important;bottom:auto!important;
+  width:470px!important;height:470px!important;
+  inset:auto!important;
+  display:block!important;
+  transform:translate(-50%,-50%)!important;
+  overflow:visible!important;
+  z-index:22!important;
+}
+.forge-core{
+  position:absolute!important;left:0!important;top:0!important;
+  width:100%!important;height:100%!important;
+  transform:none!important;
+  filter:drop-shadow(0 0 30px rgba(37,255,122,.18))!important;
+}
+.forge-core svg{width:100%!important;height:100%!important}
+.forge-core-label{top:73%!important;font-size:9px!important;letter-spacing:.28em!important}
+.forge-core-status{top:78%!important;font-size:7px!important}
+.core-halo{stroke:rgba(35,240,255,.23)!important}
+.forge-ring{stroke:rgba(69,255,126,.34)!important}
+.forge-ring.r3{stroke:rgba(23,216,255,.29)!important}
+.core-beam{stroke-width:2.5!important;opacity:.88!important}
+.core-energy{filter:url(#coreGlowStrong)!important}
+
+/* ===== 3D HARDWARE CARDS ===== */
+.forge-stage .hashrate-card,
+.forge-stage .forge-shares-min,
+.forge-stage .forge-counter{
+  border-radius:12px!important;
+  background:linear-gradient(145deg,rgba(5,13,18,.98),rgba(1,7,10,.98))!important;
+  backdrop-filter:none!important;
+  transform-style:preserve-3d!important;
+  overflow:visible!important;
+}
+.forge-stage .hashrate-card,
+.forge-stage .forge-shares-min{
+  width:180px!important;height:146px!important;
+  padding:13px 14px!important;
+  border:1px solid rgba(23,91,105,.95)!important;
+  transform:perspective(850px) rotateY(8deg) rotateX(2deg)!important;
+  box-shadow:inset 0 0 0 1px rgba(27,228,255,.025),0 12px 24px rgba(0,0,0,.6)!important;
+}
+.forge-stage .hashrate-card:before,
+.forge-stage .forge-shares-min:before,
+.forge-stage .forge-counter:before{
+  content:""!important;position:absolute!important;inset:0!important;z-index:-2!important;
+  border:1px solid rgba(20,70,82,.9)!important;border-radius:12px!important;
+  background:#02080c!important;transform:translate3d(12px,5px,-25px)!important;
+  box-shadow:5px 8px 18px rgba(0,0,0,.55)!important;pointer-events:none!important;
+}
+.forge-stage .hashrate-card:after,.forge-stage .forge-shares-min:after{
+  content:""!important;position:absolute!important;left:-4px!important;top:10px!important;bottom:10px!important;width:3px!important;
+  background:linear-gradient(#1be4ff,#39ff8a)!important;box-shadow:0 0 10px rgba(27,228,255,.35)!important;
+}
+.forge-stage .hashrate-card{left:32px!important;top:38px!important}
+.forge-stage .forge-shares-min{left:32px!important;top:208px!important;transform:perspective(850px) rotateY(8deg) rotateX(1deg)!important}
+.forge-stage .hashrate-card>span,.forge-stage .forge-shares-min>span{font-size:9px!important;color:#8da7ae!important}
+.forge-stage .hashrate-card>strong,.forge-stage .forge-shares-min>strong{font-size:24px!important;text-shadow:0 0 14px rgba(57,255,138,.08)!important}
+.forge-stage .hashrate-card>svg,.forge-stage .forge-shares-min>svg{bottom:10px!important}
+
+.forge-stage .forge-counter{
+  width:180px!important;height:146px!important;padding:15px 16px!important;
+  box-shadow:inset 0 0 0 1px rgba(27,228,255,.02),0 12px 24px rgba(0,0,0,.6)!important;
+}
+.forge-stage .forge-counter.accepted{right:32px!important;top:62px!important;transform:perspective(850px) rotateY(-8deg) rotateX(2deg)!important;border:1px solid rgba(57,255,138,.36)!important}
+.forge-stage .forge-counter.rejected{right:32px!important;top:232px!important;transform:perspective(850px) rotateY(-8deg) rotateX(-1deg)!important;border:1px solid rgba(255,79,97,.34)!important}
+.forge-stage .forge-counter.accepted:before,.forge-stage .forge-counter.rejected:before{transform:translate3d(-12px,5px,-25px)!important}
+.forge-stage .forge-counter>span:not(.event-dot){font-size:9px!important}
+.forge-stage .forge-counter>strong{font-size:34px!important}
+
+/* ===== VARDIFF HUD ===== */
+.vardiff-card{
+  width:190px!important;height:70px!important;top:28px!important;
+  border:1px solid rgba(27,228,255,.45)!important;
+  background:linear-gradient(145deg,rgba(3,14,19,.98),rgba(1,7,10,.98))!important;
+  box-shadow:0 12px 25px rgba(0,0,0,.55),0 0 22px rgba(27,228,255,.045)!important;
+}
+
+/* ===== CANDIDATE: TECHNICAL CORE ===== */
+.candidate{overflow:hidden!important}
+.candidate:after{background:linear-gradient(90deg,rgba(0,0,0,.1),transparent 65%,rgba(57,255,138,.045))!important}
+.candidate-pct{color:var(--cp-green)!important;text-shadow:0 0 22px rgba(57,255,138,.25)!important}
+.candidate-track{border-color:#1b5f6f!important}
+.candidate-track i{box-shadow:0 0 16px rgba(85,255,101,.8)!important}
+.candidate-core{filter:drop-shadow(0 0 16px rgba(57,255,138,.22))!important}
+.core-cube{box-shadow:0 0 24px rgba(57,255,138,.35),0 0 55px rgba(27,228,255,.10)!important}
+
+/* ===== STATS / HISTORY: INDUSTRIAL MODULES ===== */
+.stat,.block-history{
+  border-radius:12px!important;
+  box-shadow:inset 0 0 0 1px rgba(27,228,255,.02),0 12px 32px rgba(0,0,0,.42)!important;
+}
+.stat:after,.block-history:after{content:"";position:absolute;left:0;top:0;width:34%;height:1px;background:linear-gradient(90deg,transparent,#1be4ff,transparent);box-shadow:0 0 9px rgba(27,228,255,.25)}
+
+/* ===== COMBO ===== */
+.forge-stage .combo{
+  left:30px!important;top:calc(50% + 188px)!important;width:160px!important;
+  padding:9px 12px!important;border:1px solid rgba(255,181,47,.48)!important;
+  border-radius:10px!important;background:linear-gradient(145deg,rgba(28,16,4,.96),rgba(9,6,2,.96))!important;
+  box-shadow:0 10px 24px rgba(0,0,0,.55),inset 0 0 0 1px rgba(255,181,47,.08)!important;
+  transform:perspective(760px) rotateY(8deg)!important;z-index:44!important;
+}
+.forge-stage .combo:before{display:none!important}
+
+/* ===== MOBILE REFERENCE COMPOSITION ===== */
+@media(max-width:760px){
+  .dashboard{width:calc(100% - 20px)!important;gap:10px!important;margin:10px auto 18px!important}
+  .panel{border-radius:13px!important}
+  .hero{min-height:0!important}
+  .hero-main{padding:18px 16px 16px!important}
+  .hero-value strong{font-size:clamp(32px,8.5vw,58px)!important}
+  .versus{font-size:22px!important}
+  .round-panel{padding:14px 10px!important}
+  .round-id{font-size:20px!important;padding:6px 10px!important}
+  .remaining{font-size:30px!important}
+  .forge-head{height:42px!important;padding:11px 15px!important}
+  .forge-head .eyebrow{font-size:9px!important;letter-spacing:.12em!important}
+  .live{font-size:8px!important}
+  .forge-stage{height:395px!important}
+  .forge-core-wrap{
+    left:50%!important;top:55%!important;right:auto!important;bottom:auto!important;
+    width:330px!important;height:330px!important;
+    transform:translate(-50%,-50%)!important;
+  }
+  .forge-core{width:330px!important;height:330px!important}
+  .forge-core-label{top:73%!important;font-size:6px!important;letter-spacing:.22em!important}
+  .forge-core-status{top:78%!important;font-size:5px!important;letter-spacing:.12em!important}
+  .forge-stage .hashrate-card,.forge-stage .forge-shares-min,.forge-stage .forge-counter{width:174px!important;height:112px!important;padding:11px 12px!important}
+  .forge-stage .hashrate-card{left:8px!important;top:26px!important}
+  .forge-stage .forge-shares-min{left:8px!important;top:150px!important}
+  .forge-stage .forge-counter.accepted{right:8px!important;top:26px!important}
+  .forge-stage .forge-counter.rejected{right:8px!important;top:150px!important}
+  .forge-stage .hashrate-card>strong,.forge-stage .forge-shares-min>strong{font-size:20px!important}
+  .forge-stage .forge-counter>strong{font-size:28px!important}
+  .forge-stage .hashrate-card>svg,.forge-stage .forge-shares-min>svg{height:28px!important;bottom:7px!important}
+  .vardiff-card{width:136px!important;height:52px!important;top:18px!important}
+  .vardiff-card strong{font-size:21px!important}
+  .vardiff-card span{font-size:6px!important}
+  .vardiff-card small{font-size:5px!important}
+  .forge-stage .combo{left:8px!important;top:auto!important;bottom:8px!important;width:112px!important;padding:7px 8px!important}
+  .forge-stage .combo strong{font-size:18px!important}
+  .forge-stage .combo small{font-size:5px!important}
+  .candidate{min-height:220px!important}
+  .candidate-core{transform:scale(.78)!important;transform-origin:center!important}
+  .stats-grid{gap:8px!important}
+  .stat{min-height:92px!important}
+}
+
+@media(max-width:430px){
+  .forge-stage{height:365px!important}
+  .forge-core-wrap,.forge-core{width:300px!important;height:300px!important}
+  .forge-stage .hashrate-card,.forge-stage .forge-shares-min,.forge-stage .forge-counter{width:158px!important}
+  .forge-stage .hashrate-card{left:6px!important}.forge-stage .forge-shares-min{left:6px!important}
+  .forge-stage .forge-counter.accepted,.forge-stage .forge-counter.rejected{right:6px!important}
+  .forge-stage .hashrate-card>span,.forge-stage .forge-shares-min>span,.forge-stage .forge-counter>span:not(.event-dot){font-size:7px!important}
+}
