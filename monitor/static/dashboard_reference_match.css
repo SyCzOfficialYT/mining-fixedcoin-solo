@@ -1,167 +1,231 @@
-/* FIXEDCOIN — hard 1:1 visual match to reference screenshot
-   Loaded last. Forces stronger 3D depth, glow intensity, candidate progress,
-   COMBO styling and core energy to match the original high-fidelity image.
+/* FIXEDCOIN — HARD 1:1 REFERENCE MATCH v2
+   Overrides everything that pulls the dashboard away from the original screenshot.
 */
 
-/* ===== HERO PROGRESS BAR — thicker + stronger glow ===== */
-.target-meter,
-.candidate-meter{
-  height:14px!important;
-  border:1px solid #1a5d6b!important;
-  box-shadow:inset 0 2px 10px #000,0 0 12px rgba(57,255,138,.08)!important;
+/* ========== FORCE DESKTOP-LIKE CANDIDATE LAYOUT (even on large phones) ========== */
+#candidate.candidate,
+.candidate.panel{
+  width:100%!important;
+  margin-left:0!important;
+  margin:0!important;
+  min-height:300px!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,1.4fr) 260px!important;
+  grid-template-rows:1fr!important;
+  border:1px solid rgba(30,104,119,.72)!important;
+  border-radius:18px!important;
+  background:linear-gradient(145deg,rgba(3,13,18,.98),rgba(1,7,11,.98))!important;
+  box-shadow:0 0 0 1px rgba(0,255,255,.025) inset,0 22px 70px rgba(0,0,0,.42)!important;
+  position:relative!important;
+  overflow:hidden!important;
 }
-.target-meter i,
-.candidate-meter i{
-  background:linear-gradient(90deg,#3dff6a,#72ff66,#a8ff7a)!important;
-  box-shadow:0 0 14px rgba(85,255,101,.75),0 0 28px rgba(57,255,138,.35)!important;
+
+#candidate .candidate-left{
+  padding:22px 28px 18px 24px!important;
+  position:relative!important;
+  z-index:2!important;
 }
-.target-meter b{
-  width:3px!important;
-  height:24px!important;
-  background:#39ff8a!important;
-  box-shadow:0 0 14px #39ff8a,0 0 28px rgba(57,255,138,.5)!important;
-}
-.meter-labels strong{
+
+#candidate .candidate-pct{
+  display:block!important;
+  margin-top:16px!important;
+  font:800 clamp(48px,5vw,68px)/.95 var(--ref-mono)!important;
   color:#58ef6d!important;
-  text-shadow:0 0 12px rgba(88,239,109,.35)!important;
-  font-size:14px!important;
+  text-shadow:0 0 28px rgba(88,239,109,.25)!important;
+  letter-spacing:-.05em!important;
 }
 
-/* ===== FORGE CARDS — stronger physical 3D depth ===== */
-.forge-stage .hashrate-card,
-.forge-stage .forge-shares-min{
-  transform:perspective(900px) rotateY(10deg) rotateX(2deg)!important;
-  box-shadow:
-    inset 0 0 0 1px rgba(23,73,84,.45),
-    0 10px 24px rgba(0,0,0,.55),
-    0 0 20px rgba(0,0,0,.25)!important;
-}
-.forge-stage .hashrate-card:before,
-.forge-stage .forge-shares-min:before{
-  transform:translate3d(16px,5px,-28px)!important;
-  box-shadow:6px 8px 18px rgba(0,0,0,.55)!important;
-  border:1px solid rgba(23,73,84,.95)!important;
-}
-.forge-stage .hashrate-card:after,
-.forge-stage .forge-shares-min:after{
-  width:12px!important;
-  right:-11px!important;
+#candidate .candidate-caption{
+  display:block!important;
+  margin-top:4px!important;
+  font:700 9px var(--ref-mono)!important;
+  color:#5c747b!important;
+  letter-spacing:.12em!important;
 }
 
-.forge-stage .forge-counter.accepted{
-  transform:perspective(900px) rotateY(-10deg) rotateX(2deg)!important;
-  border:1px solid rgba(57,255,138,.38)!important;
-  box-shadow:
-    inset 0 0 0 1px rgba(57,255,138,.06),
-    0 10px 24px rgba(0,0,0,.55)!important;
-}
-.forge-stage .forge-counter.rejected{
-  transform:perspective(900px) rotateY(-10deg) rotateX(-1deg)!important;
-  border:1px solid rgba(255,79,97,.38)!important;
-  box-shadow:
-    inset 0 0 0 1px rgba(255,79,97,.04),
-    0 10px 24px rgba(0,0,0,.55)!important;
-}
-.forge-stage .forge-counter:before{
-  transform:translate3d(-14px,4px,-26px)!important;
-  box-shadow:5px 7px 16px rgba(0,0,0,.5)!important;
-}
-
-/* ===== CENTRAL CORE — more energy & glow ===== */
-.form-hex{
-  width:190px!important;
-  height:190px!important;
-  filter:drop-shadow(0 0 28px rgba(57,255,138,.55)) drop-shadow(0 0 55px rgba(57,255,138,.25))!important;
-  background:linear-gradient(145deg,#6aff9a,#1ad65e 55%,#0c8f45)!important;
-}
-.form-hex:before{
-  inset:18px!important;
-  background:#083526!important;
-}
-.form-hex span{
-  font-size:62px!important;
-  text-shadow:0 0 22px rgba(167,255,190,.65),0 0 40px rgba(57,255,138,.3)!important;
-}
-.core-field{
-  background:radial-gradient(circle,rgba(53,255,126,.28),rgba(0,0,0,0) 62%)!important;
-}
-.particle-idle{
-  opacity:.55!important;
-  background-size:15px 17px!important;
-}
-.core-rings{
-  opacity:1!important;
-}
-.core-label{
-  color:#4dff7a!important;
-  text-shadow:0 0 10px rgba(57,255,138,.25)!important;
-}
-
-/* ===== CANDIDATE SECTION — closer to reference ===== */
-.candidate-pct{
-  text-shadow:0 0 28px rgba(88,239,109,.22)!important;
-}
-.candidate-meter{
+#candidate .candidate-meter,
+#candidate .candidate-track{
   height:14px!important;
   margin-top:14px!important;
-}
-.candidate-core .cube{
-  width:58px!important;
-  height:58px!important;
-  box-shadow:0 0 28px rgba(57,255,138,.35),0 0 50px rgba(57,255,138,.12)!important;
-  border:1px solid #39ff8a!important;
-}
-.candidate-core > span{
-  top:calc(50% + 56px)!important;
-  color:#3dff70!important;
-  letter-spacing:.18em!important;
-}
-.candidate-core #blockProximity,
-.candidate-core b{
-  position:absolute!important;
-  left:0!important;
-  right:0!important;
-  top:calc(50% + 72px)!important;
-  text-align:center!important;
-  color:#3dff70!important;
-  font:700 9px var(--ref-mono)!important;
-  letter-spacing:.14em!important;
-  text-shadow:0 0 8px rgba(57,255,138,.3)!important;
+  border:1px solid #1a5d6b!important;
+  border-radius:99px!important;
+  background:#010507!important;
+  box-shadow:inset 0 2px 10px #000!important;
+  position:relative!important;
+  overflow:visible!important;
 }
 
-/* COMBO card — amber accent like reference */
+#candidate .candidate-meter i,
+#candidate .candidate-track i{
+  display:block!important;
+  height:100%!important;
+  border-radius:99px!important;
+  background:linear-gradient(90deg,#3dff6a,#72ff66,#a8ff7a)!important;
+  box-shadow:0 0 16px rgba(85,255,101,.8),0 0 32px rgba(57,255,138,.4)!important;
+}
+
+#candidate .candidate-height,
+#candidate .next-height{
+  display:flex!important;
+  justify-content:space-between!important;
+  align-items:end!important;
+  margin-top:28px!important;
+  padding-top:12px!important;
+  border-top:1px solid rgba(18,56,66,.5)!important;
+}
+
+/* Diamond core on the right */
+#candidate .candidate-core{
+  position:relative!important;
+  min-height:300px!important;
+  border-left:1px solid rgba(18,56,66,.55)!important;
+  background:radial-gradient(circle at 50% 45%,rgba(55,255,112,.07),transparent 42%)!important;
+  overflow:hidden!important;
+}
+
+#candidate .candidate-core .cube{
+  width:62px!important;
+  height:62px!important;
+  box-shadow:0 0 30px rgba(57,255,138,.4),0 0 60px rgba(57,255,138,.15)!important;
+}
+
+#candidate .candidate-core > span{
+  top:calc(50% + 58px)!important;
+  color:#3dff70!important;
+  font:700 9px var(--ref-mono)!important;
+  letter-spacing:.18em!important;
+}
+
+#candidate .candidate-core #blockProximity,
+#candidate .candidate-core b{
+  position:absolute!important;
+  left:0!important;right:0!important;
+  top:calc(50% + 76px)!important;
+  text-align:center!important;
+  color:#3dff70!important;
+  font:700 10px var(--ref-mono)!important;
+  letter-spacing:.14em!important;
+  text-shadow:0 0 10px rgba(57,255,138,.35)!important;
+}
+
+/* COMBO as strong amber card (like reference) */
+#combo.combo,
 .combo{
-  background:linear-gradient(145deg,rgba(18,12,6,.92),rgba(8,5,2,.88))!important;
-  border:1px solid rgba(255,181,47,.35)!important;
+  position:absolute!important;
+  left:22px!important;
+  bottom:22px!important;
+  z-index:25!important;
+  background:linear-gradient(145deg,rgba(22,14,4,.95),rgba(10,6,2,.92))!important;
+  border:1px solid rgba(255,181,47,.45)!important;
   border-radius:12px!important;
-  padding:12px 16px!important;
-  box-shadow:0 8px 20px rgba(0,0,0,.4),inset 0 0 0 1px rgba(255,181,47,.08)!important;
+  padding:14px 18px!important;
+  box-shadow:0 10px 28px rgba(0,0,0,.5),inset 0 0 0 1px rgba(255,181,47,.1)!important;
+  min-width:110px!important;
+}
+.combo span{
+  color:#9a8470!important;
+  font:700 9px var(--ref-mono)!important;
+  letter-spacing:.16em!important;
 }
 .combo strong{
   color:#ffb52f!important;
-  text-shadow:0 0 12px rgba(255,181,47,.35)!important;
+  font:800 28px var(--ref-mono)!important;
+  text-shadow:0 0 14px rgba(255,181,47,.4)!important;
+  margin-top:4px!important;
+  display:block!important;
 }
 .combo small{
   color:#ff8a3d!important;
+  font:700 8px var(--ref-mono)!important;
+  margin-top:4px!important;
+  display:block!important;
 }
 
-/* ===== ACCEPTED / REJECTED number glow when active ===== */
-.forge-stage .forge-counter.accepted > strong{
-  text-shadow:0 0 14px rgba(94,229,140,.35)!important;
+/* ========== FORGE 3D CARDS — much stronger tilt ========== */
+.forge-stage .hashrate-card,
+.forge-stage .forge-shares-min{
+  transform:perspective(800px) rotateY(12deg) rotateX(3deg)!important;
+  box-shadow:
+    inset 0 0 0 1px rgba(23,73,84,.5),
+    0 12px 28px rgba(0,0,0,.6),
+    0 0 24px rgba(0,0,0,.3)!important;
 }
-.forge-stage .forge-counter.rejected > strong{
-  text-shadow:0 0 14px rgba(239,104,114,.3)!important;
+.forge-stage .hashrate-card:before,
+.forge-stage .forge-shares-min:before{
+  transform:translate3d(18px,6px,-32px)!important;
+  box-shadow:8px 10px 22px rgba(0,0,0,.6)!important;
+}
+.forge-stage .forge-counter.accepted{
+  transform:perspective(800px) rotateY(-12deg) rotateX(3deg)!important;
+  border-color:rgba(57,255,138,.42)!important;
+}
+.forge-stage .forge-counter.rejected{
+  transform:perspective(800px) rotateY(-12deg) rotateX(-2deg)!important;
+  border-color:rgba(255,79,97,.42)!important;
+}
+.forge-stage .forge-counter:before{
+  transform:translate3d(-16px,5px,-30px)!important;
 }
 
-/* ===== History validity badge closer to reference ===== */
-.validity.valid{
-  color:#3be7ff!important;
-  border-color:rgba(27,228,255,.55)!important;
-  background:rgba(27,228,255,.1)!important;
-  box-shadow:0 0 8px rgba(27,228,255,.15)!important;
+/* ========== CENTRAL F — denser energy ========== */
+.form-hex{
+  width:200px!important;
+  height:200px!important;
+  filter:
+    drop-shadow(0 0 32px rgba(57,255,138,.6))
+    drop-shadow(0 0 70px rgba(57,255,138,.3))!important;
+  background:linear-gradient(145deg,#70ff9e,#1ad65e 52%,#0b8a42)!important;
 }
-.validity.immature{
-  color:#55f46d!important;
-  border-color:rgba(85,244,109,.5)!important;
-  background:rgba(85,244,109,.08)!important;
+.form-hex span{
+  font-size:66px!important;
+  text-shadow:0 0 26px rgba(167,255,190,.7),0 0 50px rgba(57,255,138,.35)!important;
+}
+.core-field{
+  background:radial-gradient(circle,rgba(53,255,126,.32),transparent 60%)!important;
+}
+.particle-idle{
+  opacity:.65!important;
+}
+.core-label{
+  color:#55ff82!important;
+  text-shadow:0 0 12px rgba(57,255,138,.3)!important;
+}
+
+/* ========== HERO BAR ========== */
+.target-meter{
+  height:14px!important;
+}
+.target-meter i{
+  box-shadow:0 0 18px rgba(85,255,101,.85),0 0 36px rgba(57,255,138,.4)!important;
+}
+.target-meter b{
+  width:3px!important;
+  height:26px!important;
+  box-shadow:0 0 16px #39ff8a,0 0 32px rgba(57,255,138,.55)!important;
+}
+
+/* Keep mobile usable but still try to keep some depth */
+@media(max-width:700px){
+  #candidate.candidate{
+    grid-template-columns:1fr!important;
+    min-height:auto!important;
+  }
+  #candidate .candidate-core{
+    min-height:220px!important;
+    border-left:0!important;
+    border-top:1px solid rgba(18,56,66,.55)!important;
+  }
+  .combo{
+    left:16px!important;
+    bottom:auto!important;
+    top:12px!important;
+  }
+  .forge-stage .hashrate-card,
+  .forge-stage .forge-shares-min{
+    transform:perspective(700px) rotateY(8deg) rotateX(2deg)!important;
+  }
+  .forge-stage .forge-counter.accepted,
+  .forge-stage .forge-counter.rejected{
+    transform:perspective(700px) rotateY(-8deg) rotateX(1deg)!important;
+  }
 }
