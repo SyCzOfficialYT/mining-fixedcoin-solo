@@ -19,7 +19,7 @@
 <section class="hero panel">
   <div class="hero-main">
     <div class="eyebrow accent">BEST SHARE <span>→</span> NETWORK BLOCK TARGET</div>
-    <p class="muted">Your best submitted share versus the actual network block difficulty.</p>
+    <p class="muted">Your best submitted share versus the actual network difficulty.</p>
     <div class="versus"><div class="value-block best"><span>BEST SHARE DIFFICULTY</span><strong id="bestShare">—</strong><small id="bestRaw">—</small></div><div class="vs">VS</div><div class="value-block target"><span>NETWORK TARGET</span><strong id="networkTarget">—</strong><small id="networkRaw">—</small><em id="remaining">— remaining</em></div></div>
     <div class="target-meter"><i id="targetMeter"></i><b id="targetMarker"></b></div>
     <div class="meter-labels"><span>0</span><strong id="targetPct">0.000%</strong><span>100% (Block Target)</span></div>
@@ -33,7 +33,7 @@
     <div class="hashrate-card"><span>HASHRATE</span><strong id="forgeHashrate">—</strong><small>AXEOS LIVE</small><svg viewBox="0 0 180 45" preserveAspectRatio="none"><polyline id="hashSpark" points="0,38 18,30 36,34 54,18 72,28 90,14 108,24 126,10 144,20 162,12 180,16"/></svg></div>
     <div class="forge-shares-min"><span>SHARES / MIN</span><strong id="sharesMin">—</strong><small>(LAST 10 MIN)</small><svg viewBox="0 0 180 45" preserveAspectRatio="none"><polyline id="shareSpark" points="0,38 18,34 36,31 54,33 72,24 90,27 108,18 126,21 144,13 162,17 180,10"/></svg></div>
     <div class="vardiff-card"><span>VARDIFF MODE</span><strong id="forgeVardiff">13.35K</strong><small>POOL DIFF · LIVE</small></div>
-    <div class="forge-core" id="forgeCore"><div class="core-rings"></div><div class="particle-idle"></div><div class="core-field"></div><div class="fix-hex"><span>F</span></div><div class="core-label">FIXCOIN · PROOF OF WORK</div><div class="core-sub">ENERGY CORE // LIVE HASH STREAM</div></div>
+    <div class="forge-core" id="forgeCore"><div class="core-rings"></div><div class="particle-idle"></div><div class="core-field"></div><div class="form-hex"><span>F</span></div><div class="core-label">FIXCOIN · PROOF OF WORK</div><div class="core-sub">ENERGY CORE // LIVE HASH STREAM</div></div>
     <div class="forge-counter accepted" id="acceptedCounter"><span>ACCEPTED SHARES</span><strong id="acceptedCount">0</strong><b>+1</b><i>✓</i></div>
     <div class="forge-counter rejected" id="rejectedCounter"><span>REJECTED SHARES</span><strong id="rejectedCount">0</strong><b>-1</b><i>×</i></div>
     <div id="impact" style="position:absolute;left:50%;top:50%;width:1px;height:1px;opacity:0;pointer-events:none"></div><div id="anvil" style="position:absolute;left:50%;top:50%;width:1px;height:1px;opacity:0;pointer-events:none"></div><div id="minerFigure" style="position:absolute;left:50%;top:50%;width:1px;height:1px;opacity:0;pointer-events:none"></div>
@@ -42,8 +42,8 @@
 </section>
 <section class="candidate panel" id="candidate">
   <div class="candidate-left"><div class="section-title"><span class="target-icon">◎</span><div><h2>BLOCK CANDIDATE&nbsp; // NETWORK PROXIMITY</h2><p>Best submitted share measured against the current network block target.</p></div></div><strong class="candidate-pct" id="candidatePct">0.000%</strong><span class="candidate-caption">PROGRESS TO BLOCK</span><div class="candidate-meter"><i id="candidateMeter"></i></div><div class="candidate-height"><span>BLOCK HEIGHT (NEXT)</span><strong id="nextHeight">#—</strong></div></div>
-  <div class="candidate-core" id="candidateCore"><div class="core-ring r1"></div><div class="core-ring r2"></div><div class="core-ring r3"></div><div class="cube">F</div><span>BLOCK</span></div>
-  <div class="combo" id="combo"><span>COMBO</span><strong id="comboValue">×0</strong><small id="comboBonus">STREAK READY</small></div><div id="activityList" hidden></div>
+  <div class="candidate-core" id="candidateCore"><div class="core-ring r1"></div><div class="core-ring r2"></div><div class="core-ring r3"></div><div class="cube">F</div><span>BLOCK</span><b id="blockProximity">VERY LOW</b></div>
+  <div class="combo" id="combo"><span>COMBO</span><strong id="comboValue">×1</strong><small id="comboBonus">STREAK START</small></div><div id="activityList" hidden></div>
 </section>
 <section class="stats-grid"><div class="stat panel"><span>AVG. SHARE DIFFICULTY</span><strong id="avgDiff">—</strong><small>(LAST 10 MIN)</small><svg viewBox="0 0 180 36"><polyline id="avgSpark" points="0,28 20,24 40,26 60,18 80,22 100,12 120,19 140,11 160,16 180,8"/></svg></div><div class="stat panel"><span>VALID SHARES</span><strong id="validShares">0</strong><small id="validPct">0.0%</small></div><div class="stat panel"><span>INVALID SHARES</span><strong class="red" id="invalidShares">0</strong><small id="invalidPct">0.0%</small></div></section>
 <section class="balance-grid"><div class="balance-stat balance-confirmed panel"><span>CONFIRMED BALANCE</span><strong id="balanceConfirmed">0.00000000 FIX</strong><small>CONFIRMED / TRUSTED</small></div><div class="balance-stat balance-unconfirmed panel"><span>UNCONFIRMED BALANCE</span><strong id="balanceUnconfirmed">0.00000000 FIX</strong><small>FOLLOWS IMMATURE BALANCE</small></div><div class="balance-stat balance-immature panel"><span>IMMATURE BALANCE</span><strong id="balanceImmature">0.00000000 FIX</strong><small>COINBASE MATURITY</small></div><div class="balance-stat balance-total panel"><span>TOTAL BALANCE</span><strong id="balanceTotal">0.00000000 FIX</strong><small>FOLLOWS CONFIRMED BALANCE</small></div><div class="balance-stat panel"><span>EST. TIME TO BLOCK</span><strong id="eta">—</strong><small>(AT CURRENT RATE)</small></div></section>
