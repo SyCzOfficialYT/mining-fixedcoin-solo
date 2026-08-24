@@ -1,6 +1,5 @@
 /* =========================================================
-   FIXEDCOIN — MOBILE-OPTIMIZED AGGRESSIVE MATCH (Option A)
-   Strong 3D + glow even on phone screens
+   FIXEDCOIN — MATCH CSS (fixed core + stronger mobile feel)
    ========================================================= */
 
 /* ---------- HERO BAR ---------- */
@@ -24,172 +23,101 @@
   text-shadow:0 0 12px rgba(88,239,109,.4)!important;
 }
 
-/* ---------- FORGE CARDS — 3D even on mobile ---------- */
+/* ---------- FORGE CARDS — 3D tilt ---------- */
 .forge-stage .hashrate-card,
 .forge-stage .forge-shares-min{
-  transform:perspective(600px) rotateY(11deg) rotateX(3deg)!important;
-  border:1px solid rgba(30,110,125,.9)!important;
-  background:linear-gradient(155deg,#061018,#02080c)!important;
+  transform:perspective(700px) rotateY(10deg) rotateX(2.5deg)!important;
   box-shadow:
-    inset 0 0 0 1px rgba(40,130,145,.3),
-    0 10px 24px rgba(0,0,0,.55),
-    0 0 20px rgba(0,0,0,.25)!important;
+    inset 0 0 0 1px rgba(40,130,145,.28),
+    0 10px 22px rgba(0,0,0,.5)!important;
 }
 .forge-stage .hashrate-card:before,
 .forge-stage .forge-shares-min:before{
-  content:""!important;
-  position:absolute!important;
-  inset:0!important;
-  border-radius:14px!important;
-  background:#02080c!important;
-  border:1px solid rgba(25,90,100,.85)!important;
-  transform:translate3d(14px,5px,-26px)!important;
-  box-shadow:7px 8px 18px rgba(0,0,0,.55)!important;
-  z-index:-2!important;
+  transform:translate3d(14px,5px,-28px)!important;
+  box-shadow:7px 9px 18px rgba(0,0,0,.55)!important;
 }
-.forge-stage .hashrate-card:after,
-.forge-stage .forge-shares-min:after{
-  content:""!important;
-  position:absolute!important;
-  right:-10px!important;
-  top:5px!important;
-  bottom:5px!important;
-  width:10px!important;
-  border-radius:0 9px 9px 0!important;
-  background:linear-gradient(90deg,rgba(20,80,90,.75),rgba(5,25,30,.65),transparent)!important;
-  transform:translateZ(-6px)!important;
-  z-index:-1!important;
-}
-
 .forge-stage .forge-counter.accepted{
-  transform:perspective(600px) rotateY(-11deg) rotateX(3deg)!important;
-  border:1px solid rgba(57,255,138,.42)!important;
-  box-shadow:inset 0 0 0 1px rgba(57,255,138,.07),0 10px 24px rgba(0,0,0,.55)!important;
+  transform:perspective(700px) rotateY(-10deg) rotateX(2.5deg)!important;
+  border-color:rgba(57,255,138,.4)!important;
 }
 .forge-stage .forge-counter.rejected{
-  transform:perspective(600px) rotateY(-11deg) rotateX(-2deg)!important;
-  border:1px solid rgba(255,79,97,.42)!important;
-  box-shadow:inset 0 0 0 1px rgba(255,79,97,.05),0 10px 24px rgba(0,0,0,.55)!important;
+  transform:perspective(700px) rotateY(-10deg) rotateX(-2deg)!important;
+  border-color:rgba(255,79,97,.4)!important;
 }
 .forge-stage .forge-counter:before{
-  transform:translate3d(-14px,5px,-26px)!important;
-  box-shadow:6px 8px 16px rgba(0,0,0,.5)!important;
+  transform:translate3d(-14px,5px,-28px)!important;
 }
 
-/* ---------- CENTRAL CORE — larger + denser on phone ---------- */
-.forge-core{
-  width:320px!important;
-  height:320px!important;
-}
+/* ---------- CENTRAL CORE — keep HEXAGON, stronger glow ---------- */
 .form-hex{
-  width:150px!important;
-  height:150px!important;
+  /* DO NOT remove clip-path */
+  clip-path:polygon(25% 4%,75% 4%,99% 50%,75% 96%,25% 96%,1% 50%)!important;
   filter:
-    drop-shadow(0 0 28px rgba(57,255,138,.65))
-    drop-shadow(0 0 60px rgba(57,255,138,.3))!important;
-  background:linear-gradient(145deg,#70ff9e,#1bd862 52%,#0a8f45)!important;
+    drop-shadow(0 0 24px rgba(57,255,138,.55))
+    drop-shadow(0 0 50px rgba(57,255,138,.25))!important;
+  background:linear-gradient(145deg,#6aff98,#1bd862 55%,#0b8f45)!important;
 }
 .form-hex:before{
-  inset:16px!important;
+  clip-path:inherit!important;
   background:#073528!important;
 }
 .form-hex span{
-  font-size:52px!important;
-  text-shadow:0 0 22px rgba(180,255,200,.75),0 0 45px rgba(57,255,138,.4)!important;
+  color:#c8ffd4!important;
+  text-shadow:0 0 20px rgba(180,255,200,.7),0 0 40px rgba(57,255,138,.35)!important;
 }
 .core-field{
-  background:radial-gradient(circle,rgba(60,255,130,.38),transparent 58%)!important;
+  background:radial-gradient(circle,rgba(60,255,130,.32),transparent 60%)!important;
 }
 .particle-idle{
-  opacity:.7!important;
-  background-size:13px 15px!important;
+  opacity:.55!important;
 }
 .core-label{
-  top:calc(50% + 90px)!important;
   color:#5dff88!important;
-  font-size:10px!important;
-  text-shadow:0 0 12px rgba(57,255,138,.35)!important;
-}
-.core-sub{
-  top:calc(50% + 112px)!important;
-  font-size:8px!important;
+  text-shadow:0 0 10px rgba(57,255,138,.3)!important;
 }
 
 /* ---------- CANDIDATE ---------- */
 #candidate.candidate,
 .candidate.panel{
-  width:100%!important;
-  margin:0!important;
-  min-height:auto!important;
-  display:grid!important;
-  grid-template-columns:1fr!important;
   border:1px solid rgba(30,104,119,.7)!important;
   border-radius:16px!important;
   background:linear-gradient(145deg,rgba(3,14,19,.98),rgba(1,7,11,.98))!important;
   box-shadow:0 0 0 1px rgba(0,255,255,.03) inset,0 18px 50px rgba(0,0,0,.4)!important;
 }
-#candidate .candidate-left{
-  padding:18px 18px 16px 18px!important;
-}
 #candidate .candidate-pct{
-  margin-top:12px!important;
-  font:800 48px/.92 var(--ref-mono)!important;
   color:#58ef6d!important;
-  text-shadow:0 0 24px rgba(88,239,109,.28)!important;
+  text-shadow:0 0 22px rgba(88,239,109,.25)!important;
 }
 #candidate .candidate-meter,
 #candidate .candidate-track{
   height:13px!important;
-  margin-top:12px!important;
   border:1px solid #1e6a7a!important;
   box-shadow:inset 0 2px 10px #000!important;
 }
 #candidate .candidate-meter i,
 #candidate .candidate-track i{
   background:linear-gradient(90deg,#2dff5c,#55ff70,#9aff7a)!important;
-  box-shadow:0 0 16px rgba(85,255,101,.85),0 0 32px rgba(57,255,138,.4)!important;
-}
-#candidate .candidate-core{
-  min-height:200px!important;
-  border-left:0!important;
-  border-top:1px solid rgba(18,56,66,.5)!important;
-  background:radial-gradient(circle at 50% 44%,rgba(55,255,112,.08),transparent 42%)!important;
+  box-shadow:0 0 16px rgba(85,255,101,.85),0 0 30px rgba(57,255,138,.4)!important;
 }
 #candidate .candidate-core .cube{
-  width:56px!important;
-  height:56px!important;
-  box-shadow:0 0 26px rgba(57,255,138,.4),0 0 50px rgba(57,255,138,.15)!important;
-}
-#candidate .candidate-core > span{
-  top:calc(50% + 48px)!important;
-  color:#3dff70!important;
-  font-size:9px!important;
+  box-shadow:0 0 24px rgba(57,255,138,.35),0 0 48px rgba(57,255,138,.12)!important;
 }
 #candidate .candidate-core #blockProximity,
 #candidate .candidate-core b{
-  top:calc(50% + 66px)!important;
   color:#3dff70!important;
-  font:700 10px var(--ref-mono)!important;
-  text-shadow:0 0 10px rgba(57,255,138,.35)!important;
+  text-shadow:0 0 10px rgba(57,255,138,.3)!important;
 }
 
-/* COMBO — strong amber card */
+/* COMBO — amber card */
 #combo.combo,
 .combo{
-  position:absolute!important;
-  left:14px!important;
-  top:12px!important;
-  bottom:auto!important;
-  z-index:30!important;
   background:linear-gradient(150deg,rgba(28,16,4,.97),rgba(12,7,2,.94))!important;
   border:1px solid rgba(255,181,47,.5)!important;
   border-radius:12px!important;
   padding:12px 16px!important;
-  min-width:100px!important;
   box-shadow:
     0 10px 24px rgba(0,0,0,.5),
-    inset 0 0 0 1px rgba(255,181,47,.12),
-    0 0 16px rgba(255,150,30,.08)!important;
+    inset 0 0 0 1px rgba(255,181,47,.12)!important;
 }
 .combo span{
   color:#a89070!important;
@@ -200,45 +128,26 @@
   color:#ffb52f!important;
   font:800 26px var(--ref-mono)!important;
   text-shadow:0 0 14px rgba(255,181,47,.45)!important;
-  margin-top:3px!important;
-  display:block!important;
 }
 .combo small{
   color:#ff8a3d!important;
   font:700 8px var(--ref-mono)!important;
-  margin-top:3px!important;
-  display:block!important;
 }
 
-/* ---------- Desktop still gets the full treatment ---------- */
-@media(min-width:800px){
+/* Mobile: keep hexagon + reasonable sizes */
+@media(max-width:760px){
+  .form-hex{
+    width:100px!important;
+    height:100px!important;
+    clip-path:polygon(25% 4%,75% 4%,99% 50%,75% 96%,25% 96%,1% 50%)!important;
+  }
+  .form-hex span{font-size:34px!important;}
   .forge-stage .hashrate-card,
   .forge-stage .forge-shares-min{
-    width:280px!important;
-    height:145px!important;
-    transform:perspective(750px) rotateY(13deg) rotateX(3.5deg)!important;
+    transform:perspective(600px) rotateY(8deg) rotateX(2deg)!important;
   }
   .forge-stage .forge-counter.accepted,
   .forge-stage .forge-counter.rejected{
-    width:280px!important;
-    height:145px!important;
-    transform:perspective(750px) rotateY(-13deg) rotateX(3deg)!important;
-  }
-  .forge-core{width:420px!important;height:420px!important;}
-  .form-hex{width:190px!important;height:190px!important;}
-  .form-hex span{font-size:64px!important;}
-  #candidate.candidate{
-    grid-template-columns:minmax(0,1.4fr) 260px!important;
-    min-height:300px!important;
-  }
-  #candidate .candidate-core{
-    min-height:300px!important;
-    border-left:1px solid rgba(18,56,66,.55)!important;
-    border-top:0!important;
-  }
-  .combo{
-    left:22px!important;
-    top:auto!important;
-    bottom:22px!important;
+    transform:perspective(600px) rotateY(-8deg) rotateX(1deg)!important;
   }
 }
