@@ -1,231 +1,260 @@
-/* FIXEDCOIN — HARD 1:1 REFERENCE MATCH v2
-   Overrides everything that pulls the dashboard away from the original screenshot.
-*/
+/* =========================================================
+   FIXEDCOIN — AGGRESSIVE 1:1 REFERENCE MATCH v3
+   Maximum force for 3D cards, dense core, long progress bars
+   ========================================================= */
 
-/* ========== FORCE DESKTOP-LIKE CANDIDATE LAYOUT (even on large phones) ========== */
+/* ---------- HERO PROGRESS (thicker + nuclear glow) ---------- */
+.target-meter{
+  height:15px!important;
+  border:1px solid #1e6a7a!important;
+  box-shadow:inset 0 2px 12px #000,0 0 16px rgba(57,255,138,.12)!important;
+}
+.target-meter i{
+  background:linear-gradient(90deg,#2dff5c,#55ff70,#9aff7a)!important;
+  box-shadow:0 0 20px rgba(85,255,101,.9),0 0 40px rgba(57,255,138,.5)!important;
+}
+.target-meter b{
+  width:4px!important;
+  height:28px!important;
+  background:#39ff8a!important;
+  box-shadow:0 0 18px #39ff8a,0 0 36px rgba(57,255,138,.6)!important;
+}
+.meter-labels strong{
+  font-size:15px!important;
+  text-shadow:0 0 14px rgba(88,239,109,.45)!important;
+}
+
+/* ---------- FORGE CARDS — REAL 3D BODY ---------- */
+.forge-stage .hashrate-card,
+.forge-stage .forge-shares-min{
+  width:290px!important;
+  height:150px!important;
+  min-width:290px!important;
+  min-height:150px!important;
+  transform:perspective(750px) rotateY(14deg) rotateX(4deg)!important;
+  border:1px solid rgba(30,110,125,.95)!important;
+  background:linear-gradient(155deg,#061018,#02080c)!important;
+  box-shadow:
+    inset 0 0 0 1px rgba(40,130,145,.35),
+    0 14px 32px rgba(0,0,0,.65),
+    0 0 30px rgba(0,0,0,.35)!important;
+}
+.forge-stage .hashrate-card{left:38px!important;top:42px!important;}
+.forge-stage .forge-shares-min{left:38px!important;top:210px!important;}
+
+.forge-stage .hashrate-card:before,
+.forge-stage .forge-shares-min:before{
+  content:""!important;
+  position:absolute!important;
+  inset:0!important;
+  border-radius:14px!important;
+  background:#02080c!important;
+  border:1px solid rgba(25,90,100,.9)!important;
+  transform:translate3d(20px,7px,-36px)!important;
+  box-shadow:10px 12px 26px rgba(0,0,0,.65)!important;
+  z-index:-2!important;
+}
+.forge-stage .hashrate-card:after,
+.forge-stage .forge-shares-min:after{
+  content:""!important;
+  position:absolute!important;
+  right:-13px!important;
+  top:6px!important;
+  bottom:6px!important;
+  width:13px!important;
+  border-radius:0 10px 10px 0!important;
+  background:linear-gradient(90deg,rgba(20,80,90,.8),rgba(5,25,30,.7),transparent)!important;
+  transform:translateZ(-8px)!important;
+  z-index:-1!important;
+}
+
+.forge-stage .forge-counter.accepted,
+.forge-stage .forge-counter.rejected{
+  width:290px!important;
+  min-width:290px!important;
+  height:150px!important;
+  min-height:150px!important;
+}
+.forge-stage .forge-counter.accepted{
+  right:38px!important;
+  top:55px!important;
+  transform:perspective(750px) rotateY(-14deg) rotateX(4deg)!important;
+  border:1px solid rgba(57,255,138,.45)!important;
+  box-shadow:
+    inset 0 0 0 1px rgba(57,255,138,.08),
+    0 14px 32px rgba(0,0,0,.65)!important;
+}
+.forge-stage .forge-counter.rejected{
+  right:38px!important;
+  top:225px!important;
+  transform:perspective(750px) rotateY(-14deg) rotateX(-3deg)!important;
+  border:1px solid rgba(255,79,97,.45)!important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,79,97,.06),
+    0 14px 32px rgba(0,0,0,.65)!important;
+}
+.forge-stage .forge-counter:before{
+  transform:translate3d(-20px,6px,-34px)!important;
+  box-shadow:8px 10px 24px rgba(0,0,0,.6)!important;
+}
+
+/* ---------- CENTRAL CORE — BIG + DENSE ENERGY ---------- */
+.forge-core{
+  width:460px!important;
+  height:460px!important;
+}
+.form-hex{
+  width:210px!important;
+  height:210px!important;
+  filter:
+    drop-shadow(0 0 36px rgba(57,255,138,.7))
+    drop-shadow(0 0 80px rgba(57,255,138,.35))
+    drop-shadow(0 0 120px rgba(57,255,138,.15))!important;
+  background:linear-gradient(145deg,#78ffA5,#1bd862 50%,#0a8f45)!important;
+}
+.form-hex:before{
+  inset:22px!important;
+  background:#073528!important;
+}
+.form-hex span{
+  font-size:72px!important;
+  text-shadow:
+    0 0 28px rgba(180,255,200,.8),
+    0 0 55px rgba(57,255,138,.45)!important;
+}
+.core-field{
+  background:radial-gradient(circle,rgba(60,255,130,.4),transparent 58%)!important;
+}
+.particle-idle{
+  opacity:.75!important;
+  background-size:14px 16px!important;
+}
+.core-rings{
+  opacity:1!important;
+}
+.core-label{
+  top:calc(50% + 122px)!important;
+  color:#5dff88!important;
+  font-size:11px!important;
+  text-shadow:0 0 14px rgba(57,255,138,.4)!important;
+}
+.core-sub{
+  top:calc(50% + 148px)!important;
+  font-size:9px!important;
+}
+
+/* ---------- CANDIDATE — LONG BAR + STRONG COMBO ---------- */
 #candidate.candidate,
 .candidate.panel{
   width:100%!important;
-  margin-left:0!important;
   margin:0!important;
-  min-height:300px!important;
+  min-height:310px!important;
   display:grid!important;
-  grid-template-columns:minmax(0,1.4fr) 260px!important;
-  grid-template-rows:1fr!important;
-  border:1px solid rgba(30,104,119,.72)!important;
+  grid-template-columns:minmax(0,1.5fr) 270px!important;
+  border:1px solid rgba(30,104,119,.75)!important;
   border-radius:18px!important;
-  background:linear-gradient(145deg,rgba(3,13,18,.98),rgba(1,7,11,.98))!important;
-  box-shadow:0 0 0 1px rgba(0,255,255,.025) inset,0 22px 70px rgba(0,0,0,.42)!important;
-  position:relative!important;
-  overflow:hidden!important;
+  background:linear-gradient(145deg,rgba(3,14,19,.98),rgba(1,7,11,.98))!important;
+  box-shadow:0 0 0 1px rgba(0,255,255,.03) inset,0 22px 70px rgba(0,0,0,.45)!important;
 }
 
 #candidate .candidate-left{
-  padding:22px 28px 18px 24px!important;
-  position:relative!important;
-  z-index:2!important;
+  padding:24px 30px 20px 26px!important;
 }
 
 #candidate .candidate-pct{
-  display:block!important;
-  margin-top:16px!important;
-  font:800 clamp(48px,5vw,68px)/.95 var(--ref-mono)!important;
+  margin-top:18px!important;
+  font:800 clamp(52px,5.2vw,72px)/.92 var(--ref-mono)!important;
   color:#58ef6d!important;
-  text-shadow:0 0 28px rgba(88,239,109,.25)!important;
-  letter-spacing:-.05em!important;
-}
-
-#candidate .candidate-caption{
-  display:block!important;
-  margin-top:4px!important;
-  font:700 9px var(--ref-mono)!important;
-  color:#5c747b!important;
-  letter-spacing:.12em!important;
+  text-shadow:0 0 32px rgba(88,239,109,.3)!important;
 }
 
 #candidate .candidate-meter,
 #candidate .candidate-track{
-  height:14px!important;
-  margin-top:14px!important;
-  border:1px solid #1a5d6b!important;
-  border-radius:99px!important;
-  background:#010507!important;
-  box-shadow:inset 0 2px 10px #000!important;
-  position:relative!important;
-  overflow:visible!important;
+  height:15px!important;
+  margin-top:16px!important;
+  border:1px solid #1e6a7a!important;
+  box-shadow:inset 0 2px 12px #000!important;
 }
-
 #candidate .candidate-meter i,
 #candidate .candidate-track i{
-  display:block!important;
-  height:100%!important;
-  border-radius:99px!important;
-  background:linear-gradient(90deg,#3dff6a,#72ff66,#a8ff7a)!important;
-  box-shadow:0 0 16px rgba(85,255,101,.8),0 0 32px rgba(57,255,138,.4)!important;
+  background:linear-gradient(90deg,#2dff5c,#55ff70,#9aff7a)!important;
+  box-shadow:0 0 20px rgba(85,255,101,.9),0 0 40px rgba(57,255,138,.45)!important;
 }
 
-#candidate .candidate-height,
-#candidate .next-height{
-  display:flex!important;
-  justify-content:space-between!important;
-  align-items:end!important;
-  margin-top:28px!important;
-  padding-top:12px!important;
-  border-top:1px solid rgba(18,56,66,.5)!important;
-}
-
-/* Diamond core on the right */
 #candidate .candidate-core{
-  position:relative!important;
-  min-height:300px!important;
-  border-left:1px solid rgba(18,56,66,.55)!important;
-  background:radial-gradient(circle at 50% 45%,rgba(55,255,112,.07),transparent 42%)!important;
-  overflow:hidden!important;
+  min-height:310px!important;
+  background:radial-gradient(circle at 50% 44%,rgba(55,255,112,.09),transparent 40%)!important;
 }
-
 #candidate .candidate-core .cube{
-  width:62px!important;
-  height:62px!important;
-  box-shadow:0 0 30px rgba(57,255,138,.4),0 0 60px rgba(57,255,138,.15)!important;
+  width:66px!important;
+  height:66px!important;
+  box-shadow:0 0 34px rgba(57,255,138,.45),0 0 70px rgba(57,255,138,.18)!important;
 }
-
 #candidate .candidate-core > span{
-  top:calc(50% + 58px)!important;
+  top:calc(50% + 60px)!important;
   color:#3dff70!important;
-  font:700 9px var(--ref-mono)!important;
-  letter-spacing:.18em!important;
+  font-size:10px!important;
 }
-
 #candidate .candidate-core #blockProximity,
 #candidate .candidate-core b{
-  position:absolute!important;
-  left:0!important;right:0!important;
-  top:calc(50% + 76px)!important;
-  text-align:center!important;
+  top:calc(50% + 80px)!important;
   color:#3dff70!important;
-  font:700 10px var(--ref-mono)!important;
-  letter-spacing:.14em!important;
-  text-shadow:0 0 10px rgba(57,255,138,.35)!important;
+  font:700 11px var(--ref-mono)!important;
+  text-shadow:0 0 12px rgba(57,255,138,.4)!important;
 }
 
-/* COMBO as strong amber card (like reference) */
+/* COMBO — strong amber card like reference */
 #combo.combo,
 .combo{
   position:absolute!important;
-  left:22px!important;
-  bottom:22px!important;
-  z-index:25!important;
-  background:linear-gradient(145deg,rgba(22,14,4,.95),rgba(10,6,2,.92))!important;
-  border:1px solid rgba(255,181,47,.45)!important;
-  border-radius:12px!important;
-  padding:14px 18px!important;
-  box-shadow:0 10px 28px rgba(0,0,0,.5),inset 0 0 0 1px rgba(255,181,47,.1)!important;
-  min-width:110px!important;
+  left:24px!important;
+  bottom:24px!important;
+  z-index:30!important;
+  background:linear-gradient(150deg,rgba(28,16,4,.97),rgba(12,7,2,.94))!important;
+  border:1px solid rgba(255,181,47,.5)!important;
+  border-radius:13px!important;
+  padding:15px 20px!important;
+  min-width:120px!important;
+  box-shadow:
+    0 12px 30px rgba(0,0,0,.55),
+    inset 0 0 0 1px rgba(255,181,47,.12),
+    0 0 20px rgba(255,150,30,.08)!important;
 }
 .combo span{
-  color:#9a8470!important;
+  color:#a89070!important;
   font:700 9px var(--ref-mono)!important;
-  letter-spacing:.16em!important;
+  letter-spacing:.18em!important;
 }
 .combo strong{
   color:#ffb52f!important;
-  font:800 28px var(--ref-mono)!important;
-  text-shadow:0 0 14px rgba(255,181,47,.4)!important;
-  margin-top:4px!important;
+  font:800 30px var(--ref-mono)!important;
+  text-shadow:0 0 16px rgba(255,181,47,.5)!important;
+  margin-top:5px!important;
   display:block!important;
 }
 .combo small{
   color:#ff8a3d!important;
-  font:700 8px var(--ref-mono)!important;
-  margin-top:4px!important;
+  font:700 9px var(--ref-mono)!important;
+  margin-top:5px!important;
   display:block!important;
 }
 
-/* ========== FORGE 3D CARDS — much stronger tilt ========== */
-.forge-stage .hashrate-card,
-.forge-stage .forge-shares-min{
-  transform:perspective(800px) rotateY(12deg) rotateX(3deg)!important;
-  box-shadow:
-    inset 0 0 0 1px rgba(23,73,84,.5),
-    0 12px 28px rgba(0,0,0,.6),
-    0 0 24px rgba(0,0,0,.3)!important;
-}
-.forge-stage .hashrate-card:before,
-.forge-stage .forge-shares-min:before{
-  transform:translate3d(18px,6px,-32px)!important;
-  box-shadow:8px 10px 22px rgba(0,0,0,.6)!important;
-}
-.forge-stage .forge-counter.accepted{
-  transform:perspective(800px) rotateY(-12deg) rotateX(3deg)!important;
-  border-color:rgba(57,255,138,.42)!important;
-}
-.forge-stage .forge-counter.rejected{
-  transform:perspective(800px) rotateY(-12deg) rotateX(-2deg)!important;
-  border-color:rgba(255,79,97,.42)!important;
-}
-.forge-stage .forge-counter:before{
-  transform:translate3d(-16px,5px,-30px)!important;
-}
-
-/* ========== CENTRAL F — denser energy ========== */
-.form-hex{
-  width:200px!important;
-  height:200px!important;
-  filter:
-    drop-shadow(0 0 32px rgba(57,255,138,.6))
-    drop-shadow(0 0 70px rgba(57,255,138,.3))!important;
-  background:linear-gradient(145deg,#70ff9e,#1ad65e 52%,#0b8a42)!important;
-}
-.form-hex span{
-  font-size:66px!important;
-  text-shadow:0 0 26px rgba(167,255,190,.7),0 0 50px rgba(57,255,138,.35)!important;
-}
-.core-field{
-  background:radial-gradient(circle,rgba(53,255,126,.32),transparent 60%)!important;
-}
-.particle-idle{
-  opacity:.65!important;
-}
-.core-label{
-  color:#55ff82!important;
-  text-shadow:0 0 12px rgba(57,255,138,.3)!important;
-}
-
-/* ========== HERO BAR ========== */
-.target-meter{
-  height:14px!important;
-}
-.target-meter i{
-  box-shadow:0 0 18px rgba(85,255,101,.85),0 0 36px rgba(57,255,138,.4)!important;
-}
-.target-meter b{
-  width:3px!important;
-  height:26px!important;
-  box-shadow:0 0 16px #39ff8a,0 0 32px rgba(57,255,138,.55)!important;
-}
-
-/* Keep mobile usable but still try to keep some depth */
+/* ---------- Keep usable on phone ---------- */
 @media(max-width:700px){
-  #candidate.candidate{
-    grid-template-columns:1fr!important;
-    min-height:auto!important;
-  }
-  #candidate .candidate-core{
-    min-height:220px!important;
-    border-left:0!important;
-    border-top:1px solid rgba(18,56,66,.55)!important;
-  }
-  .combo{
-    left:16px!important;
-    bottom:auto!important;
-    top:12px!important;
-  }
+  #candidate.candidate{grid-template-columns:1fr!important;min-height:auto!important;}
+  #candidate .candidate-core{min-height:230px!important;border-left:0!important;border-top:1px solid rgba(18,56,66,.55)!important;}
+  .combo{left:14px!important;bottom:auto!important;top:14px!important;}
   .forge-stage .hashrate-card,
   .forge-stage .forge-shares-min{
-    transform:perspective(700px) rotateY(8deg) rotateX(2deg)!important;
+    transform:perspective(650px) rotateY(10deg) rotateX(3deg)!important;
+    width:150px!important;min-width:150px!important;height:95px!important;
   }
   .forge-stage .forge-counter.accepted,
   .forge-stage .forge-counter.rejected{
-    transform:perspective(700px) rotateY(-8deg) rotateX(1deg)!important;
+    transform:perspective(650px) rotateY(-10deg) rotateX(2deg)!important;
+    width:150px!important;min-width:150px!important;height:95px!important;
   }
+  .forge-core{width:280px!important;height:280px!important;}
+  .form-hex{width:130px!important;height:130px!important;}
+  .form-hex span{font-size:44px!important;}
 }
