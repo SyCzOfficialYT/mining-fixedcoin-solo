@@ -1,47 +1,40 @@
 /* =========================================================
-   FIXEDCOIN — AGGRESSIVE 1:1 REFERENCE MATCH v3
-   Maximum force for 3D cards, dense core, long progress bars
+   FIXEDCOIN — MOBILE-OPTIMIZED AGGRESSIVE MATCH (Option A)
+   Strong 3D + glow even on phone screens
    ========================================================= */
 
-/* ---------- HERO PROGRESS (thicker + nuclear glow) ---------- */
+/* ---------- HERO BAR ---------- */
 .target-meter{
-  height:15px!important;
+  height:14px!important;
   border:1px solid #1e6a7a!important;
-  box-shadow:inset 0 2px 12px #000,0 0 16px rgba(57,255,138,.12)!important;
+  box-shadow:inset 0 2px 10px #000,0 0 14px rgba(57,255,138,.1)!important;
 }
 .target-meter i{
   background:linear-gradient(90deg,#2dff5c,#55ff70,#9aff7a)!important;
-  box-shadow:0 0 20px rgba(85,255,101,.9),0 0 40px rgba(57,255,138,.5)!important;
+  box-shadow:0 0 16px rgba(85,255,101,.85),0 0 32px rgba(57,255,138,.4)!important;
 }
 .target-meter b{
-  width:4px!important;
-  height:28px!important;
+  width:3px!important;
+  height:24px!important;
   background:#39ff8a!important;
-  box-shadow:0 0 18px #39ff8a,0 0 36px rgba(57,255,138,.6)!important;
+  box-shadow:0 0 14px #39ff8a,0 0 28px rgba(57,255,138,.5)!important;
 }
 .meter-labels strong{
-  font-size:15px!important;
-  text-shadow:0 0 14px rgba(88,239,109,.45)!important;
+  font-size:14px!important;
+  text-shadow:0 0 12px rgba(88,239,109,.4)!important;
 }
 
-/* ---------- FORGE CARDS — REAL 3D BODY ---------- */
+/* ---------- FORGE CARDS — 3D even on mobile ---------- */
 .forge-stage .hashrate-card,
 .forge-stage .forge-shares-min{
-  width:290px!important;
-  height:150px!important;
-  min-width:290px!important;
-  min-height:150px!important;
-  transform:perspective(750px) rotateY(14deg) rotateX(4deg)!important;
-  border:1px solid rgba(30,110,125,.95)!important;
+  transform:perspective(600px) rotateY(11deg) rotateX(3deg)!important;
+  border:1px solid rgba(30,110,125,.9)!important;
   background:linear-gradient(155deg,#061018,#02080c)!important;
   box-shadow:
-    inset 0 0 0 1px rgba(40,130,145,.35),
-    0 14px 32px rgba(0,0,0,.65),
-    0 0 30px rgba(0,0,0,.35)!important;
+    inset 0 0 0 1px rgba(40,130,145,.3),
+    0 10px 24px rgba(0,0,0,.55),
+    0 0 20px rgba(0,0,0,.25)!important;
 }
-.forge-stage .hashrate-card{left:38px!important;top:42px!important;}
-.forge-stage .forge-shares-min{left:38px!important;top:210px!important;}
-
 .forge-stage .hashrate-card:before,
 .forge-stage .forge-shares-min:before{
   content:""!important;
@@ -49,212 +42,203 @@
   inset:0!important;
   border-radius:14px!important;
   background:#02080c!important;
-  border:1px solid rgba(25,90,100,.9)!important;
-  transform:translate3d(20px,7px,-36px)!important;
-  box-shadow:10px 12px 26px rgba(0,0,0,.65)!important;
+  border:1px solid rgba(25,90,100,.85)!important;
+  transform:translate3d(14px,5px,-26px)!important;
+  box-shadow:7px 8px 18px rgba(0,0,0,.55)!important;
   z-index:-2!important;
 }
 .forge-stage .hashrate-card:after,
 .forge-stage .forge-shares-min:after{
   content:""!important;
   position:absolute!important;
-  right:-13px!important;
-  top:6px!important;
-  bottom:6px!important;
-  width:13px!important;
-  border-radius:0 10px 10px 0!important;
-  background:linear-gradient(90deg,rgba(20,80,90,.8),rgba(5,25,30,.7),transparent)!important;
-  transform:translateZ(-8px)!important;
+  right:-10px!important;
+  top:5px!important;
+  bottom:5px!important;
+  width:10px!important;
+  border-radius:0 9px 9px 0!important;
+  background:linear-gradient(90deg,rgba(20,80,90,.75),rgba(5,25,30,.65),transparent)!important;
+  transform:translateZ(-6px)!important;
   z-index:-1!important;
 }
 
-.forge-stage .forge-counter.accepted,
-.forge-stage .forge-counter.rejected{
-  width:290px!important;
-  min-width:290px!important;
-  height:150px!important;
-  min-height:150px!important;
-}
 .forge-stage .forge-counter.accepted{
-  right:38px!important;
-  top:55px!important;
-  transform:perspective(750px) rotateY(-14deg) rotateX(4deg)!important;
-  border:1px solid rgba(57,255,138,.45)!important;
-  box-shadow:
-    inset 0 0 0 1px rgba(57,255,138,.08),
-    0 14px 32px rgba(0,0,0,.65)!important;
+  transform:perspective(600px) rotateY(-11deg) rotateX(3deg)!important;
+  border:1px solid rgba(57,255,138,.42)!important;
+  box-shadow:inset 0 0 0 1px rgba(57,255,138,.07),0 10px 24px rgba(0,0,0,.55)!important;
 }
 .forge-stage .forge-counter.rejected{
-  right:38px!important;
-  top:225px!important;
-  transform:perspective(750px) rotateY(-14deg) rotateX(-3deg)!important;
-  border:1px solid rgba(255,79,97,.45)!important;
-  box-shadow:
-    inset 0 0 0 1px rgba(255,79,97,.06),
-    0 14px 32px rgba(0,0,0,.65)!important;
+  transform:perspective(600px) rotateY(-11deg) rotateX(-2deg)!important;
+  border:1px solid rgba(255,79,97,.42)!important;
+  box-shadow:inset 0 0 0 1px rgba(255,79,97,.05),0 10px 24px rgba(0,0,0,.55)!important;
 }
 .forge-stage .forge-counter:before{
-  transform:translate3d(-20px,6px,-34px)!important;
-  box-shadow:8px 10px 24px rgba(0,0,0,.6)!important;
+  transform:translate3d(-14px,5px,-26px)!important;
+  box-shadow:6px 8px 16px rgba(0,0,0,.5)!important;
 }
 
-/* ---------- CENTRAL CORE — BIG + DENSE ENERGY ---------- */
+/* ---------- CENTRAL CORE — larger + denser on phone ---------- */
 .forge-core{
-  width:460px!important;
-  height:460px!important;
+  width:320px!important;
+  height:320px!important;
 }
 .form-hex{
-  width:210px!important;
-  height:210px!important;
+  width:150px!important;
+  height:150px!important;
   filter:
-    drop-shadow(0 0 36px rgba(57,255,138,.7))
-    drop-shadow(0 0 80px rgba(57,255,138,.35))
-    drop-shadow(0 0 120px rgba(57,255,138,.15))!important;
-  background:linear-gradient(145deg,#78ffA5,#1bd862 50%,#0a8f45)!important;
+    drop-shadow(0 0 28px rgba(57,255,138,.65))
+    drop-shadow(0 0 60px rgba(57,255,138,.3))!important;
+  background:linear-gradient(145deg,#70ff9e,#1bd862 52%,#0a8f45)!important;
 }
 .form-hex:before{
-  inset:22px!important;
+  inset:16px!important;
   background:#073528!important;
 }
 .form-hex span{
-  font-size:72px!important;
-  text-shadow:
-    0 0 28px rgba(180,255,200,.8),
-    0 0 55px rgba(57,255,138,.45)!important;
+  font-size:52px!important;
+  text-shadow:0 0 22px rgba(180,255,200,.75),0 0 45px rgba(57,255,138,.4)!important;
 }
 .core-field{
-  background:radial-gradient(circle,rgba(60,255,130,.4),transparent 58%)!important;
+  background:radial-gradient(circle,rgba(60,255,130,.38),transparent 58%)!important;
 }
 .particle-idle{
-  opacity:.75!important;
-  background-size:14px 16px!important;
-}
-.core-rings{
-  opacity:1!important;
+  opacity:.7!important;
+  background-size:13px 15px!important;
 }
 .core-label{
-  top:calc(50% + 122px)!important;
+  top:calc(50% + 90px)!important;
   color:#5dff88!important;
-  font-size:11px!important;
-  text-shadow:0 0 14px rgba(57,255,138,.4)!important;
+  font-size:10px!important;
+  text-shadow:0 0 12px rgba(57,255,138,.35)!important;
 }
 .core-sub{
-  top:calc(50% + 148px)!important;
-  font-size:9px!important;
+  top:calc(50% + 112px)!important;
+  font-size:8px!important;
 }
 
-/* ---------- CANDIDATE — LONG BAR + STRONG COMBO ---------- */
+/* ---------- CANDIDATE ---------- */
 #candidate.candidate,
 .candidate.panel{
   width:100%!important;
   margin:0!important;
-  min-height:310px!important;
+  min-height:auto!important;
   display:grid!important;
-  grid-template-columns:minmax(0,1.5fr) 270px!important;
-  border:1px solid rgba(30,104,119,.75)!important;
-  border-radius:18px!important;
+  grid-template-columns:1fr!important;
+  border:1px solid rgba(30,104,119,.7)!important;
+  border-radius:16px!important;
   background:linear-gradient(145deg,rgba(3,14,19,.98),rgba(1,7,11,.98))!important;
-  box-shadow:0 0 0 1px rgba(0,255,255,.03) inset,0 22px 70px rgba(0,0,0,.45)!important;
+  box-shadow:0 0 0 1px rgba(0,255,255,.03) inset,0 18px 50px rgba(0,0,0,.4)!important;
 }
-
 #candidate .candidate-left{
-  padding:24px 30px 20px 26px!important;
+  padding:18px 18px 16px 18px!important;
 }
-
 #candidate .candidate-pct{
-  margin-top:18px!important;
-  font:800 clamp(52px,5.2vw,72px)/.92 var(--ref-mono)!important;
+  margin-top:12px!important;
+  font:800 48px/.92 var(--ref-mono)!important;
   color:#58ef6d!important;
-  text-shadow:0 0 32px rgba(88,239,109,.3)!important;
+  text-shadow:0 0 24px rgba(88,239,109,.28)!important;
 }
-
 #candidate .candidate-meter,
 #candidate .candidate-track{
-  height:15px!important;
-  margin-top:16px!important;
+  height:13px!important;
+  margin-top:12px!important;
   border:1px solid #1e6a7a!important;
-  box-shadow:inset 0 2px 12px #000!important;
+  box-shadow:inset 0 2px 10px #000!important;
 }
 #candidate .candidate-meter i,
 #candidate .candidate-track i{
   background:linear-gradient(90deg,#2dff5c,#55ff70,#9aff7a)!important;
-  box-shadow:0 0 20px rgba(85,255,101,.9),0 0 40px rgba(57,255,138,.45)!important;
+  box-shadow:0 0 16px rgba(85,255,101,.85),0 0 32px rgba(57,255,138,.4)!important;
 }
-
 #candidate .candidate-core{
-  min-height:310px!important;
-  background:radial-gradient(circle at 50% 44%,rgba(55,255,112,.09),transparent 40%)!important;
+  min-height:200px!important;
+  border-left:0!important;
+  border-top:1px solid rgba(18,56,66,.5)!important;
+  background:radial-gradient(circle at 50% 44%,rgba(55,255,112,.08),transparent 42%)!important;
 }
 #candidate .candidate-core .cube{
-  width:66px!important;
-  height:66px!important;
-  box-shadow:0 0 34px rgba(57,255,138,.45),0 0 70px rgba(57,255,138,.18)!important;
+  width:56px!important;
+  height:56px!important;
+  box-shadow:0 0 26px rgba(57,255,138,.4),0 0 50px rgba(57,255,138,.15)!important;
 }
 #candidate .candidate-core > span{
-  top:calc(50% + 60px)!important;
+  top:calc(50% + 48px)!important;
   color:#3dff70!important;
-  font-size:10px!important;
+  font-size:9px!important;
 }
 #candidate .candidate-core #blockProximity,
 #candidate .candidate-core b{
-  top:calc(50% + 80px)!important;
+  top:calc(50% + 66px)!important;
   color:#3dff70!important;
-  font:700 11px var(--ref-mono)!important;
-  text-shadow:0 0 12px rgba(57,255,138,.4)!important;
+  font:700 10px var(--ref-mono)!important;
+  text-shadow:0 0 10px rgba(57,255,138,.35)!important;
 }
 
-/* COMBO — strong amber card like reference */
+/* COMBO — strong amber card */
 #combo.combo,
 .combo{
   position:absolute!important;
-  left:24px!important;
-  bottom:24px!important;
+  left:14px!important;
+  top:12px!important;
+  bottom:auto!important;
   z-index:30!important;
   background:linear-gradient(150deg,rgba(28,16,4,.97),rgba(12,7,2,.94))!important;
   border:1px solid rgba(255,181,47,.5)!important;
-  border-radius:13px!important;
-  padding:15px 20px!important;
-  min-width:120px!important;
+  border-radius:12px!important;
+  padding:12px 16px!important;
+  min-width:100px!important;
   box-shadow:
-    0 12px 30px rgba(0,0,0,.55),
+    0 10px 24px rgba(0,0,0,.5),
     inset 0 0 0 1px rgba(255,181,47,.12),
-    0 0 20px rgba(255,150,30,.08)!important;
+    0 0 16px rgba(255,150,30,.08)!important;
 }
 .combo span{
   color:#a89070!important;
-  font:700 9px var(--ref-mono)!important;
-  letter-spacing:.18em!important;
+  font:700 8px var(--ref-mono)!important;
+  letter-spacing:.16em!important;
 }
 .combo strong{
   color:#ffb52f!important;
-  font:800 30px var(--ref-mono)!important;
-  text-shadow:0 0 16px rgba(255,181,47,.5)!important;
-  margin-top:5px!important;
+  font:800 26px var(--ref-mono)!important;
+  text-shadow:0 0 14px rgba(255,181,47,.45)!important;
+  margin-top:3px!important;
   display:block!important;
 }
 .combo small{
   color:#ff8a3d!important;
-  font:700 9px var(--ref-mono)!important;
-  margin-top:5px!important;
+  font:700 8px var(--ref-mono)!important;
+  margin-top:3px!important;
   display:block!important;
 }
 
-/* ---------- Keep usable on phone ---------- */
-@media(max-width:700px){
-  #candidate.candidate{grid-template-columns:1fr!important;min-height:auto!important;}
-  #candidate .candidate-core{min-height:230px!important;border-left:0!important;border-top:1px solid rgba(18,56,66,.55)!important;}
-  .combo{left:14px!important;bottom:auto!important;top:14px!important;}
+/* ---------- Desktop still gets the full treatment ---------- */
+@media(min-width:800px){
   .forge-stage .hashrate-card,
   .forge-stage .forge-shares-min{
-    transform:perspective(650px) rotateY(10deg) rotateX(3deg)!important;
-    width:150px!important;min-width:150px!important;height:95px!important;
+    width:280px!important;
+    height:145px!important;
+    transform:perspective(750px) rotateY(13deg) rotateX(3.5deg)!important;
   }
   .forge-stage .forge-counter.accepted,
   .forge-stage .forge-counter.rejected{
-    transform:perspective(650px) rotateY(-10deg) rotateX(2deg)!important;
-    width:150px!important;min-width:150px!important;height:95px!important;
+    width:280px!important;
+    height:145px!important;
+    transform:perspective(750px) rotateY(-13deg) rotateX(3deg)!important;
   }
-  .forge-core{width:280px!important;height:280px!important;}
-  .form-hex{width:130px!important;height:130px!important;}
-  .form-hex span{font-size:44px!important;}
+  .forge-core{width:420px!important;height:420px!important;}
+  .form-hex{width:190px!important;height:190px!important;}
+  .form-hex span{font-size:64px!important;}
+  #candidate.candidate{
+    grid-template-columns:minmax(0,1.4fr) 260px!important;
+    min-height:300px!important;
+  }
+  #candidate .candidate-core{
+    min-height:300px!important;
+    border-left:1px solid rgba(18,56,66,.55)!important;
+    border-top:0!important;
+  }
+  .combo{
+    left:22px!important;
+    top:auto!important;
+    bottom:22px!important;
+  }
 }
