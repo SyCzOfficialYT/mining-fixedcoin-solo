@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Harden the v4 dashboard backend around authoritative Stratum round state."""
+"""Harden the v4 dashboard backend around authoritative Stratum round state.
+
+IMPORTANT: Do NOT switch the rendered template to dashboard_v4.html.
+The visual reference match (dashboard_v3 + reference_exact + reference_match)
+must remain the active UI.
+"""
 from pathlib import Path
 
 APP = Path('/app/monitor/app.py')
@@ -18,9 +23,8 @@ def once(old, new, label, required=False):
     changed = True
     print(label)
 
-once('render_template("dashboard_v3.html",payout=config().get("payout_address",""),maturity=MATURITY)',
-     'render_template("dashboard_v4.html",payout=config().get("payout_address",""),maturity=MATURITY)',
-     'patched dashboard route: dashboard_v4.html')
+# Intentionally DO NOT switch to dashboard_v4.html — keep v3 for the reference look.
+# (Previous version of this patch forced dashboard_v4.html and broke the visual match.)
 
 once('BLOCKS = DATA / "blocks.json"\n',
      'BLOCKS = DATA / "blocks.json"\nLEDGER = Path(os.getenv("BLOCK_LEDGER_PATH", str(DATADIR / "solo-blocks.json")))\n',
@@ -86,4 +90,4 @@ if '"uptime_seconds"' not in text:
 
 if changed:
     APP.write_text(text)
-print('dashboard v4 backend repair complete')
+print('dashboard v4 backend repair complete (template remains dashboard_v3.html)')
