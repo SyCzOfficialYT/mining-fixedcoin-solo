@@ -1,136 +1,14 @@
-/* FIXCORE forge metric cards — mirrored 3D shell of the right-side share cards.
-   Left metrics intentionally mirror the Accepted/Rejected geometry:
-   - same physical card footprint
-   - opposite Y rotation so the top edge falls toward the right
-   - mirrored rear plate / thumb thickness
-   - real preserve-3d depth
-   - same parallax variables as the share cards
+/* FIXCOIN // CYBERPUNK REFERENCE COMPOSITION
+   Loaded by dashboard_v4.html. Keep the native SVG artwork intact.
 */
-.forge-stage .hashrate-card,
-.forge-stage .forge-shares-min {
-  position:absolute!important;
-  box-sizing:border-box!important;
-  width:210px!important;
-  min-width:210px!important;
-  height:118px!important;
-  min-height:118px!important;
-  margin:0!important;
-  padding:.65rem .8rem .7rem .95rem!important;
-  border-radius:14px!important;
-  background:#050a0e!important;
-  overflow:visible!important;
-  transform-style:preserve-3d!important;
-  backface-visibility:hidden!important;
-  transform-origin:center center!important;
-  will-change:transform!important;
-  display:flex!important;
-  flex-direction:column!important;
-  align-items:stretch!important;
-  justify-content:flex-start!important;
-  text-align:left!important;
-  z-index:48!important;
-  border:1px solid #174954!important;
-  transform:perspective(700px) rotateY(calc(18deg + var(--metric-px,0deg))) rotateX(calc(4deg + var(--metric-py,0deg)))!important;
-  box-shadow:
-    inset 0 0 0 1px rgba(23,73,84,.38),
-    inset 0 0 12px rgba(20,183,205,.035),
-    0 0 0 1px rgba(22,101,115,.22),
-    0 8px 18px rgba(0,0,0,.48)!important;
-}
+.forge-stage .hashrate-card,.forge-stage .forge-shares-min{position:absolute!important;box-sizing:border-box!important;width:210px!important;min-width:210px!important;height:118px!important;min-height:118px!important;margin:0!important;padding:.65rem .8rem .7rem .95rem!important;border-radius:14px!important;background:#050a0e!important;overflow:visible!important;transform-style:preserve-3d!important;z-index:48!important;border:1px solid #174954!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;justify-content:flex-start!important;text-align:left!important;box-shadow:inset 0 0 0 1px rgba(23,73,84,.38),0 8px 18px rgba(0,0,0,.48)!important}
+.forge-stage .hashrate-card{left:30px!important;right:auto!important;top:42px!important;transform:perspective(700px) rotateY(18deg) rotateX(4deg)!important}.forge-stage .forge-shares-min{left:30px!important;right:auto!important;top:195px!important;transform:perspective(700px) rotateY(18deg) rotateX(3deg)!important}
+.forge-stage .hashrate-card:before,.forge-stage .forge-shares-min:before{content:"";position:absolute;inset:0;border-radius:14px;background:#03070a;z-index:-2;transform:translate3d(12px,3px,-28px);border:1px solid rgba(23,73,84,.9);pointer-events:none}
+.forge-stage .hashrate-card>span,.forge-stage .forge-shares-min>span{display:block!important;width:100%!important;color:#8aa0aa!important;font:600 10px/1 Inter,ui-sans-serif,system-ui,sans-serif!important;letter-spacing:.12em!important;text-transform:uppercase!important;margin:0 0 1px!important;white-space:nowrap!important}.forge-stage .hashrate-card>strong,.forge-stage .forge-shares-min>strong{display:block!important;width:100%!important;color:#e9f8fa!important;font:700 1.9rem/1 "JetBrains Mono",ui-monospace,monospace!important;margin:0!important;white-space:nowrap!important}.forge-stage .hashrate-card>small,.forge-stage .forge-shares-min>small{display:block!important;color:#5e777e!important;font:500 7px/1.15 "JetBrains Mono",monospace!important;letter-spacing:.1em!important;text-transform:uppercase!important;margin:2px 0 0!important}.forge-stage .hashrate-card>svg,.forge-stage .forge-shares-min>svg{display:block!important;width:100%!important;height:27px!important;margin:6px 0 0!important}.forge-stage .hashrate-card polyline,.forge-stage .forge-shares-min polyline{fill:none!important;stroke:#39ff8a!important;stroke-width:2.1!important;filter:drop-shadow(0 0 4px rgba(57,255,138,.5))!important}
 
-.forge-stage .hashrate-card{left:30px!important;right:auto!important;top:42px!important}
-.forge-stage .forge-shares-min{
-  left:30px!important;
-  right:auto!important;
-  top:195px!important;
-  transform:perspective(700px) rotateY(calc(18deg + var(--metric-px,0deg))) rotateX(calc(3deg + var(--metric-py,0deg)))!important;
-}
+/* THE IMPORTANT FIX: center the existing 600x600 SVG instead of resizing/translating its internals. */
+.forge-stage .forge-art{position:absolute!important;inset:0!important;overflow:hidden!important}.forge-stage .forge-core-wrap{position:absolute!important;left:50%!important;top:53%!important;right:auto!important;bottom:auto!important;inset:auto!important;width:285px!important;height:285px!important;transform:translate(-50%,-50%)!important;overflow:visible!important;z-index:20!important}.forge-stage .forge-core{position:absolute!important;left:0!important;top:0!important;width:285px!important;height:285px!important;margin:0!important;transform:none!important;filter:drop-shadow(0 0 24px rgba(57,255,138,.22))!important}.forge-stage .forge-core svg{display:block!important;width:100%!important;height:100%!important;max-width:none!important;overflow:visible!important}
+.forge-stage .core-halo{stroke:rgba(27,228,255,.22)!important}.forge-stage .forge-ring{stroke:rgba(57,255,138,.34)!important;filter:drop-shadow(0 0 4px rgba(57,255,138,.12))!important}.forge-stage .forge-ring.r3{stroke:rgba(27,228,255,.26)!important}.forge-stage .core-beam{opacity:.72!important}.forge-stage .core-bracket{fill:rgba(3,18,22,.9)!important;stroke:rgba(27,228,255,.4)!important}.forge-stage .core-energy{fill:url(#coreEnergy)!important;stroke:#8cffaa!important;stroke-width:1.4!important;filter:url(#coreGlow)!important}.forge-stage .core-energy-inner{fill:#061b14!important;stroke:#52ff7a!important;stroke-width:1!important}.forge-stage .core-f{fill:#d4ffdc!important;font-size:52px!important;filter:url(#coreGlow)!important}.forge-stage .core-particle{fill:#baffc8!important;filter:url(#coreGlow)!important}.forge-stage .energy-pulse{display:none!important}.forge-stage .forge-core-label{font-size:10px!important;color:#55ff82!important;text-shadow:0 0 9px rgba(73,255,112,.55)!important}.forge-stage .forge-core-status{font-size:7px!important;color:rgba(143,190,198,.72)!important}
 
-/* Mirrored rear plate: the right-side cards push their depth to the right;
-   the left-side cards push their depth to the left. */
-.forge-stage .hashrate-card::before,
-.forge-stage .forge-shares-min::before{
-  content:""!important;
-  display:block!important;
-  position:absolute!important;
-  inset:0!important;
-  border-radius:14px!important;
-  background:#03070a!important;
-  z-index:-2!important;
-  pointer-events:none!important;
-  transform:translate3d(12px,3px,-28px)!important;
-  transform-style:preserve-3d!important;
-  border:1px solid rgba(23,73,84,.9)!important;
-  box-shadow:4px 6px 12px rgba(0,0,0,.5),0 0 12px rgba(20,183,205,.06)!important;
-}
-
-/* Physical side wall on the left edge, mirrored from the right share-card rim. */
-.forge-stage .hashrate-card::after,
-.forge-stage .forge-shares-min::after{
-  content:""!important;
-  position:absolute!important;
-  top:7px!important;
-  bottom:7px!important;
-  left:-8px!important;
-  width:10px!important;
-  border-radius:10px 0 0 10px!important;
-  background:linear-gradient(270deg,rgba(25,109,123,.72),rgba(10,49,58,.62),transparent)!important;
-  box-shadow:-2px 0 10px rgba(22,210,231,.13)!important;
-  transform:translateZ(-4px)!important;
-  z-index:-1!important;
-  pointer-events:none!important;
-}
-
-.forge-stage .hashrate-card>span,
-.forge-stage .forge-shares-min>span{
-  display:block!important;position:relative!important;inset:auto!important;width:100%!important;box-sizing:border-box!important;
-  flex:0 0 auto!important;margin:0 0 1px!important;padding:0!important;align-self:stretch!important;z-index:4!important;
-  color:#8aa0aa!important;font:600 10px/1 Inter,ui-sans-serif,system-ui,sans-serif!important;letter-spacing:.12em!important;
-  text-transform:uppercase!important;text-align:left!important;white-space:nowrap!important;transform:translateZ(8px)!important;
-}
-.forge-stage .hashrate-card>strong,
-.forge-stage .forge-shares-min>strong{
-  position:relative!important;inset:auto!important;display:block!important;width:100%!important;box-sizing:border-box!important;
-  flex:0 0 auto!important;margin:0!important;padding:0!important;align-self:stretch!important;z-index:4!important;
-  color:#e9f8fa!important;font:700 1.9rem/1 "JetBrains Mono",ui-monospace,monospace!important;letter-spacing:-.02em!important;
-  text-align:left!important;white-space:nowrap!important;text-shadow:0 0 10px rgba(220,250,255,.12)!important;transform:translateZ(14px)!important;
-}
-.forge-stage .hashrate-card>small,
-.forge-stage .forge-shares-min>small{
-  position:relative!important;inset:auto!important;display:block!important;width:100%!important;box-sizing:border-box!important;
-  flex:0 0 auto!important;margin:2px 0 0!important;padding:0!important;align-self:stretch!important;z-index:4!important;
-  color:#5e777e!important;font:500 7px/1.15 "JetBrains Mono",monospace!important;letter-spacing:.10em!important;
-  text-align:left!important;text-transform:uppercase!important;white-space:nowrap!important;transform:translateZ(7px)!important;
-}
-.forge-stage .hashrate-card>svg,
-.forge-stage .forge-shares-min>svg{
-  display:block!important;position:relative!important;flex:1 1 auto!important;align-self:stretch!important;width:100%!important;
-  min-height:27px!important;height:27px!important;margin:6px 0 0!important;padding:0!important;overflow:visible!important;z-index:4!important;
-  transform:translateZ(9px)!important;
-}
-.forge-stage .hashrate-card polyline,
-.forge-stage .forge-shares-min polyline{
-  fill:none!important;stroke:#39ff8a!important;stroke-width:2.1!important;filter:drop-shadow(0 0 4px rgba(57,255,138,.5))!important;
-}
-
-@media(max-width:700px){
-  .forge-stage .hashrate-card,.forge-stage .forge-shares-min{
-    left:22px!important;width:200px!important;min-width:200px!important;height:112px!important;min-height:112px!important;
-  }
-  .forge-stage .hashrate-card{top:42px!important}
-  .forge-stage .forge-shares-min{top:189px!important}
-}
-@media(max-width:520px){
-  .forge-stage .hashrate-card,.forge-stage .forge-shares-min{
-    left:14px!important;width:190px!important;min-width:190px!important;height:108px!important;min-height:108px!important;
-    padding:.65rem .8rem .7rem .95rem!important;
-  }
-  .forge-stage .hashrate-card{top:36px!important}
-  .forge-stage .forge-shares-min{top:179px!important}
-  .forge-stage .hashrate-card>span,.forge-stage .forge-shares-min>span{font-size:10px!important}
-  .forge-stage .hashrate-card>strong,.forge-stage .forge-shares-min>strong{font-size:1.9rem!important}
-  .forge-stage .hashrate-card>svg,.forge-stage .forge-shares-min>svg{min-height:24px!important;height:24px!important;margin-top:5px!important}
-}
-@media(prefers-reduced-motion:reduce){
-  .forge-stage .hashrate-card,.forge-stage .forge-shares-min{will-change:auto!important}
-}
+@media(max-width:700px){.forge-stage .forge-core-wrap{left:50%!important;top:53%!important;width:285px!important;height:285px!important;transform:translate(-50%,-50%)!important}.forge-stage .forge-core{width:285px!important;height:285px!important}.forge-stage .hashrate-card,.forge-stage .forge-shares-min{width:170px!important;min-width:170px!important;height:96px!important;min-height:96px!important}.forge-stage .hashrate-card{left:12px!important;top:38px!important}.forge-stage .forge-shares-min{left:12px!important;top:180px!important}.forge-stage .forge-counter{width:170px!important;min-width:170px!important;height:96px!important;min-height:96px!important}.forge-stage .forge-counter.accepted{right:12px!important;top:42px!important}.forge-stage .forge-counter.rejected{right:12px!important;bottom:42px!important;top:auto!important}}
+@media(max-width:430px){.forge-stage .forge-core-wrap{width:250px!important;height:250px!important}.forge-stage .forge-core{width:250px!important;height:250px!important}.forge-stage .hashrate-card,.forge-stage .forge-shares-min,.forge-stage .forge-counter{width:154px!important;min-width:154px!important;height:92px!important;min-height:92px!important}.forge-stage .hashrate-card,.forge-stage .forge-shares-min{left:8px!important}.forge-stage .forge-counter{right:8px!important}.forge-stage .hashrate-card>strong,.forge-stage .forge-shares-min>strong{font-size:1.55rem!important}.forge-stage .forge-counter>strong{font-size:1.8rem!important}}
