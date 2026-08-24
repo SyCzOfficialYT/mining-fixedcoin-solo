@@ -1,111 +1,15 @@
-/* FIXEDCOIN // CYBERPUNK HUD — REFERENCE MATCH v2
-   Visual-only layer. The reference is a restrained sci-fi mining HUD:
-   dark glass, angular hardware frames, thin neon lines, controlled bloom.
+/* FIXEDCOIN // CYBERPUNK REFERENCE SKIN v3
+   Visual only. Preserve dashboard_v4 native SVG FIXCORE and telemetry DOM.
 */
-:root{--fx-g:#39ff8a;--fx-g2:#65ff78;--fx-c:#1be4ff;--fx-r:#ff4f61;--fx-a:#ffb52f}
-
-html,body{background:#010609!important;color:#e7f7f8!important}
-body:before{content:""!important;position:fixed!important;inset:0!important;pointer-events:none!important;z-index:0!important;background-image:linear-gradient(rgba(27,228,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(27,228,255,.028) 1px,transparent 1px)!important;background-size:52px 52px!important;opacity:.32!important}
+:root{--fxg:#39ff8a;--fxg2:#5aff78;--fxc:#1be4ff;--fxr:#ff4f61;--fxa:#ffb52f;--fxm:"JetBrains Mono",ui-monospace,monospace}
+html,body{background:#010609!important;color:#e7f7f8!important;overflow-x:hidden!important}body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-5;background:radial-gradient(circle at 50% 25%,rgba(27,228,255,.05),transparent 34%),radial-gradient(circle at 50% 70%,rgba(57,255,138,.035),transparent 40%),linear-gradient(rgba(27,228,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(27,228,255,.018) 1px,transparent 1px);background-size:auto,auto,52px 52px,52px 52px}
 .dashboard{isolation:isolate!important}
-
-/* ------------------------------------------------------------------
-   HARDWARE PANELS — angular frame + inner HUD rail
-   ------------------------------------------------------------------ */
-.panel{position:relative!important;border:1px solid rgba(24,112,129,.72)!important;border-radius:13px!important;background:linear-gradient(145deg,rgba(3,15,21,.985),rgba(1,6,10,.995))!important;box-shadow:inset 0 0 0 1px rgba(57,255,138,.025),inset 0 1px 0 rgba(27,228,255,.10),0 18px 55px rgba(0,0,0,.64),0 0 24px rgba(27,228,255,.045)!important;overflow:hidden!important}
-.panel:before{content:""!important;position:absolute!important;inset:0!important;pointer-events:none!important;z-index:50!important;border:1px solid rgba(27,228,255,.08)!important;background:linear-gradient(90deg,rgba(57,255,138,.20) 0 1px,transparent 1px 4%,transparent 96%,rgba(27,228,255,.18) 96% 97%,transparent 97%)!important;opacity:1!important}
-.panel:after{content:""!important;position:absolute!important;inset:7px!important;pointer-events:none!important;z-index:51!important;border:1px solid rgba(27,228,255,.045)!important;background:linear-gradient(135deg,rgba(27,228,255,.022),transparent 24%,transparent 76%,rgba(57,255,138,.018))!important}
-.hero,.forge,.candidate,.stat,.balance-stat,.history{clip-path:polygon(0 11px,11px 0,calc(100% - 11px) 0,100% 11px,100% calc(100% - 11px),calc(100% - 11px) 100%,11px 100%,0 calc(100% - 11px))!important}
-.hero>*,.forge>*,.candidate>*,.stat>*,.balance-stat>*,.history>*{position:relative;z-index:60}
-
-/* tiny technical ticks */
-.hero-main:after,.candidate-left:after,.history:after{content:"// FIXCORE SYSTEM // ONLINE //";position:absolute;right:18px;bottom:9px;color:rgba(27,228,255,.22);font:7px/1 var(--mono,monospace);letter-spacing:.18em;pointer-events:none}
-
-/* ------------------------------------------------------------------
-   HERO
-   ------------------------------------------------------------------ */
-.value-block.best strong,.candidate-pct{color:var(--fx-g2)!important;text-shadow:0 0 14px rgba(57,255,138,.30),0 0 32px rgba(57,255,138,.09)!important}
-.target-meter,.candidate-meter{background:#010508!important;border-color:#155465!important;box-shadow:inset 0 2px 9px #000,0 0 12px rgba(27,228,255,.06)!important}
-.target-meter i,.candidate-meter i{background:linear-gradient(90deg,#2dff5c,#65ff70,#a6ff86)!important;box-shadow:0 0 10px rgba(57,255,138,.85),0 0 24px rgba(57,255,138,.28)!important}
-.round-id{border-color:#14748a!important;box-shadow:0 0 12px rgba(27,228,255,.24),inset 0 0 14px rgba(27,228,255,.05)!important}
-
-/* ------------------------------------------------------------------
-   FORGE — reference composition: cards remain outside the core.
-   ------------------------------------------------------------------ */
-.forge-stage{background:radial-gradient(circle at 50% 55%,rgba(57,255,138,.12),transparent 17%),radial-gradient(circle at 50% 55%,rgba(27,228,255,.14),transparent 38%),linear-gradient(180deg,#020b10,#01070b 72%,#010507)!important}
-.forge-stage:before{opacity:.72!important;background:linear-gradient(rgba(0,229,255,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,.035) 1px,transparent 1px)!important;background-size:42px 42px!important}
-.forge-stage:after{background:radial-gradient(circle at 50% 55%,rgba(57,255,138,.12),transparent 24%),radial-gradient(circle at 50% 55%,transparent 30%,rgba(0,0,0,.48) 82%)!important}
-
-.hashrate-card,.forge-shares-min,.forge-counter{background:linear-gradient(145deg,rgba(3,14,19,.96),rgba(1,6,9,.98))!important;border-color:rgba(27,228,255,.36)!important;border-radius:9px!important;box-shadow:inset 0 0 0 1px rgba(27,228,255,.055),0 10px 26px rgba(0,0,0,.58),0 0 13px rgba(27,228,255,.035)!important}
-.hashrate-card,.forge-shares-min{transform:perspective(900px) rotateY(7deg)!important}
-.forge-counter.accepted{transform:perspective(900px) rotateY(-7deg)!important;border-color:rgba(57,255,138,.38)!important}
-.forge-counter.rejected{transform:perspective(900px) rotateY(-7deg)!important;border-color:rgba(255,79,97,.34)!important}
-.hashrate-card:before,.forge-shares-min:before,.forge-counter:before{content:""!important;position:absolute!important;inset:4px!important;transform:translate(8px,7px)!important;border:1px solid rgba(27,228,255,.16)!important;background:#02070a!important;z-index:-1!important;pointer-events:none!important;box-shadow:0 8px 20px rgba(0,0,0,.55)!important}
-
-/* ------------------------------------------------------------------
-   FIXCORE — THIS IS THE IMPORTANT FIX.
-   The giant solid green hex was wrong. Keep the core dark, centered,
-   outlined and proportional to the reference.
-   ------------------------------------------------------------------ */
-.forge-core{position:absolute!important;left:50%!important;top:55%!important;transform:translate(-50%,-50%)!important;width:360px!important;height:360px!important;display:block!important;z-index:20!important;filter:drop-shadow(0 0 18px rgba(27,228,255,.12))!important}
-.core-rings{position:absolute!important;inset:0!important;background:repeating-radial-gradient(circle,transparent 0 34px,rgba(27,228,255,.18) 35px 36px,transparent 37px 52px)!important;opacity:.95!important}
-.core-rings:before{content:""!important;position:absolute!important;inset:20px!important;border:1px solid rgba(27,228,255,.30)!important;border-radius:50%!important;box-shadow:0 0 24px rgba(27,228,255,.10)!important}
-.core-rings:after{content:""!important;position:absolute!important;inset:72px!important;border:1px solid rgba(57,255,138,.34)!important;border-radius:50%!important;box-shadow:0 0 24px rgba(57,255,138,.10)!important}
-.core-field{position:absolute!important;inset:70px!important;border-radius:50%!important;background:radial-gradient(circle,rgba(57,255,138,.22),rgba(27,228,255,.08) 38%,transparent 70%)!important}
-
-/* Center logo: dark sci-fi face, thin neon edge — NOT a bright solid blob. */
-.form-hex{position:absolute!important;left:50%!important;top:50%!important;width:116px!important;height:116px!important;transform:translate(-50%,-50%)!important;background:linear-gradient(145deg,#123c2b,#071a16 58%,#04100f)!important;clip-path:polygon(25% 4%,75% 4%,98% 50%,75% 96%,25% 96%,2% 50%)!important;border:0!important;filter:drop-shadow(0 0 9px rgba(57,255,138,.42))!important;box-shadow:none!important;z-index:8!important}
-.form-hex:after{content:""!important;position:absolute!important;inset:2px!important;clip-path:inherit!important;border:1px solid rgba(57,255,138,.88)!important;background:transparent!important}
-.form-hex:before{content:""!important;position:absolute!important;inset:12px!important;background:#061c15!important;clip-path:inherit!important;border:1px solid rgba(27,228,255,.22)!important;box-shadow:inset 0 0 22px rgba(57,255,138,.10)!important}
-.form-hex span{position:relative!important;z-index:3!important;color:#8affaa!important;font:800 38px/116px var(--mono,monospace)!important;text-shadow:0 0 10px rgba(57,255,138,.65),0 0 24px rgba(57,255,138,.25)!important}
-.core-label{z-index:10!important;color:#58ff86!important;text-shadow:0 0 10px rgba(57,255,138,.45)!important}
-.core-sub{z-index:10!important}
-
-/* Keep cards above the core. */
-.hashrate-card,.forge-shares-min,.vardiff-card,.forge-counter{z-index:45!important}
-
-/* ------------------------------------------------------------------
-   CANDIDATE CORE
-   ------------------------------------------------------------------ */
-.candidate{box-shadow:inset 0 0 0 1px rgba(27,228,255,.035),0 18px 55px rgba(0,0,0,.62),0 0 24px rgba(27,228,255,.055)!important}
-.candidate-core{filter:drop-shadow(0 0 14px rgba(57,255,138,.14))!important}
-.candidate-core .r1{border-color:rgba(57,255,138,.38)!important;box-shadow:0 0 20px rgba(57,255,138,.12)!important}
-.candidate-core .r2{border-color:rgba(27,228,255,.28)!important}
-.candidate-core .r3{border-color:rgba(57,255,138,.18)!important}
-.candidate-core .cube{background:#082a1c!important;border-color:#39ff8a!important;box-shadow:0 0 18px rgba(57,255,138,.45),0 0 42px rgba(57,255,138,.14),inset 0 0 14px rgba(57,255,138,.10)!important;text-shadow:0 0 12px rgba(57,255,138,.7)!important}
-.combo{background:linear-gradient(150deg,rgba(28,17,3,.97),rgba(8,5,2,.97))!important;border:1px solid rgba(255,181,47,.58)!important;box-shadow:0 10px 24px rgba(0,0,0,.62),0 0 12px rgba(255,181,47,.08),inset 0 0 0 1px rgba(255,181,47,.08)!important}
-.combo strong{color:#ffb52f!important;text-shadow:0 0 12px rgba(255,181,47,.52)!important}
-
-/* ------------------------------------------------------------------
-   LOWER TELEMETRY
-   ------------------------------------------------------------------ */
-.stat,.balance-stat{border-color:rgba(27,228,255,.25)!important;box-shadow:inset 0 1px rgba(27,228,255,.08),0 10px 28px rgba(0,0,0,.45)!important}
-.balance-confirmed,.balance-total{border-color:rgba(57,255,138,.32)!important}
-.balance-immature{border-color:rgba(255,181,47,.25)!important}
-.history{border-color:rgba(27,228,255,.30)!important}
-
-/* ------------------------------------------------------------------
-   MOBILE — preserve the reference composition, never let the logo
-   cover telemetry cards.
-   ------------------------------------------------------------------ */
-@media(max-width:760px){
-  .dashboard{width:calc(100% - 18px)!important;gap:10px!important;margin:10px auto 18px!important}
-  .panel{box-shadow:inset 0 0 0 1px rgba(27,228,255,.04),0 14px 38px rgba(0,0,0,.62),0 0 20px rgba(27,228,255,.045)!important}
-  .hero,.forge,.candidate,.stat,.balance-stat,.history{clip-path:polygon(0 8px,8px 0,calc(100% - 8px) 0,100% 8px,100% calc(100% - 8px),calc(100% - 8px) 100%,8px 100%,0 calc(100% - 8px))!important}
-  .forge-core{left:50%!important;top:56%!important;width:300px!important;height:300px!important;transform:translate(-50%,-50%)!important}
-  .core-rings{background:repeating-radial-gradient(circle,transparent 0 24px,rgba(27,228,255,.20) 25px 26px,transparent 27px 39px)!important}
-  .core-rings:before{inset:12px!important}.core-rings:after{inset:42px!important}.core-field{inset:40px!important}
-  .form-hex{left:50%!important;top:50%!important;width:88px!important;height:88px!important;transform:translate(-50%,-50%)!important}
-  .form-hex span{font-size:30px!important;line-height:88px!important}
-  .core-label{top:calc(50% + 72px)!important;font-size:7px!important}.core-sub{top:calc(50% + 88px)!important;font-size:5px!important}
-  .forge-stage .hashrate-card,.forge-stage .forge-shares-min{width:166px!important;min-width:166px!important;height:104px!important;min-height:104px!important;padding:11px!important;transform:perspective(650px) rotateY(6deg)!important}
-  .forge-stage .hashrate-card{left:8px!important;top:40px!important}.forge-stage .forge-shares-min{left:8px!important;top:185px!important}
-  .forge-stage .forge-counter{width:166px!important;min-width:166px!important;height:104px!important;min-height:104px!important;padding:11px!important;transform:perspective(650px) rotateY(-6deg)!important}
-  .forge-stage .forge-counter.accepted{right:8px!important;top:52px!important}.forge-stage .forge-counter.rejected{right:8px!important;top:197px!important}
-  .vardiff-card{z-index:48!important}
-}
-@media(max-width:430px){
-  .forge-core{width:270px!important;height:270px!important}
-  .form-hex{width:78px!important;height:78px!important}.form-hex span{font-size:27px!important;line-height:78px!important}
-  .forge-stage .hashrate-card,.forge-stage .forge-shares-min,.forge-stage .forge-counter{width:150px!important;min-width:150px!important}
-  .forge-stage .hashrate-card,.forge-stage .forge-shares-min{left:6px!important}.forge-stage .forge-counter{right:6px!important}
-}
+.panel{position:relative!important;border:1px solid rgba(23,93,108,.9)!important;border-radius:14px!important;background:linear-gradient(145deg,rgba(3,14,20,.985),rgba(1,6,10,.995))!important;box-shadow:inset 0 0 0 1px rgba(27,228,255,.035),inset 0 1px rgba(57,255,138,.06),0 18px 60px rgba(0,0,0,.58),0 0 22px rgba(27,228,255,.035)!important;overflow:hidden!important}.panel:before{content:"";position:absolute;inset:0;pointer-events:none;z-index:55;background:linear-gradient(90deg,rgba(57,255,138,.18) 0 1px,transparent 1px 2.5%,transparent 97.5%,rgba(27,228,255,.18) 97.5% 97.7%,transparent 97.7%),linear-gradient(180deg,rgba(27,228,255,.11),transparent 18%,transparent 82%,rgba(57,255,138,.06))}.panel:after{content:"";position:absolute;inset:7px;pointer-events:none;z-index:56;border:1px solid rgba(27,228,255,.05);clip-path:polygon(0 8px,8px 0,calc(100% - 8px) 0,100% 8px,100% calc(100% - 8px),calc(100% - 8px) 100%,8px 100%,0 calc(100% - 8px))}.hero,.forge,.candidate,.stat,.block-history{clip-path:polygon(0 10px,10px 0,calc(100% - 10px) 0,100% 10px,100% calc(100% - 10px),calc(100% - 10px) 100%,10px 100%,0 calc(100% - 10px))!important}.hero>*,.forge>*,.candidate>*,.stat>*,.block-history>*{position:relative;z-index:60}
+.hero .eyebrow,.forge-head .eyebrow{font-family:var(--fxm)!important;letter-spacing:.16em!important}.hero-value.best strong,.value-block.best strong,.candidate-pct{color:var(--fxg2)!important;text-shadow:0 0 18px rgba(57,255,138,.22),0 0 38px rgba(57,255,138,.08)!important}.target-meter,.candidate-meter{background:#010508!important;border-color:#155565!important;box-shadow:inset 0 2px 8px #000,0 0 10px rgba(27,228,255,.08)!important}.target-meter i,.candidate-meter i{background:linear-gradient(90deg,#32ed5c,#5aff70,#a4ff8d)!important;box-shadow:0 0 9px rgba(57,255,138,.9),0 0 25px rgba(57,255,138,.25)!important}.round-panel{background:linear-gradient(180deg,rgba(4,26,35,.88),rgba(1,8,13,.78))!important}.round-id{color:var(--fxc)!important;border-color:#14738a!important;box-shadow:0 0 16px rgba(27,228,255,.18),inset 0 0 15px rgba(27,228,255,.04)!important}.remaining{color:#1be4ff!important;text-shadow:0 0 18px rgba(27,228,255,.28)!important}.status.active{color:#59ff83!important;border-color:#208c48!important;box-shadow:0 0 14px rgba(57,255,138,.1)!important}
+.forge-head{border-bottom-color:rgba(18,70,82,.82)!important}.forge-stage{background:radial-gradient(ellipse at 50% 53%,rgba(14,103,121,.25),transparent 31%),radial-gradient(ellipse at 76% 53%,rgba(22,255,113,.11),transparent 25%),linear-gradient(180deg,#020b11,#02080c 70%,#010507)!important}.forge-stage:before{content:""!important;position:absolute!important;inset:-20% -10% -5%!important;background:linear-gradient(rgba(0,229,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,.04) 1px,transparent 1px)!important;background-size:48px 48px!important;transform:perspective(700px) rotateX(58deg) translateY(210px) scale(1.45)!important;transform-origin:50% 100%!important;opacity:.5!important;z-index:1!important}.forge-stage:after{content:""!important;position:absolute!important;inset:0!important;pointer-events:none!important;z-index:3!important;background:radial-gradient(circle at 50% 53%,rgba(57,255,138,.11),transparent 23%),linear-gradient(90deg,rgba(0,0,0,.16),transparent 24%,transparent 76%,rgba(0,0,0,.16))!important}.forge-vignette{z-index:45!important;background:radial-gradient(ellipse at center,transparent 42%,rgba(0,0,0,.34) 100%)!important}#particleCanvas{z-index:18!important;mix-blend-mode:screen!important}
+.forge-stage .hashrate-card,.forge-stage .forge-shares-min,.forge-stage .forge-counter{box-sizing:border-box!important;overflow:visible!important;transform-style:preserve-3d!important;backface-visibility:hidden!important}.forge-stage .hashrate-card,.forge-stage .forge-shares-min{border:1px solid rgba(23,73,84,.98)!important;border-radius:12px!important;background:linear-gradient(145deg,#050d12,#02070a)!important;box-shadow:inset 0 0 0 1px rgba(23,73,84,.34),0 9px 20px rgba(0,0,0,.55),0 0 10px rgba(27,228,255,.035)!important;transform:perspective(900px) rotateY(7deg) rotateX(1deg)!important}.forge-stage .hashrate-card:before,.forge-stage .forge-shares-min:before,.forge-stage .forge-counter:before{content:""!important;position:absolute!important;inset:0!important;border-radius:12px!important;background:#03070a!important;z-index:-2!important;transform:translate3d(13px,4px,-24px)!important;border:1px solid rgba(23,73,84,.82)!important;box-shadow:4px 7px 15px rgba(0,0,0,.45)!important;pointer-events:none!important}.forge-stage .hashrate-card:after,.forge-stage .forge-shares-min:after{content:""!important;position:absolute!important;right:-8px!important;top:7px!important;bottom:7px!important;width:9px!important;background:linear-gradient(90deg,rgba(18,72,82,.7),rgba(4,26,32,.55),transparent)!important;transform:translateZ(-5px)!important;z-index:-1!important}.forge-stage .hashrate-card polyline,.forge-stage .forge-shares-min polyline,.stat polyline{stroke:#58ef6d!important;filter:drop-shadow(0 0 5px rgba(84,239,108,.4))!important}.forge-stage .forge-counter{border-radius:12px!important;background:linear-gradient(145deg,#050d12,#02070a)!important}.forge-stage .forge-counter.accepted{border:1px solid rgba(57,255,138,.42)!important;box-shadow:inset 0 0 0 1px rgba(57,255,138,.04),0 9px 20px rgba(0,0,0,.55),0 0 15px rgba(57,255,138,.045)!important;transform:perspective(900px) rotateY(-7deg) rotateX(1deg)!important}.forge-stage .forge-counter.rejected{border:1px solid rgba(255,79,97,.36)!important;box-shadow:inset 0 0 0 1px rgba(255,79,97,.03),0 9px 20px rgba(0,0,0,.55),0 0 12px rgba(255,79,97,.035)!important;transform:perspective(900px) rotateY(-7deg) rotateX(-1deg)!important}.forge-stage .forge-counter.accepted>strong{color:#5ee58c!important;text-shadow:0 0 9px rgba(57,255,138,.18)!important}.forge-stage .forge-counter.rejected>strong{color:#ef6872!important;text-shadow:0 0 9px rgba(255,79,97,.15)!important}
+/* Native SVG FIXCORE: no fake CSS hex. */
+.forge-core-wrap{inset:2% 18% 1%!important;z-index:4!important;overflow:hidden!important}.forge-core{position:relative!important;left:auto!important;top:auto!important;width:min(62%,560px)!important;height:auto!important;aspect-ratio:1/1!important;transform:translateZ(0)!important;filter:drop-shadow(0 0 28px rgba(37,255,122,.2))!important}.forge-core svg{overflow:visible!important}.core-halo{stroke:rgba(35,240,255,.24)!important;filter:drop-shadow(0 0 5px rgba(27,228,255,.15))}.forge-ring{stroke:rgba(69,255,126,.34)!important;filter:drop-shadow(0 0 5px rgba(57,255,138,.12))}.forge-ring.r3{stroke:rgba(23,216,255,.3)!important}.core-bracket{fill:rgba(3,19,23,.84)!important;stroke:rgba(35,239,255,.4)!important}.core-energy{fill:url(#coreEnergy)!important;stroke:#9dffb6!important;stroke-width:1.8!important;filter:url(#coreGlowStrong)!important}.core-energy-inner{fill:#061d16!important;stroke:#65ff82!important;stroke-width:1.2!important}.core-f{fill:#caffd4!important;font-size:58px!important;filter:url(#coreGlowStrong)!important}.core-beam{opacity:.9!important;filter:url(#coreGlow)!important}.core-particle{fill:#baffc8!important;filter:url(#coreGlowStrong)!important}.forge-core .energy-pulse{box-shadow:0 0 30px rgba(70,255,125,.22),inset 0 0 30px rgba(24,215,107,.1)!important}.forge-core-label{color:#55ff82!important;text-shadow:0 0 12px rgba(73,255,112,.65)!important}.forge-core-status{color:rgba(143,190,198,.72)!important}
+.candidate{box-shadow:inset 0 0 0 1px rgba(27,228,255,.035),0 18px 55px rgba(0,0,0,.62),0 0 24px rgba(27,228,255,.055)!important}.candidate-core{filter:drop-shadow(0 0 15px rgba(57,255,138,.15))!important}.candidate-core .core-ring{border-color:rgba(27,228,255,.25)!important}.candidate-core .ring-a{border-color:rgba(57,255,138,.38)!important}.candidate-core .ring-c{border-color:rgba(57,255,138,.16)!important}.candidate-core .core-cube{background:linear-gradient(145deg,#123f2a,#061a13)!important;border-color:#39ff8a!important;box-shadow:0 0 18px rgba(57,255,138,.42),0 0 42px rgba(57,255,138,.12),inset 0 0 14px rgba(57,255,138,.1)!important}.forge-stage .combo{background:linear-gradient(150deg,rgba(28,17,3,.96),rgba(8,5,2,.97))!important;border:1px solid rgba(255,181,47,.52)!important;box-shadow:0 9px 22px rgba(0,0,0,.58),0 0 12px rgba(255,181,47,.08),inset 0 0 0 1px rgba(255,181,47,.06)!important}.forge-stage .combo>strong{color:#ffb52f!important;text-shadow:0 0 10px rgba(255,181,47,.42)!important}.stat,.balance-stat,.block-history{border-color:rgba(23,93,108,.72)!important;box-shadow:inset 0 1px rgba(27,228,255,.07),0 12px 30px rgba(0,0,0,.46)!important}.balance-confirmed,.balance-total{border-color:rgba(57,255,138,.3)!important}.balance-immature{border-color:rgba(255,181,47,.25)!important}
+@media(max-width:700px){.forge-core-wrap{inset:3% 16% 1%!important}.forge-core{width:min(72%,430px)!important}.forge-stage .hashrate-card,.forge-stage .forge-shares-min{width:calc(50% - 26px)!important;min-width:0!important;height:104px!important;min-height:104px!important;padding:11px!important}.forge-stage .hashrate-card{left:12px!important;top:38px!important}.forge-stage .forge-shares-min{left:12px!important;top:190px!important}.forge-stage .forge-counter{width:calc(50% - 26px)!important;min-width:0!important;height:104px!important;min-height:104px!important;padding:11px!important}.forge-stage .forge-counter.accepted{right:12px!important;top:48px!important}.forge-stage .forge-counter.rejected{right:12px!important;bottom:48px!important;top:auto!important}.forge-stage .hashrate-card>strong,.forge-stage .forge-shares-min>strong{font-size:23px!important}.forge-stage .forge-counter>strong{font-size:29px!important}.forge-stage .combo{left:18px!important;top:auto!important;bottom:12px!important;width:110px!important;padding:7px 8px 3px!important;transform:none!important}.forge-stage .combo>strong{font-size:22px!important}}
+@media(max-width:430px){.forge-core-wrap{inset:4% 14% 1%!important}.forge-core{width:270px!important}.forge-stage .hashrate-card,.forge-stage .forge-shares-min,.forge-stage .forge-counter{width:calc(50% - 22px)!important}.forge-stage .hashrate-card,.forge-stage .forge-shares-min{left:8px!important}.forge-stage .forge-counter{right:8px!important}}
