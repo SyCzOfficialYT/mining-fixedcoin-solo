@@ -1,0 +1,381 @@
+/*
+ * FIXEDCOIN // CYBERPUNK HUD
+ * Visual-only layer. No telemetry, API or interaction logic is changed.
+ * Loaded last so it can unify the existing dashboard variants without
+ * disturbing their responsive layout or JavaScript hooks.
+ */
+
+:root{
+  --fx-neon:#39ff8a;
+  --fx-neon-soft:#58ef6d;
+  --fx-cyan:#1be4ff;
+  --fx-red:#ff4f61;
+  --fx-amber:#ffb52f;
+  --fx-bg:#01070b;
+  --fx-panel:#030d13;
+  --fx-grid:rgba(27,228,255,.075);
+  --fx-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Consolas,monospace;
+}
+
+/* -------------------------------------------------------------------------
+   GLOBAL HUD SURFACE
+   ------------------------------------------------------------------------- */
+html,body{
+  background:
+    radial-gradient(circle at 50% -10%,rgba(15,77,94,.24),transparent 34%),
+    radial-gradient(circle at 12% 54%,rgba(57,255,138,.055),transparent 27%),
+    radial-gradient(circle at 90% 58%,rgba(27,228,255,.045),transparent 25%),
+    #010509!important;
+}
+
+body:before{
+  background:
+    linear-gradient(var(--fx-grid) 1px,transparent 1px),
+    linear-gradient(90deg,var(--fx-grid) 1px,transparent 1px)!important;
+  background-size:72px 72px!important;
+  opacity:.5!important;
+}
+
+.dashboard{isolation:isolate}
+
+.panel{
+  border:1px solid rgba(30,104,119,.78)!important;
+  background:
+    linear-gradient(145deg,rgba(4,18,24,.985),rgba(1,7,11,.985))!important;
+  box-shadow:
+    inset 0 0 0 1px rgba(0,255,255,.028),
+    inset 0 1px 0 rgba(96,255,193,.025),
+    0 18px 55px rgba(0,0,0,.46),
+    0 0 24px rgba(27,228,255,.025)!important;
+}
+
+.panel:before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  z-index:48;
+  border-radius:inherit;
+  background:
+    linear-gradient(90deg,transparent 0 4%,rgba(57,255,138,.18) 4% 4.12%,transparent 4.12% 95.88%,rgba(27,228,255,.14) 95.88% 96%,transparent 96%),
+    linear-gradient(0deg,transparent 0 94%,rgba(27,228,255,.12) 94% 94.15%,transparent 94.15%);
+  opacity:.42;
+  mix-blend-mode:screen;
+}
+
+.panel:after{
+  background:
+    linear-gradient(120deg,rgba(27,228,255,.045),transparent 26%,transparent 72%,rgba(57,255,138,.04)),
+    repeating-linear-gradient(90deg,transparent 0 11px,rgba(255,255,255,.006) 11px 12px)!important;
+}
+
+/* -------------------------------------------------------------------------
+   HUD CORNER CUTS / TECHNICAL FRAME
+   ------------------------------------------------------------------------- */
+.hero,.forge,.candidate,.history,.stat,.balance-stat{
+  clip-path:polygon(
+    0 12px,12px 0,calc(100% - 12px) 0,100% 12px,
+    100% calc(100% - 12px),calc(100% - 12px) 100%,12px 100%,0 calc(100% - 12px)
+  );
+}
+
+/* Keep content above decorative frame. */
+.hero > *, .forge > *, .candidate > *, .history > *, .stat > *, .balance-stat > *{position:relative;z-index:5}
+
+/* -------------------------------------------------------------------------
+   HERO / TARGET METER
+   ------------------------------------------------------------------------- */
+.target-meter,.candidate-meter{
+  background:linear-gradient(180deg,#010406,#02090c)!important;
+  border-color:#1e6a7a!important;
+  box-shadow:inset 0 2px 9px #000,0 0 13px rgba(27,228,255,.07)!important;
+}
+
+.target-meter i,.candidate-meter i{
+  background:linear-gradient(90deg,#2dff5c,#55ff70,#a2ff83)!important;
+  box-shadow:0 0 14px rgba(85,255,101,.9),0 0 30px rgba(57,255,138,.38)!important;
+}
+
+.target-meter b{
+  width:3px!important;
+  background:var(--fx-neon)!important;
+  box-shadow:0 0 14px var(--fx-neon),0 0 28px rgba(57,255,138,.5)!important;
+}
+
+.round-id{
+  border-color:#12677d!important;
+  box-shadow:0 0 12px rgba(27,228,255,.12),inset 0 0 14px rgba(27,228,255,.04)!important;
+}
+
+/* -------------------------------------------------------------------------
+   FORGE // CARD DEPTH
+   ------------------------------------------------------------------------- */
+.forge-stage{
+  background:
+    radial-gradient(ellipse at 50% 53%,rgba(14,103,121,.24),transparent 31%),
+    radial-gradient(ellipse at 76% 53%,rgba(22,255,113,.12),transparent 25%),
+    linear-gradient(180deg,#020b11,#02080c 70%,#010507)!important;
+}
+
+.forge-stage:before{
+  opacity:.58!important;
+}
+
+.forge-stage .hashrate-card,
+.forge-stage .forge-shares-min,
+.forge-stage .forge-counter{
+  transform-style:preserve-3d!important;
+  backface-visibility:hidden!important;
+  border-radius:14px!important;
+  box-shadow:
+    inset 0 0 0 1px rgba(23,73,84,.32),
+    0 9px 20px rgba(0,0,0,.58),
+    0 0 20px rgba(27,228,255,.035)!important;
+}
+
+.forge-stage .hashrate-card,
+.forge-stage .forge-shares-min{
+  border-color:rgba(23,73,84,.98)!important;
+  background:linear-gradient(145deg,#050c11,#02070a)!important;
+  transform:perspective(900px) rotateY(8deg) rotateX(1.5deg)!important;
+}
+
+.forge-stage .hashrate-card:before,
+.forge-stage .forge-shares-min:before,
+.forge-stage .forge-counter:before{
+  content:""!important;
+  position:absolute!important;
+  inset:0!important;
+  border-radius:inherit!important;
+  background:#03070a!important;
+  border:1px solid rgba(23,73,84,.72)!important;
+  transform:translate3d(13px,4px,-24px)!important;
+  box-shadow:5px 7px 16px rgba(0,0,0,.55)!important;
+  pointer-events:none!important;
+  z-index:-2!important;
+}
+
+.forge-stage .forge-counter.accepted{
+  border-color:rgba(57,255,138,.42)!important;
+  transform:perspective(900px) rotateY(-8deg) rotateX(1.5deg)!important;
+}
+
+.forge-stage .forge-counter.rejected{
+  border-color:rgba(255,79,97,.42)!important;
+  transform:perspective(900px) rotateY(-8deg) rotateX(-1deg)!important;
+}
+
+.forge-stage .forge-counter.accepted:before{border-color:rgba(57,255,138,.48)!important}
+.forge-stage .forge-counter.rejected:before{border-color:rgba(255,79,97,.42)!important}
+
+.forge-stage .hashrate-card>strong,
+.forge-stage .forge-shares-min>strong{
+  text-shadow:0 0 12px rgba(231,247,248,.08)!important;
+}
+
+/* -------------------------------------------------------------------------
+   CENTRAL ENERGY CORE
+   ------------------------------------------------------------------------- */
+.forge-core{
+  filter:drop-shadow(0 0 18px rgba(27,228,255,.04));
+}
+
+.core-rings{
+  opacity:1!important;
+  filter:drop-shadow(0 0 5px rgba(27,228,255,.12));
+}
+
+.core-rings:before{
+  box-shadow:0 0 18px rgba(27,228,255,.08);
+}
+
+.core-rings:after{
+  box-shadow:0 0 20px rgba(57,255,138,.08);
+}
+
+.core-field{
+  background:
+    radial-gradient(circle,rgba(57,255,138,.28),rgba(27,228,255,.08) 32%,transparent 67%)!important;
+  filter:blur(.2px);
+}
+
+.particle-idle{
+  opacity:.72!important;
+  filter:drop-shadow(0 0 4px rgba(57,255,138,.45));
+}
+
+/* The live HTML currently uses .form-hex; support the older .fix-hex design too. */
+.form-hex,.fix-hex{
+  clip-path:polygon(25% 4%,75% 4%,99% 50%,75% 96%,25% 96%,1% 50%)!important;
+  background:linear-gradient(145deg,#6aff98,#1bd862 55%,#0b8f45)!important;
+  filter:
+    drop-shadow(0 0 20px rgba(57,255,138,.62))
+    drop-shadow(0 0 48px rgba(57,255,138,.28))!important;
+  box-shadow:0 0 30px rgba(57,255,138,.18),inset 0 0 20px rgba(214,255,226,.08)!important;
+}
+
+.form-hex:before,.fix-hex:before{
+  clip-path:inherit!important;
+  background:#073528!important;
+  box-shadow:inset 0 0 18px rgba(57,255,138,.14)!important;
+}
+
+.form-hex span,.fix-hex span{
+  color:#c8ffd4!important;
+  text-shadow:0 0 18px rgba(180,255,200,.72),0 0 42px rgba(57,255,138,.38)!important;
+}
+
+.core-label{
+  color:#5dff88!important;
+  text-shadow:0 0 10px rgba(57,255,138,.38)!important;
+}
+
+.core-sub{color:#557078!important}
+
+/* -------------------------------------------------------------------------
+   CANDIDATE // NETWORK HUD
+   ------------------------------------------------------------------------- */
+.candidate{
+  border-color:rgba(30,104,119,.8)!important;
+  box-shadow:
+    inset 0 0 0 1px rgba(0,255,255,.035),
+    0 18px 50px rgba(0,0,0,.48),
+    0 0 22px rgba(27,228,255,.025)!important;
+}
+
+.candidate .target-icon{
+  box-shadow:0 0 12px rgba(57,255,138,.22),inset 0 0 9px rgba(57,255,138,.05)!important;
+}
+
+.candidate-pct{
+  color:var(--fx-neon-soft)!important;
+  text-shadow:0 0 22px rgba(88,239,109,.22),0 0 45px rgba(57,255,138,.08)!important;
+}
+
+.candidate-core{
+  background:radial-gradient(circle at 50% 48%,rgba(55,255,112,.09),transparent 48%)!important;
+}
+
+.candidate-core .cube{
+  border-color:var(--fx-neon)!important;
+  background:#0b3a27!important;
+  box-shadow:0 0 24px rgba(57,255,138,.42),0 0 48px rgba(57,255,138,.14),inset 0 0 12px rgba(57,255,138,.08)!important;
+  text-shadow:0 0 12px rgba(93,255,131,.5);
+}
+
+.candidate-core .r1{box-shadow:0 0 14px rgba(57,255,138,.08)}
+.candidate-core .r2,.candidate-core .r3{box-shadow:0 0 18px rgba(27,228,255,.05)}
+
+/* -------------------------------------------------------------------------
+   COMBO HUD
+   ------------------------------------------------------------------------- */
+.combo{
+  background:linear-gradient(150deg,rgba(28,16,4,.97),rgba(12,7,2,.94))!important;
+  border:1px solid rgba(255,181,47,.52)!important;
+  box-shadow:
+    0 10px 24px rgba(0,0,0,.58),
+    inset 0 0 0 1px rgba(255,181,47,.12),
+    0 0 15px rgba(255,181,47,.05)!important;
+}
+
+.combo strong{text-shadow:0 0 15px rgba(255,181,47,.48)!important}
+
+/* -------------------------------------------------------------------------
+   STATS / BALANCE CARDS
+   ------------------------------------------------------------------------- */
+.stat,.balance-stat{
+  box-shadow:
+    inset 0 0 0 1px rgba(0,255,255,.025),
+    0 12px 34px rgba(0,0,0,.38),
+    0 0 16px rgba(27,228,255,.018)!important;
+}
+
+.stat strong,.balance-stat strong{
+  text-shadow:0 0 12px rgba(57,255,138,.07);
+}
+
+.balance-confirmed{border-color:rgba(57,255,138,.25)!important}
+.balance-unconfirmed{border-color:rgba(27,228,255,.25)!important}
+.balance-immature{border-color:rgba(255,181,47,.22)!important}
+.balance-total{border-color:rgba(57,255,138,.42)!important}
+
+/* -------------------------------------------------------------------------
+   BLOCK HISTORY
+   ------------------------------------------------------------------------- */
+.history-count{
+  box-shadow:0 0 12px rgba(57,255,138,.08),inset 0 0 8px rgba(57,255,138,.035);
+}
+
+.validity.valid,.validity.immature,.validity.invalid{
+  box-shadow:0 0 8px rgba(27,228,255,.05);
+}
+
+/* -------------------------------------------------------------------------
+   LIVE STATE: subtle pulse, not a permanent seizure
+   ------------------------------------------------------------------------- */
+.live i{box-shadow:0 0 10px #5aff77,0 0 22px rgba(90,255,119,.38)!important}
+
+@keyframes fxHudPulse{
+  0%,100%{opacity:.72}
+  50%{opacity:1}
+}
+
+.forge-core .core-rings:after{animation:refOrbit 10s linear infinite,fxHudPulse 3s ease-in-out infinite}
+
+/* -------------------------------------------------------------------------
+   MOBILE: preserve the cyberpunk identity instead of flattening it
+   ------------------------------------------------------------------------- */
+@media(max-width:760px){
+  .panel{
+    border-radius:16px!important;
+    box-shadow:
+      inset 0 0 0 1px rgba(0,255,255,.028),
+      0 14px 38px rgba(0,0,0,.48),
+      0 0 18px rgba(27,228,255,.025)!important;
+  }
+
+  .forge-stage .hashrate-card,
+  .forge-stage .forge-shares-min,
+  .forge-stage .forge-counter{
+    box-shadow:
+      inset 0 0 0 1px rgba(23,73,84,.3),
+      0 8px 17px rgba(0,0,0,.58),
+      0 0 14px rgba(27,228,255,.035)!important;
+  }
+
+  .forge-stage .hashrate-card:before,
+  .forge-stage .forge-shares-min:before,
+  .forge-stage .forge-counter:before{
+    transform:translate3d(8px,3px,-16px)!important;
+  }
+
+  .forge-core{
+    filter:drop-shadow(0 0 18px rgba(57,255,138,.07));
+  }
+
+  .form-hex,.fix-hex{
+    filter:
+      drop-shadow(0 0 16px rgba(57,255,138,.62))
+      drop-shadow(0 0 34px rgba(57,255,138,.25))!important;
+  }
+
+  .candidate-core .cube{
+    box-shadow:0 0 18px rgba(57,255,138,.4),0 0 34px rgba(57,255,138,.12)!important;
+  }
+}
+
+@media(max-width:430px){
+  body:after{
+    content:"FIXCOIN // SOLO MINING // CYBERPUNK CORE";
+    position:fixed;
+    left:0;
+    right:0;
+    bottom:3px;
+    z-index:999;
+    text-align:center;
+    pointer-events:none;
+    color:rgba(57,255,138,.18);
+    font:700 6px/1 var(--fx-mono);
+    letter-spacing:.2em;
+  }
+}
