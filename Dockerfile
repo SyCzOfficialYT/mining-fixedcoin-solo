@@ -27,12 +27,9 @@ RUN STRATUM_BUILD_ONLY=1 python3 /app/stratum/server.py \
  && python3 /app/scripts/fixcoin_dashboard_forge_upgrade_patch.py \
  && python3 /app/scripts/fixcoin_dashboard_forge_collision_patch.py \
  && python3 /app/scripts/fixcoin_dashboard_forge_metrics_bevel_patch.py \
- && python3 /app/scripts/fixcoin_dashboard_reference_rebuild_patch.py \
- && python3 /app/scripts/fixcoin_dashboard_reference_rows_patch.py \
- && python3 /app/scripts/fixcoin_dashboard_reference_wallet_patch.py \
  && python3 /app/scripts/fixcoin_dashboard_route_v4_patch.py \
- && python3 /app/scripts/fixcoin_dashboard_reference_polish_patch.py \
- && python3 -m py_compile /app/monitor/app.py /app/stratum/server.py /app/stratum/server_full.py /app/scripts/fixcoin_consensus_patch.py /app/scripts/fixcoin_network_difficulty_patch.py /app/scripts/fixcoin_stratum_difficulty_patch.py /app/scripts/fixcoin_dashboard_difficulty_patch.py /app/scripts/fixcoin_dashboard_realtime_patch.py /app/scripts/fixcoin_dashboard_v4_patch.py /app/scripts/fixcoin_dashboard_v4_js_patch.py /app/scripts/fixcoin_dashboard_round_authority_patch.py /app/scripts/fixcoin_dashboard_forge_patch.py /app/scripts/fixcoin_dashboard_balance_activity_patch.py /app/scripts/fixcoin_dashboard_activity_authority_patch.py /app/scripts/fixcoin_axeos_hashrate_patch.py /app/scripts/fixcoin_dashboard_forge_upgrade_patch.py /app/scripts/fixcoin_dashboard_forge_collision_patch.py /app/scripts/fixcoin_dashboard_forge_metrics_bevel_patch.py /app/scripts/fixcoin_dashboard_reference_rebuild_patch.py /app/scripts/fixcoin_dashboard_reference_rows_patch.py /app/scripts/fixcoin_dashboard_reference_wallet_patch.py /app/scripts/fixcoin_dashboard_route_v4_patch.py /app/scripts/fixcoin_dashboard_reference_polish_patch.py \
+ && python3 /app/scripts/fixcoin_dashboard_candidate_final_patch.py \
+ && python3 -m py_compile /app/monitor/app.py /app/stratum/server.py /app/stratum/server_full.py /app/scripts/fixcoin_consensus_patch.py /app/scripts/fixcoin_network_difficulty_patch.py /app/scripts/fixcoin_stratum_difficulty_patch.py /app/scripts/fixcoin_dashboard_difficulty_patch.py /app/scripts/fixcoin_dashboard_realtime_patch.py /app/scripts/fixcoin_dashboard_v4_patch.py /app/scripts/fixcoin_dashboard_v4_js_patch.py /app/scripts/fixcoin_dashboard_round_authority_patch.py /app/scripts/fixcoin_dashboard_forge_patch.py /app/scripts/fixcoin_dashboard_balance_activity_patch.py /app/scripts/fixcoin_dashboard_activity_authority_patch.py /app/scripts/fixcoin_axeos_hashrate_patch.py /app/scripts/fixcoin_dashboard_forge_upgrade_patch.py /app/scripts/fixcoin_dashboard_forge_collision_patch.py /app/scripts/fixcoin_dashboard_forge_metrics_bevel_patch.py /app/scripts/fixcoin_dashboard_route_v4_patch.py /app/scripts/fixcoin_dashboard_candidate_final_patch.py \
  && chmod +x /app/docker/entrypoint.sh /app/scripts/setup_address.py
 ENV FIX_DATADIR=/data/fixedcoin FIX_RPCPORT=24761 FIX_P2PPORT=24768 FIX_DASH_PORT=5050
 EXPOSE 3333 5050 24768
