@@ -5,13 +5,15 @@
 .forge-stage .collision-field{display:none!important}
 .forge-stage .event-particle,.forge-stage .collision-particle,.forge-stage .collision-hit-ring{display:none!important}
 .forge-stage .forge-core,.forge-stage .forge-ring,.forge-stage .core-energy,.forge-stage .core-f{will-change:transform!important}
-.candidate-track{isolation:isolate!important;contain:layout paint!important}
-.candidate-track .candidate-particle-canvas{position:absolute!important;inset:-16px 0!important;width:100%!important;height:46px!important;pointer-events:none!important;z-index:3!important;display:block!important;mix-blend-mode:screen!important}
+.candidate-track{position:relative!important;isolation:isolate!important;contain:layout paint!important;overflow:visible!important}
+.candidate-track .candidate-particle-canvas{position:absolute!important;inset:-16px 0!important;width:100%!important;height:46px!important;pointer-events:none!important;z-index:3!important;display:block!important;mix-blend-mode:screen!important;contain:strict!important}
 .candidate-track i{z-index:4!important}
+.candidate.panel#candidate .candidate-core{position:relative!important;isolation:isolate!important;overflow:hidden!important}
+.candidate.panel#candidate .candidate-core-particle-canvas{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;pointer-events:none!important;z-index:4!important;display:block!important;mix-blend-mode:screen!important;contain:strict!important}
 @media(max-width:700px){
   .fx-animation-canvas{image-rendering:auto!important}
   .candidate-track .candidate-particle-canvas{inset:-12px 0!important;height:40px!important}
 }
 @media(prefers-reduced-motion:reduce){
-  .fx-animation-canvas,.candidate-track .candidate-particle-canvas{display:none!important}
+  .fx-animation-canvas,.candidate-track .candidate-particle-canvas,.candidate.panel#candidate .candidate-core-particle-canvas{display:none!important}
 }
