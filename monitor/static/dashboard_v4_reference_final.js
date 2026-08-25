@@ -3,6 +3,7 @@
 if(window.__FIXEDCOIN_REFERENCE_FINAL__) return;
 window.__FIXEDCOIN_REFERENCE_FINAL__=true;
 const $=id=>document.getElementById(id);
+const heightFmt=v=>{const n=Math.trunc(Number(v)||0);return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g,",")};
 const fmtCoin=v=>{const n=Number(v);return Number.isFinite(n)?n.toFixed(8)+' FIX':'—'};
 const fmtDiff=v=>{const n=Number(v)||0;if(n>=1e9)return(n/1e9).toFixed(2)+'B';if(n>=1e6)return(n/1e6).toFixed(2)+'M';if(n>=1e3)return(n/1e3).toFixed(2)+'K';return n.toFixed(2)};
 async function syncReferenceTelemetry(){try{const r=await fetch('/api/status?reference='+Date.now(),{cache:'no-store'});if(!r.ok)return;const s=await r.json(),w=s.wallet||{},m=s.mining||{};const vals={confirmedBalance:fmtCoin(w.confirmed),unconfirmedBalance:fmtCoin(w.unconfirmed),immatureBalance:fmtCoin(w.immature),totalBalance:fmtCoin(w.total),liveVarDiff:fmtDiff(Object.values(m.workers||{}).reduce((d,x)=>Math.max(d,Number(x?.difficulty)||0),Number(m.fixed_difficulty)||0))};Object.entries(vals).forEach(([id,value])=>{const el=$(id);if(el)el.textContent=value})}catch(_){} }
@@ -20,7 +21,26 @@ function drawForge(){if(!fctx||!fc)return;const r=fc.getBoundingClientRect();fct
 if(fc){new ResizeObserver(resizeForge).observe(fc);resizeForge();requestAnimationFrame(drawForge)}
 function makeBar(id){const canvas=$(id);if(!canvas)return;const host=canvas.parentElement,ctx=canvas.getContext('2d',{alpha:true}),particles=[];let dpr=1;const resize=()=>{const r=host.getBoundingClientRect();dpr=Math.min(2,window.devicePixelRatio||1);canvas.width=Math.max(1,Math.round(r.width*dpr));canvas.height=Math.max(1,Math.round(r.height*dpr));ctx.setTransform(dpr,0,0,dpr,0,0)};const step=()=>{const r=host.getBoundingClientRect();ctx.clearRect(0,0,r.width,r.height);const meter=host.querySelector('i'),pct=clamp(parseFloat(meter?.style.width)||0,0,100),target=r.width*pct/100;if(pct>0)for(let i=0;i<3;i++)if(Math.random()<.55)particles.push({x:Math.max(0,target-12-Math.random()*42),y:r.height/2+(Math.random()-.5)*8,vx:.25+Math.random()*.75,life:0,max:24+Math.random()*26,s:1+Math.random()*2.4});for(let i=particles.length-1;i>=0;i--){const p=particles[i];p.life++;p.x+=p.vx;p.y+=(Math.random()-.5)*.45;const a=Math.sin(Math.min(1,p.life/p.max)*Math.PI);ctx.beginPath();ctx.arc(p.x,p.y,p.s,0,Math.PI*2);ctx.fillStyle=`rgba(82,255,105,${a*.9})`;ctx.shadowBlur=8;ctx.shadowColor='rgba(82,255,105,.8)';ctx.fill();if(p.life>=p.max||p.x>target+34)particles.splice(i,1)}requestAnimationFrame(step)};new ResizeObserver(resize).observe(host);resize();requestAnimationFrame(step)}
 makeBar('targetParticles');makeBar('candidateParticles');
-const core=$('forgeCore');
-if(core){let coreTimer=0;const pulse=kind=>{core.classList.remove('core-hot','core-reject');void core.offsetWidth;core.classList.add(kind==='reject'?'core-reject':'core-hot');clearTimeout(coreTimer);coreTimer=setTimeout(()=>core.classList.remove('core-hot','core-reject'),620)};core.addEventListener('pointerenter',()=>core.classList.add('core-hot'),{passive:true});core.addEventListener('pointerleave',()=>core.classList.remove('core-hot'),{passive:true});try{const es=new EventSource('/api/stream');es.onmessage=e=>{try{const d=JSON.parse(e.data||'{}');if(d.type==='accept'||d.type==='reject')pulse(d.type)}catch(_){}};es.onerror=()=>{}}catch(_){}}
+
+/* Live share-hit feedback: the forge reacts to every accepted/rejected Stratum event. */
+const realtimeStyle=document.createElement('style');
+realtimeStyle.textContent=`
+.reference-dashboard .forge-counter.share-hit{animation:rfShareCard .72s cubic-bezier(.16,.84,.22,1)}
+.reference-dashboard .combo.share-hit{animation:rfComboHit .72s cubic-bezier(.16,.84,.22,1)}
+.reference-dashboard .share-burst{position:absolute;left:50%;top:50%;z-index:26;pointer-events:none;color:var(--rf-green);font:800 10px/1 var(--rf-mono);letter-spacing:.16em;text-shadow:0 0 10px rgba(77,255,114,.9);transform:translate(-50%,-50%);animation:rfShareBurst .78s cubic-bezier(.16,.84,.22,1) forwards}
+.reference-dashboard .share-burst.reject{color:var(--rf-red);text-shadow:0 0 10px rgba(255,79,97,.9)}
+@keyframes rfShareCard{0%{transform:perspective(900px) rotateY(8deg) rotateX(2deg) translateZ(0) scale(1)}24%{transform:perspective(900px) rotateY(8deg) rotateX(2deg) translateZ(18px) scale(1.045);box-shadow:inset 0 0 0 1px rgba(77,255,114,.2),0 0 32px rgba(77,255,114,.38),0 20px 45px rgba(0,0,0,.7)}100%{transform:perspective(900px) rotateY(8deg) rotateX(2deg) translateZ(0) scale(1)}}
+@keyframes rfComboHit{0%,100%{transform:translateZ(45px) scale(1)}28%{transform:translateZ(75px) scale(1.12);filter:drop-shadow(0 0 14px rgba(255,181,47,.55))}55%{transform:translateZ(55px) scale(1.03)}}
+@keyframes rfShareBurst{0%{opacity:0;transform:translate(-50%,-50%) scale(.65)}18%{opacity:1}100%{opacity:0;transform:translate(-50%,-115px) scale(1.12)}}
+@media(prefers-reduced-motion:reduce){.reference-dashboard .share-burst,.reference-dashboard .forge-counter.share-hit,.reference-dashboard .combo.share-hit{animation:none!important}}
+`;
+document.head.appendChild(realtimeStyle);
+
+const core=$('forgeCore'),acceptedCard=$('acceptedCounter'),rejectedCard=$('rejectedCounter'),combo=$('combo');
+let coreTimer=0,shareTimer=0;
+const pulse=kind=>{if(!core)return;core.classList.remove('core-hot','core-reject');void core.offsetWidth;core.classList.add(kind==='reject'?'core-reject':'core-hot');clearTimeout(coreTimer);coreTimer=setTimeout(()=>core.classList.remove('core-hot','core-reject'),620)};
+const hitCard=(el,kind)=>{if(!el)return;el.classList.remove('share-hit');void el.offsetWidth;el.classList.add('share-hit');clearTimeout(shareTimer);shareTimer=setTimeout(()=>el.classList.remove('share-hit'),760);if(stage){const burst=document.createElement('span');burst.className='share-burst'+(kind==='reject'?' reject':'');burst.textContent=kind==='reject'?'REJECT':'ACCEPT +1';stage.appendChild(burst);setTimeout(()=>burst.remove(),820)}};
+const handleLiveEvent=d=>{if(!d||!d.type)return;if(d.type==='accept'){pulse('accept');hitCard(acceptedCard,'accept');hitCard(combo,'accept')}else if(d.type==='reject'){pulse('reject');hitCard(rejectedCard,'reject')}};
+if(core){core.addEventListener('pointerenter',()=>core.classList.add('core-hot'),{passive:true});core.addEventListener('pointerleave',()=>core.classList.remove('core-hot'),{passive:true});try{const es=new EventSource('/api/stream');es.onmessage=e=>{try{handleLiveEvent(JSON.parse(e.data||'{}'))}catch(_){}};es.onerror=()=>{}}catch(_){} }
 document.documentElement.dataset.fixedcoinReference='final';
 })();
