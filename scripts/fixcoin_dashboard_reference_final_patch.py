@@ -13,8 +13,10 @@ html=re.sub(r'<link rel="stylesheet" href="/static/dashboard_v4_reference_realti
 head=html.find('</head>')
 if head<0: raise RuntimeError('dashboard reference final: </head> missing')
 html=html[:head]+rt_link+html[head:]
-required_html=['class="reference-dashboard"','id="forgeStage"','id="forgeCore"','id="particleCanvas"','id="forgeParticles"','id="targetParticles"','id="candidateParticles"','id="liveVarDiff"','id="confirmedBalance"','id="unconfirmedBalance"','id="immatureBalance"','id="totalBalance"','id="candidateCore"','id="blockHistoryList"','dashboard_v4_reference_final.css','dashboard_v4_reference_final.js',rt_link]
+required_html=['id="forgeStage"','id="forgeCore"','id="particleCanvas"','id="forgeParticles"','id="targetParticles"','id="candidateParticles"','id="liveVarDiff"','id="confirmedBalance"','id="unconfirmedBalance"','id="immatureBalance"','id="totalBalance"','id="candidateCore"','id="blockHistoryList"','dashboard_v4_reference_final.css','dashboard_v4_reference_final.js',rt_link]
 missing=[x for x in required_html if x not in html]
+if not re.search(r'class="[^"]*\breference-dashboard\b[^"]*"', html):
+    missing.append('class token reference-dashboard')
 required_css=['.reference-dashboard .forge-stage','.reference-dashboard .core-logo','.reference-dashboard .balance-grid','.bar-particles','.reference-dashboard .candidate-core']
 missing += [x for x in required_css if x not in css]
 required_js=['syncReferenceTelemetry','forgeParticles','makeBar','targetParticles','candidateParticles','pointerMove']
