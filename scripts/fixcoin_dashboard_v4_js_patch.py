@@ -11,10 +11,9 @@ html = HTML.read_text()
 forge_js = FORGE_JS.read_text()
 forge_css = FORGE_CSS.read_text()
 
-# Validate behavior/implementation, not DOM elements injected later by the
-# animation compositor. The animation performance patch runs AFTER this
-# validator in Docker, so requiring its canvases in HTML/CSS here is a
-# build-order bug.
+# This validator runs BEFORE the animation performance patch in Docker.
+# Therefore it must validate the canonical forge primitives only and must not
+# require canvases/assets that are injected later by the performance patch.
 required = [
     'function render(s,animate=false){', 'async function poll(animate=false){',
     "new EventSource('/api/stream')", 'function burstParticles(', 'function strike(',
@@ -37,15 +36,12 @@ missing += [item for item in forge_required if item not in forge_js]
 css_required = ['.forge-core{', '.core-energy{', '.forge-ring{', '.forge.hit-accept', '.forge.hit-reject']
 missing += [item for item in css_required if item not in forge_css]
 
-# The forge already has a compositor canvas primitive at this build stage.
-# The newer performance patch later adds fx-animation-canvas and the
-# candidate-particle-canvas. Do not require those later-injected primitives
-# from this earlier validator.
-if not any(token in forge_css for token in (
-    '.fo-animation-canvas', '.particle-canvas', 'fx-animation-canvas',
-    'candidate-particle-canvas'
-)):
-    missing.append('.particle-canvas|forge compositor canvas')
+# particleCanvas is a dashboard template/JS primitive. Its visual/compositor
+# CSS is allowed to live in dashboard_v4.css or a later performance stylesheet;
+# checking forge_css here caused a false build failure because that stylesheet
+# is not the owner of the compositor canvas.
+if 'particleCanvas' not in html and 'particleCanvas' not in text:
+    missing.append('particleCanvas|realtime particle primitive')
 
 if missing:
     raise RuntimeError(
