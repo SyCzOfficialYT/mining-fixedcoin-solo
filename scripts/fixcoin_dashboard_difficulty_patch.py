@@ -39,6 +39,31 @@ if old in text:
 elif 'pool_difficulty=fixed_diff; network_diff=' not in text:
     raise RuntimeError("dashboard pool difficulty marker mismatch: could not locate pool configuration block")
 
+# The latest Stratum round/job is authoritative for mining-round height.
+# Persisted stats may belong to an older process and Core can temporarily report
+# a lower height while it is rebuilding/reindexing. Never let that stale value
+# overwrite the newest NEW ROUND / Job height parsed from stratum.log.
+old = 'height=int(stats.get("round_height") or info.get("blocks") or mininginfo.get("blocks") or log_job.get("height") or 0); headers=int(info.get("headers") or height)'
+new = 'height=int(log_job.get("height") or stats.get("round_height") or info.get("blocks") or mininginfo.get("blocks") or 0); headers=int(info.get("headers") or height)'
+if old in text:
+    text = text.replace(old, new, 1)
+elif 'height=int(log_job.get("height") or stats.get("round_height")' not in text:
+    raise RuntimeError("dashboard height marker mismatch: could not locate status height assignment")
+
+old = 'job={"job_id":log_job.get("job_id"),"height":stats.get("round_height") or log_job.get("height") or height,"network_diff":network_diff}'
+new = 'job={"job_id":log_job.get("job_id"),"height":log_job.get("height") or stats.get("round_height") or height,"network_diff":network_diff}'
+if old in text:
+    text = text.replace(old, new, 1)
+elif 'job={"job_id":log_job.get("job_id"),"height":log_job.get("height") or stats.get("round_height")' not in text:
+    raise RuntimeError("dashboard job height marker mismatch")
+
+old = '"round":{"height":int(stats.get("round_height") or height),'
+new = '"round":{"height":int(log_job.get("height") or stats.get("round_height") or height),'
+if old in text:
+    text = text.replace(old, new, 1)
+elif '"round":{"height":int(log_job.get("height") or stats.get("round_height") or height),' not in text:
+    raise RuntimeError("dashboard round height marker mismatch")
+
 # ---------------------------------------------------------------------------
 # 2. Parse explicit Fixed/VarDiff telemetry from Stratum logs.
 # ---------------------------------------------------------------------------
@@ -99,4 +124,4 @@ elif '"uptime_seconds":node_uptime_seconds()' not in text:
 APP.write_text(text)
 
 # v4 is the active dashboard. Do not require obsolete v3 card markers here.
-print("patched dashboard backend: Core difficulty authoritative; pool difficulty defined; live Stratum difficulty/mode and node uptime exposed")
+print("patched dashboard backend: Core difficulty authoritative; pool difficulty defined; live Stratum difficulty/mode and node uptime exposed; Stratum round/job height preferred over stale persisted stats")
