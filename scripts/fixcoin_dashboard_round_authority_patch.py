@@ -8,12 +8,16 @@ app=APP.read_text(); js=JS.read_text(); changed_app=False; changed_js=False
 
 # Backend: tolerate all current patch-chain variants and converge on the
 # authoritative round_height/round_started fields produced by NEW ROUND logs.
-height_re=r'height=int\([^\n]+\);'
+# IMPORTANT: anchor this to the status() indentation. A plain `height=int(...)`
+# search also matches `round_height=int(...)` inside parse_logs(), which caused
+# the round-authority patch to rewrite its own NEW ROUND state assignment and
+# produce a runtime NameError for log_job before it existed.
+height_re=r'(?m)^    height=int\([^\n]+\);'
 height_match=re.search(height_re,app)
 if height_match and 'height=int(log_job.get("round_height") or stats.get("round_height")' not in height_match.group(0):
     old=height_match.group(0)
-    new='height=int(log_job.get("round_height") or stats.get("round_height") or info.get("blocks") or mininginfo.get("blocks") or 0);'
-    app=app.replace(old,new,1); changed_app=True; print('patched dashboard height precedence: NEW ROUND first')
+    new='    height=int(log_job.get("round_height") or stats.get("round_height") or info.get("blocks") or mininginfo.get("blocks") or 0);'
+    app=app[:height_match.start()]+new+app[height_match.end():]; changed_app=True; print('patched dashboard height precedence: NEW ROUND first')
 
 # The v4 backend patch adds round_started_at/epoch to log_job. Ensure the
 # serialized round object consumes those authoritative fields.
