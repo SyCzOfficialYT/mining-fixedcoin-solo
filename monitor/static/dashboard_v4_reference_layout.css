@@ -1,0 +1,59 @@
+:root{--ref-cyan:#19d9ff;--ref-green:#50ff83;--ref-red:#ff4f5f;--ref-bg:#02090c;--ref-panel:rgba(4,18,23,.82)}
+
+/* REFERENCE LAYOUT // desktop forge architecture + stable mobile compositor */
+.dashboard{width:min(1500px,calc(100vw - 32px));margin:0 auto}
+.forge{overflow:hidden}
+.forge-stage{display:grid!important;grid-template-columns:minmax(190px,240px) minmax(360px,1fr) minmax(190px,240px)!important;grid-template-rows:1fr!important;align-items:center!important;column-gap:18px!important;min-height:620px!important;height:clamp(620px,58vw,800px)!important;padding:28px!important}
+.forge-art{position:absolute!important;inset:0!important;pointer-events:none!important}
+.forge-core-wrap{inset:5% 22% 5%!important}
+.hashrate-card,.forge-shares-min{left:28px!important;right:auto!important;width:calc(100% - 56px)!important;max-width:215px!important}
+.hashrate-card{top:28px!important}
+.forge-shares-min{top:178px!important}
+.forge-counter.accepted,.forge-counter.rejected{right:28px!important;left:auto!important;width:calc(100% - 56px)!important;max-width:215px!important}
+.forge-counter.accepted{top:28px!important}
+.forge-counter.rejected{top:178px!important;bottom:auto!important}
+.accept-stream{right:22%!important}.reject-stream{left:22%!important}
+.forge-stage .combo{left:28px!important;bottom:28px!important;width:174px!important}
+
+/* Candidate becomes the dedicated reference panel directly below the forge. */
+.candidate{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(180px,240px)!important;gap:24px!important;align-items:center!important;min-height:190px!important;padding:24px!important;position:relative!important;overflow:hidden!important}
+.candidate-left{min-width:0!important}.candidate-core{justify-self:center!important;width:180px!important;height:180px!important}
+.candidate-track{position:relative!important;overflow:hidden!important}
+.candidate-track .candidate-particle-canvas{display:block!important;pointer-events:none!important}
+
+/* Exactly 3 primary metrics + 5 balance/rate cards. Existing IDs are preserved. */
+.stats-grid{display:grid!important;grid-template-columns:repeat(15,minmax(0,1fr))!important;gap:14px!important}
+.stats-grid .stat:nth-child(1),.stats-grid .stat:nth-child(2),.stats-grid .stat:nth-child(3){grid-column:span 5!important}
+.stats-grid .stat:nth-child(4),.stats-grid .stat:nth-child(5),.stats-grid .stat:nth-child(6),.stats-grid .stat:nth-child(7),.stats-grid .stat:nth-child(8){grid-column:span 3!important}
+.stats-grid .stat{min-width:0!important}
+
+@media(max-width:900px){
+  .dashboard{width:calc(100vw - 20px)!important}
+  .forge-stage{grid-template-columns:1fr!important;grid-template-rows:auto!important;min-height:620px!important;height:700px!important;padding:16px!important}
+  .forge-art{inset:0!important}
+  .forge-core-wrap{inset:12% 5% 18%!important}
+  .hashrate-card,.forge-shares-min{left:12px!important;width:calc(50% - 18px)!important;max-width:none!important}
+  .hashrate-card{top:16px!important}.forge-shares-min{top:126px!important}
+  .forge-counter.accepted,.forge-counter.rejected{right:12px!important;width:calc(50% - 18px)!important;max-width:none!important}
+  .forge-counter.accepted{top:16px!important}.forge-counter.rejected{top:126px!important}
+  .accept-stream{right:5%!important}.reject-stream{left:5%!important}
+  .forge-stage .combo{left:12px!important;bottom:14px!important}
+  .candidate{grid-template-columns:1fr!important;min-height:250px!important}.candidate-core{width:150px!important;height:150px!important;justify-self:center!important}
+  .stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.stats-grid .stat:nth-child(n){grid-column:span 1!important}
+  .stats-grid .stat:nth-child(1){grid-column:span 2!important}.stats-grid .stat:nth-child(2),.stats-grid .stat:nth-child(3){grid-column:span 1!important}
+}
+
+@media(max-width:560px){
+  .dashboard{width:calc(100vw - 12px)!important}
+  .forge-head{padding:0 12px!important}.forge-head .eyebrow{font-size:7px!important;letter-spacing:.1em!important}
+  .forge-stage{min-height:560px!important;height:620px!important;padding:10px!important}
+  .forge-core-wrap{inset:16% 0 18%!important}.forge-core{width:min(76%,420px)!important}
+  .hashrate-card,.forge-shares-min{left:8px!important;width:calc(50% - 14px)!important;padding:10px!important}
+  .forge-counter.accepted,.forge-counter.rejected{right:8px!important;width:calc(50% - 14px)!important;padding:10px!important}
+  .hashrate-card{top:10px!important}.forge-shares-min{top:108px!important}.forge-counter.accepted{top:10px!important}.forge-counter.rejected{top:108px!important}
+  .hashrate-card strong,.forge-shares-min strong,.forge-counter strong{font-size:18px!important}
+  .forge-stage .combo{left:8px!important;bottom:8px!important}
+  .candidate{padding:16px!important}.candidate-pct{font-size:32px!important}
+}
+
+@media(prefers-reduced-motion:reduce){.forge-stage .live i,.forge-core::before,.forge-core::after{animation:none!important}}
