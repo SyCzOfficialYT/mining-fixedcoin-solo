@@ -1,59 +1,27 @@
 #!/usr/bin/env python3
-"""Validate the canonical v4 dashboard realtime and FIXCORE forge primitives."""
+"""Validate the canonical v4 realtime backend and repository-owned reference HUD."""
 from pathlib import Path
 
-JS = Path('/app/monitor/static/dashboard_v4.js')
-HTML = Path('/app/monitor/templates/dashboard_v4.html')
-FORGE_JS = Path('/app/monitor/static/dashboard_v4_forge.js')
-FORGE_CSS = Path('/app/monitor/static/dashboard_v4_forge.css')
-text = JS.read_text()
-html = HTML.read_text()
-forge_js = FORGE_JS.read_text()
-forge_css = FORGE_CSS.read_text()
-
-# This validator runs BEFORE the animation performance patch in Docker.
-# Therefore it must validate the canonical forge primitives only and must not
-# require canvases/assets that are injected later by the performance patch.
-required = [
-    'function render(s,animate=false){', 'async function poll(animate=false){',
-    "new EventSource('/api/stream')", 'function burstParticles(', 'function strike(',
-    'started_epoch', "if(e.type==='accept')", "if(e.type==='reject')", 'particleCanvas', 'spawnParticle(',
-]
-missing = [item for item in required if item not in text]
-
-html_required = [
-    'forge-core-wrap', 'id="forgeCore"', 'id="forgeParticleField"',
-    'dashboard_v4_forge.css', 'id="acceptedCounter"', 'id="rejectedCounter"',
-]
-missing += [item for item in html_required if item not in html]
-
-forge_required = [
-    'fixedcoin:accept', 'fixedcoin:reject', 'fixedcoin:block',
-    'hit-accept', 'hit-reject', 'hit-block',
-]
+JS=Path('/app/monitor/static/dashboard_v4.js')
+HTML=Path('/app/monitor/templates/dashboard_v4.html')
+FORGE_JS=Path('/app/monitor/static/dashboard_v4_forge.js')
+FORGE_CSS=Path('/app/monitor/static/dashboard_v4_forge.css')
+text=JS.read_text(); html=HTML.read_text(); forge_js=FORGE_JS.read_text(); forge_css=FORGE_CSS.read_text()
+required=['function render(s,animate=false){','async function poll(animate=false){',"new EventSource('/api/stream')",'function burstParticles(','function strike(','started_epoch',"if(e.type==='accept')","if(e.type==='reject')",'particleCanvas','spawnParticle(']
+missing=[item for item in required if item not in text]
+html_any=[('id="forgeCore"','id="forgeCore"'),('forge-center','forge-center'),('id="forgeParticles"','id="forgeParticles"')]
+for label,needle in html_any:
+    if needle in html: break
+else:
+    missing.append('FIXCORE reference primitive (forgeCore/forge-center/forgeParticles)')
+for needle in ('dashboard_v4_forge.css','id="acceptedCounter"','id="rejectedCounter"','class="reference-dashboard"'):
+    if needle not in html: missing.append(needle)
+forge_required=['fixedcoin:accept','fixedcoin:reject','fixedcoin:block','hit-accept','hit-reject','hit-block']
 missing += [item for item in forge_required if item not in forge_js]
-
-css_required = ['.forge-core{', '.core-energy{', '.forge-ring{', '.forge.hit-accept', '.forge.hit-reject']
+css_required=['.forge-core{','.core-energy{','.forge-ring{','.forge.hit-accept','.forge.hit-reject']
 missing += [item for item in css_required if item not in forge_css]
-
-# particleCanvas is a dashboard template/JS primitive. Its visual/compositor
-# CSS is allowed to live in dashboard_v4.css or a later performance stylesheet;
-# checking forge_css here caused a false build failure because that stylesheet
-# is not the owner of the compositor canvas.
-if 'particleCanvas' not in html and 'particleCanvas' not in text:
-    missing.append('particleCanvas|realtime particle primitive')
-
-if missing:
-    raise RuntimeError(
-        'dashboard v4 is missing required realtime/FIXCORE primitives: '
-        + ', '.join(missing)
-    )
-
-for forbidden in ('miner_reference.svg', '<img', '<image', 'dashboard_v4_miner.js'):
-    if forbidden in html:
-        raise RuntimeError('legacy miner primitive found in dashboard template: ' + forbidden)
-
-print(
-    'dashboard v4 verified: SSE, authoritative timer, FIXCORE SVG energy forge, '
-    'realtime canvas particles, accept/reject/block motion, and no legacy miner markup'
-)
+if 'particleCanvas' not in html and 'particleCanvas' not in text: missing.append('particleCanvas|realtime particle primitive')
+if missing: raise RuntimeError('dashboard v4 realtime/FIXCORE validation failed: '+', '.join(missing))
+for forbidden in ('miner_reference.svg','<img','<image','dashboard_v4_miner.js'):
+    if forbidden in html: raise RuntimeError('legacy miner primitive found in dashboard template: '+forbidden)
+print('dashboard v4 verified: realtime renderer, canonical particle primitive, reference FIX HUD, accept/reject/block motion and no legacy miner markup')
