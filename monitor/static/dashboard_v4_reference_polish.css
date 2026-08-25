@@ -1,0 +1,70 @@
+/* FIXEDCOIN // REFERENCE POLISH v1
+   Final cascade after the reference/mobile composition layer.
+   Visual only: telemetry IDs and JS contracts remain untouched.
+*/
+
+/* ---- candidate: restore the complete reference surface ---- */
+.candidate{position:relative!important;grid-template-rows:auto auto!important;}
+.candidate .activity-panel{display:block!important;grid-column:1 / -1!important;grid-row:2!important;min-width:0!important;border-top:1px solid rgba(23,73,84,.72)!important;background:linear-gradient(180deg,rgba(2,10,14,.55),rgba(1,7,10,.78))!important;padding:12px 16px 14px!important;}
+.activity-title{color:#718a91!important;font:700 9px/1 var(--rr-mono,"JetBrains Mono",monospace)!important;letter-spacing:.16em!important;text-transform:uppercase!important;margin-bottom:8px!important;}
+.activity-row{display:grid!important;grid-template-columns:20px minmax(0,1fr) auto!important;align-items:center!important;gap:7px!important;min-height:27px!important;padding:4px 0!important;border-top:1px solid rgba(22,58,68,.55)!important;color:#7f969b!important;font:500 8px/1.15 var(--rr-mono,"JetBrains Mono",monospace)!important;}
+.activity-row:first-of-type{border-top:0!important}
+.activity-row>b{width:15px!important;height:15px!important;display:grid!important;place-items:center!important;border:1px solid currentColor!important;border-radius:50%!important;font-size:8px!important}
+.activity-row>b.ok{color:#52ed83!important}.activity-row>b.bad{color:#ff5362!important}.activity-row>b.round{color:#1be4ff!important}
+.activity-row span{min-width:0!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}.activity-row span small{color:#516b72!important}.activity-row time{color:#526b72!important;font-size:7px!important;white-space:nowrap!important}
+
+/* ---- candidate progress instrument ---- */
+.candidate-track{background:linear-gradient(180deg,#010608,#02090d)!important;}
+.candidate-track i{position:relative!important;overflow:visible!important;background:linear-gradient(90deg,#35dc5c,#71ff68)!important;}
+.candidate-track i:after{content:""!important;position:absolute!important;right:-2px!important;top:50%!important;width:34px!important;height:34px!important;transform:translate(50%,-50%)!important;border-radius:50%!important;background:radial-gradient(circle,rgba(112,255,120,.92) 0 3px,rgba(75,255,105,.36) 4px 8px,transparent 18px)!important;filter:blur(.1px)!important;box-shadow:0 0 18px rgba(82,255,105,.72)!important;}
+.candidate-track i:before{content:""!important;position:absolute!important;right:-30px!important;top:50%!important;width:64px!important;height:2px!important;transform:translateY(-50%)!important;background:linear-gradient(90deg,rgba(88,255,110,.55),transparent)!important;filter:blur(1px)!important;}
+
+/* ---- metric cards: preserve the reference's physical spacing ---- */
+.stats-grid{gap:10px!important;}
+.stats-row{min-width:0!important;}
+.stats-primary{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:10px!important;}
+.stats-balance{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:10px!important;margin-top:10px!important;}
+.stats-balance .balance-stat{min-width:0!important;}
+
+/* ---- mobile reference composition ---- */
+@media(max-width:760px){
+  .candidate{grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;grid-template-rows:auto auto!important;min-height:420px!important;height:420px!important;}
+  .candidate-left{padding:17px 18px 15px!important;min-width:0!important;}
+  .candidate .section-heading{gap:8px!important;}
+  .candidate .target-icon{flex-basis:24px!important;width:24px!important;height:24px!important;font-size:13px!important;}
+  .candidate .section-heading h2{font-size:11px!important;line-height:1.08!important;letter-spacing:.065em!important;white-space:nowrap!important;}
+  .candidate .section-heading p{font-size:6px!important;max-width:240px!important;white-space:nowrap!important;}
+  .candidate-pct{margin:19px 0 0!important;font-size:42px!important;}
+  .candidate .caption{margin:3px 0 0!important;font-size:6px!important;}
+  .candidate-track{height:8px!important;margin:8px 0 0!important;}
+  .next-height{margin:17px 0 0!important;padding-bottom:7px!important;}
+  .next-height>span{font-size:6px!important;}
+  .next-height>strong{font-size:16px!important;}
+  .candidate-core{min-height:0!important;height:auto!important;border-left:1px solid rgba(23,73,84,.72)!important;}
+  .candidate-core .core-cube{transform:scale(.72)!important}
+  .candidate-core .core-ring{transform:scale(.72)!important}
+  .candidate-core small{bottom:38px!important;font-size:6px!important}
+  .candidate-core b{bottom:22px!important;font-size:5px!important}
+  .candidate .activity-panel{display:block!important;grid-column:1 / -1!important;grid-row:2!important;padding:10px 12px 12px!important;}
+  .activity-title{font-size:7px!important;margin-bottom:4px!important}
+  .activity-row{grid-template-columns:17px minmax(0,1fr) auto!important;min-height:24px!important;padding:3px 0!important;font-size:6px!important;}
+  .activity-row>b{width:13px!important;height:13px!important;font-size:7px!important}
+  .activity-row time{font-size:6px!important}
+
+  /* Reference mobile uses 3-up metric rows, never a 5-card sandwich. */
+  .stats-primary{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:7px!important;}
+  .stats-balance{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:7px!important;margin-top:7px!important;}
+  .balance-stat{min-height:86px!important;padding:12px 10px!important;border-radius:12px!important;}
+  .balance-stat>span{font-size:6px!important;letter-spacing:.11em!important;white-space:nowrap!important;}
+  .balance-stat>strong{font-size:14px!important;line-height:1!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;}
+  .balance-stat>small{font-size:6px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;}
+}
+
+@media(max-width:430px){
+  .stats-primary,.stats-balance{grid-template-columns:repeat(2,minmax(0,1fr))!important;}
+  .stats-primary .stat:first-child{grid-column:1 / -1!important;}
+  .candidate{min-height:400px!important;height:400px!important;}
+  .candidate .section-heading h2{font-size:9px!important;}
+  .candidate .section-heading p{font-size:5px!important;}
+  .candidate-pct{font-size:36px!important;}
+}
