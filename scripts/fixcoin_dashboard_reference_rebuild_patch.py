@@ -17,12 +17,10 @@ html = html.replace('</head>', CSS + '</head>', 1)
 # The reference has no activity list between candidate and the lower metrics.
 html = re.sub(r'<div class="activity-panel">.*?</div></section>', '</section>', html, count=1, flags=re.S)
 
-# IMPORTANT: the reference composition treats the Forge + Block Candidate as one
-# physical instrument. Older patches left .combo inside .forge-stage and the
-# .candidate section outside .forge. That makes the reference CSS selectors
-# (.forge>.combo / .forge>.candidate) miss completely and produces the broken
-# mobile geometry seen on the dashboard. Normalize the DOM here, after all
-# earlier forge patches have finished touching the template.
+# Normalize the DOM after all earlier forge patches have finished touching the template.
+# The reference composition treats Forge + Block Candidate as one physical instrument:
+# .forge > .combo and .forge > .candidate. Older patches left combo inside forge-stage
+# and candidate outside forge, so the reference selectors could not control the geometry.
 combo_match = re.search(r'<div class="combo" id="combo">.*?</div>', html, flags=re.S)
 candidate_match = re.search(
     r'<section class="candidate panel" id="candidate">.*?</section>(?=<section class="stats-grid">)',
@@ -39,15 +37,24 @@ candidate = candidate_match.group(0)
 html = html.replace(combo, '', 1)
 html = html.replace(candidate, '', 1)
 
-# The forge currently ends immediately before the old candidate section. Put the
-# combo and candidate back at the forge level so the reference layout owns them.
-forge_boundary = '</div></section><section class="stats-grid">'
-if forge_boundary not in html:
+# Find the forge/stats boundary structurally instead of relying on one exact minified
+# string. Previous patches may change whitespace or the final forge child markup.
+forge_stats = re.search(
+    r'(<section class="forge panel" id="forge">.*?)(</section>)(<section class="stats-grid">)',
+    html,
+    flags=re.S,
+)
+if not forge_stats:
     raise RuntimeError('reference rebuild: forge/stats boundary not found')
-html = html.replace(
-    forge_boundary,
-    '</div>' + combo + candidate + '</section><section class="stats-grid">',
-    1,
+
+forge_open_body, forge_close, stats_open = forge_stats.groups()
+html = html[:forge_stats.start()] + (
+    forge_open_body
+    + combo
+    + candidate
+    + forge_close
+    + stats_open
+    + html[forge_stats.end():]
 )
 
 # Rebuild the lower metrics as two explicit rows: 3 mining metrics, then 5 wallet/rate cards.
