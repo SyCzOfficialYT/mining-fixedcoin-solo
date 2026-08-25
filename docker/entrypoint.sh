@@ -20,8 +20,8 @@ fi
 export FIX_RPCPASS="$RPCPASS"
 
 cat > "$DATADIR/fixedcoin.conf" <<EOF
-server=1
 daemon=0
+server=1
 listen=1
 port=${P2PPORT}
 rpcport=${RPCPORT}
@@ -52,9 +52,6 @@ fixedcoin-cli -datadir="$DATADIR" -rpcuser="$RPCUSER" -rpcpassword="$RPCPASS" ge
 
 python3 /app/scripts/setup_address.py
 ln -sfn "$DATADIR/solo-blocks.json" /app/data/blocks.json
-
-python3 /app/monitor/app.py >>/app/data/dashboard.log 2>&1 &
-DASH_PID=$!
 
 # Always generate the adapter first, then apply all FixedCoin-only patches.
 # The consensus patch owns the final adapter version marker.
@@ -106,6 +103,26 @@ print("Verified FixedCoin Stratum runtime invariants: powLimit + canonical netwo
 PY
 
 python3 -m py_compile /app/stratum/server_full.py
+
+# Apply every dashboard patch before importing monitor.app. Python keeps the
+# imported module in memory, so starting the dashboard before these patches
+# would leave Flask serving stale/pre-patch code even though app.py on disk is
+# subsequently modified.
+python3 /app/scripts/fixcoin_dashboard_realtime_patch.py
+python3 /app/scripts/fixcoin_dashboard_v4_patch.py
+python3 /app/scripts/fixcoin_dashboard_v4_js_patch.py
+python3 /app/scripts/fixcoin_dashboard_round_authority_patch.py
+python3 /app/scripts/fixcoin_dashboard_forge_patch.py
+python3 /app/scripts/fixcoin_dashboard_balance_activity_patch.py
+python3 /app/scripts/fixcoin_dashboard_activity_authority_patch.py
+python3 /app/scripts/fixcoin_axeos_hashrate_patch.py
+python3 /app/scripts/fixcoin_dashboard_reference_final_patch.py
+
+python3 -m py_compile /app/monitor/app.py
+
+# Dashboard is started only after all dashboard patches are complete.
+python3 /app/monitor/app.py >>/app/data/dashboard.log 2>&1 &
+DASH_PID=$!
 
 # IMPORTANT: server.py is the generator. Starting it in normal mode can
 # regenerate the unpatched adapter because its generator marker predates the
