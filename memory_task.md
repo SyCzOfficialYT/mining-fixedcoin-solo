@@ -27,27 +27,29 @@ Rebuild the dashboard against the supplied reference image instead of stacking a
 - [x] Make `dashboard_v4.html` the persistent monitor route target in `monitor/app.py`.
 - [x] Version-pin the final reference CSS/JS assets to avoid stale browser cache.
 - [x] Create a dedicated final visual layer instead of continuing to mutate unrelated historical v4 CSS files.
-- [x] Add a build-time final reference validator.
+- [x] Add a build-time final reference validator that also installs the realtime core-hit CSS.
 - [x] Remove the conflicting historical visual patch chain from Docker build order; keep backend/telemetry patches and the repo-owned final HUD.
 - [x] Make the v4 primitive validator compatible with the new reference DOM.
 - [x] Make Forge and balance backend patches skip obsolete DOM mutation when the final reference template is active.
 - [x] Make round-authority patch idempotent against the current backend.
 - [x] Normalize wallet dashboard semantics: total=confirmed/trusted, unconfirmed=immature, immature exposed separately.
+- [x] Add SSE-driven FIXCORE accept/reject hit feedback.
 - [ ] **LOCAL VERIFICATION:** on the target CachyOS host, pull `main`, rebuild/restart Docker, verify `/`, static asset versions, console/runtime errors, and visually compare desktop + mobile against the supplied reference.
 
 ## Implemented in this pass
 
 - `monitor/templates/dashboard_v4.html`: rebuilt around the reference composition with center FIX HUD, explicit progress-bar particle canvases, canonical realtime particle canvas, candidate HUD, three primary share cards, five balance/ETA cards and block history.
 - `monitor/static/dashboard_v4_reference_final.css`: final visual composition layer for reference geometry, 3D physical shells, depth grid, core rings/logo, candidate core, responsive scaling and balance row.
-- `monitor/static/dashboard_v4_reference_final.js`: live wallet/VarDiff binding, single forge particle field, progress-bar particle streams and bounded pointer parallax.
+- `monitor/static/dashboard_v4_reference_final.js`: live wallet/VarDiff binding, single forge particle field, progress-bar particle streams, bounded pointer parallax and SSE-driven core hit feedback.
+- `monitor/static/dashboard_v4_reference_realtime.css`: isolated accept/reject core-hit animations.
 - `monitor/app.py`: root route serves `dashboard_v4.html`.
-- `scripts/fixcoin_dashboard_reference_final_patch.py`: final build-time validation.
-- `Dockerfile`: historical visual patch chain removed so it cannot overwrite or structurally move the final reference DOM.
+- `scripts/fixcoin_dashboard_reference_final_patch.py`: final build-time installation/validation step.
+- `Dockerfile`: historical visual patch chain removed so it cannot overwrite or structurally move the final reference DOM; final reference validation now runs during the image build.
 - `scripts/fixcoin_dashboard_v4_js_patch.py`, `fixcoin_dashboard_forge_patch.py`, `fixcoin_dashboard_balance_activity_patch.py`, and `fixcoin_dashboard_round_authority_patch.py`: made compatible/idempotent with the new final template.
 
 ## Local Verification
 
-The repository-side implementation has been syntax-checked for the new JavaScript and HTML/CSS structure, including duplicate-ID detection and balanced CSS braces. The live Docker/browser verification remains intentionally unchecked because the target Docker daemon/browser is on the user's CachyOS workstation.
+The repository-side implementation has been syntax-checked for the new JavaScript and HTML/CSS structure, including duplicate-ID detection and balanced CSS braces. GitHub reports no workflow run for the latest commit yet. The live Docker/browser verification remains intentionally unchecked because the target Docker daemon/browser is on the user's CachyOS workstation.
 
 Run:
 
@@ -56,7 +58,7 @@ git pull --ff-only
 sudo docker compose down
 sudo docker compose up -d --build
 sudo docker logs --tail=200 fixedcoin-solo
-curl -s http://127.0.0.1:5050/ | grep -oE 'dashboard_v4_reference_final\.(css|js)[^" ]*' | sort -u
+curl -s http://127.0.0.1:5050/ | grep -oE 'dashboard_v4_reference_final\.(css|js)[^" ]*|dashboard_v4_reference_realtime\.css[^" ]*' | sort -u
 sudo docker exec fixedcoin-solo sh -c 'grep -oE "forgeParticles|particleCanvas|targetParticles|candidateParticles|liveVarDiff|confirmedBalance|unconfirmedBalance|immatureBalance|totalBalance" /app/monitor/templates/dashboard_v4.html | sort -u'
 ```
 
