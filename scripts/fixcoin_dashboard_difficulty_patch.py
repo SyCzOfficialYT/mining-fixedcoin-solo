@@ -29,6 +29,16 @@ if old in text:
 elif 'network_diff=as_number(core_diff)' not in text:
     raise RuntimeError("dashboard difficulty marker mismatch: could not locate network_diff assignment")
 
+# The pool/Stratum difficulty is a separate value from network difficulty.
+# Keep it explicitly defined so /api/status can never reference an undefined
+# pool_difficulty variable after the dashboard patches are applied.
+old = 'pool=config(); fixed_diff=as_number(pool.get("fixed_difficulty",13354),13354); network_diff='
+new = 'pool=config(); fixed_diff=as_number(pool.get("fixed_difficulty",13354),13354); pool_difficulty=fixed_diff; network_diff='
+if old in text:
+    text = text.replace(old, new, 1)
+elif 'pool_difficulty=fixed_diff; network_diff=' not in text:
+    raise RuntimeError("dashboard pool difficulty marker mismatch: could not locate pool configuration block")
+
 # ---------------------------------------------------------------------------
 # 2. Parse explicit Fixed/VarDiff telemetry from Stratum logs.
 # ---------------------------------------------------------------------------
@@ -63,10 +73,10 @@ elif '"mode":str(lv.get("mode")' not in text:
     raise RuntimeError("dashboard worker output marker mismatch")
 
 old = '"fixed_difficulty":fixed_diff,"best_share":round_best'
-new = '"fixed_difficulty":fixed_diff,"stratum_difficulty":next((as_number(w.get("difficulty")) for w in workers.values() if w.get("active")),fixed_diff),"stratum_mode":next((str(w.get("mode") or "fixed") for w in workers.values() if w.get("active")),"fixed"),"best_share":round_best'
+new = '"fixed_difficulty":fixed_diff,"pool_difficulty":pool_difficulty,"vardiff_mode":next((str(w.get("mode") or "fixed") for w in workers.values() if w.get("active")),"fixed")=="vardiff","stratum_difficulty":next((as_number(w.get("difficulty")) for w in workers.values() if w.get("active")),fixed_diff),"stratum_mode":next((str(w.get("mode") or "fixed") for w in workers.values() if w.get("active")),"fixed"),"best_share":round_best'
 if old in text:
     text = text.replace(old, new, 1)
-elif '"stratum_difficulty":next(' not in text:
+elif '"pool_difficulty":pool_difficulty' not in text:
     raise RuntimeError("dashboard mining output marker mismatch")
 
 # ---------------------------------------------------------------------------
@@ -89,4 +99,4 @@ elif '"uptime_seconds":node_uptime_seconds()' not in text:
 APP.write_text(text)
 
 # v4 is the active dashboard. Do not require obsolete v3 card markers here.
-print("patched dashboard backend: Core difficulty authoritative; live Stratum difficulty/mode and node uptime exposed")
+print("patched dashboard backend: Core difficulty authoritative; pool difficulty defined; live Stratum difficulty/mode and node uptime exposed")
