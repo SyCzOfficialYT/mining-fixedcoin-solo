@@ -1,64 +1,60 @@
 # FixedCoin Dashboard Agent Task
 
 **Mode:** agent / execute-to-completion
-**Scope:** `dashboard_v4`, realtime forge, block-candidate particles, animation performance, responsive reference layout, Docker build integrity, final visual polish.
+**Scope:** `dashboard_v4`, realtime forge, block-candidate HUD, animation performance, responsive reference layout, Docker build integrity, final visual polish.
 **Date:** 2026-08-25
 
 ## Objective
 
-Bring the dashboard to the reference layout while keeping realtime telemetry intact and moving animation work onto low-overhead canvas compositor layers. The block-candidate area must have its own particle treatment, the central FIXCORE HUD must remain visible on mobile, and Docker builds must not fail because a validator expects post-build DOM that is intentionally injected later.
+Rebuild the dashboard against the supplied reference image instead of merely stacking small CSS overrides. The live dashboard must retain realtime mining telemetry while presenting the cyberpunk/industrial HUD composition: visible central FIX hexagon, 3D card depth/parallax, forge particle volume, particles on progress bars, integrated block-candidate HUD, and five balance/ETA cards.
 
 ## Task Queue
 
 - [x] Keep `dashboard_v4` as the canonical dashboard template.
-- [x] Preserve realtime SSE, authoritative round/timer state, accepted/rejected share telemetry and FIXCORE forge primitives.
-- [x] Keep the canonical `.particle-canvas` realtime primitive available to the v4 validator.
-- [x] Add a dedicated block-candidate particle canvas layer.
-- [x] Add a dedicated candidate-core particle layer for the block-candidate HUD.
-- [x] Move high-frequency forge particles/events to a single compositor canvas with visibility/FPS throttling.
-- [x] Pause animation work when the forge is outside the viewport.
-- [x] Respect `prefers-reduced-motion` and `navigator.connection.saveData`.
-- [x] Apply the reference three-column desktop forge layout and responsive mobile compositor layout.
-- [x] Keep the reference layout and animation CSS version-pinned in the generated dashboard.
-- [x] Run the animation performance patch after the canonical v4 primitives exist.
-- [x] Make the v4 validator validate canonical source primitives instead of requiring post-build canvas injection.
-- [x] Ensure Docker runs the reference-layout patch and animation-performance patch during image build.
-- [x] Add final visual layer: brighter/persistent FIXCORE HUD, stronger candidate-core treatment, visible candidate particle lane, mobile core sizing, and doubled-heading suppression.
-- [x] Run the final visual layer as the last dashboard CSS patch in the Docker build chain.
-- [ ] **LOCAL VERIFICATION:** pull `main`, rebuild the image, start the container, then verify `/`, static asset versions, dashboard particle layers and clean startup logs on the target host.
+- [x] Preserve realtime status/log rendering and existing mining/Stratum telemetry IDs.
+- [x] Preserve the canonical `.particle-canvas` primitive used by the existing v4 renderer.
+- [x] Add a dedicated block-candidate particle lane on the progress bar.
+- [x] Add a dedicated network-target particle lane on the progress bar.
+- [x] Add a dedicated forge particle volume using one Canvas compositor layer.
+- [x] Keep the central FIXCORE/HUD visible instead of allowing mobile/reference overrides to hide it.
+- [x] Apply the reference three-zone forge composition: left metrics / center core / right accepted-rejected telemetry.
+- [x] Add physical 3D card shells and bounded pointer parallax.
+- [x] Add the reference block-candidate core with rings, cube logo, status labels and depth grid.
+- [x] Restore the five balance/ETA cards and bind them to the live wallet values returned by `/api/status`.
+- [x] Make live VarDiff visible in the center HUD from the active worker difficulty.
+- [x] Keep responsive mobile composition structurally faithful instead of collapsing the forge into a single column.
+- [x] Keep mining/consensus/Stratum logic untouched by the visual rebuild.
+- [x] Make `dashboard_v4.html` the persistent monitor route target in `monitor/app.py`.
+- [x] Version-pin the final reference CSS/JS assets to avoid stale browser cache.
+- [x] Create a dedicated final visual layer instead of continuing to mutate unrelated historical v4 CSS files.
+- [x] Document the work in this memory task.
+- [ ] **LOCAL VERIFICATION:** on the target CachyOS host, pull `main`, rebuild/restart Docker, verify `/`, static asset versions, console/runtime errors, and visually compare desktop + mobile against the supplied reference.
 
-## Known Failure That Triggered This Task
+## Implemented in this pass
 
-The Docker build previously stopped in `fixcoin_dashboard_v4_js_patch.py` with:
+- `monitor/templates/dashboard_v4.html` was rebuilt around the reference composition and now contains the center FIX HUD, explicit bar-particle canvases, candidate HUD, three primary share cards, five balance/ETA cards and the existing block-history surface.
+- `monitor/static/dashboard_v4_reference_final.css` is the final visual composition layer. It owns the reference geometry, 3D physical card shells, depth grid, core rings/logo, candidate core, responsive scaling and five-card balance row.
+- `monitor/static/dashboard_v4_reference_final.js` adds live wallet/VarDiff binding, a single forge particle field, progress-bar particle streams and bounded pointer parallax.
+- `monitor/app.py` now serves `dashboard_v4.html` at `/`.
 
-`RuntimeError: dashboard v4 is missing required realtime/FIXCORE primitives: .particle-canvas|modern compositor canvas`
+## Acceptance Criteria
 
-The root cause was validator/build-order coupling: the performance compositor creates some canvases dynamically, so the validator must not require those post-build DOM nodes. The canonical `particleCanvas` primitive is validated in the dashboard layer, while the performance patch owns the dynamically created compositor layers.
-
-## Current Repository State
-
-The repair chain is on `main`. The latest visual pass adds `monitor/static/dashboard_v4_visual_final.css` and `scripts/fixcoin_dashboard_visual_final_patch.py`, and the Docker build invokes the visual patch after the reference layout patch. Mining/Stratum logic is intentionally untouched by the visual pass.
-
-The host-side runtime already verified before this final visual pass that FixedCoin Solo starts, accepts shares, VarDiff adjusts, and serves the expected pinned animation/reference assets. The remaining unchecked item is deliberately a host-side verification step because this agent cannot execute Docker on the user's CachyOS workstation.
+1. Central FIX logo is visible on desktop and mobile.
+2. Forge remains a three-zone composition: left telemetry / center core / right share telemetry.
+3. 3D card depth/parallax is visibly present without breaking scrolling.
+4. Both progress bars show animated particles near the actual best-share position.
+5. Five balance/ETA cards are visible and update from `/api/status`.
+6. Block history and existing live counters continue to render.
+7. No Stratum/consensus behavior is changed by the visual pass.
+8. Docker/browser verification remains the final unchecked step because it must be performed against the user's running node.
 
 ## Verification Commands
 
 ```bash
 git pull --ff-only
 sudo docker compose down
-sudo docker compose build --no-cache
-sudo docker compose up -d
+sudo docker compose up -d --build
 sudo docker logs --tail=200 fixedcoin-solo
-curl -s http://127.0.0.1:5050/ | grep -oE 'dashboard_v4_animation_perf\\.(css|js)[^" ]*|dashboard_v4_reference_layout\\.css[^" ]*|dashboard_v4_visual_final\\.css[^" ]*' | sort -u
-sudo docker exec fixedcoin-solo sh -c 'grep -oE "particle-canvas|candidate-particle-canvas|candidate-core-particle-canvas|fx-animation-canvas" /app/monitor/templates/dashboard_v4.html | sort -u'
+curl -s http://127.0.0.1:5050/ | grep -oE 'dashboard_v4_reference_final\.(css|js)[^" ]*' | sort -u
+sudo docker exec fixedcoin-solo sh -c 'grep -oE "forgeParticles|targetParticles|candidateParticles|liveVarDiff|confirmedBalance|unconfirmedBalance|immatureBalance|totalBalance" /app/monitor/templates/dashboard_v4.html | sort -u'
 ```
-
-## Exit Criteria
-
-1. Docker build reaches completion without the v4 primitive validator error.
-2. Container starts with FixedCoin Solo online.
-3. Dashboard serves the pinned animation/reference/final-visual assets.
-4. Forge particles remain animated without a runaway per-element animation workload.
-5. Block Candidate visibly receives its own particle treatment.
-6. Mobile layout retains the central FIXCORE/HUD instead of simply hiding it.
-7. Realtime share counters/events continue to work.
