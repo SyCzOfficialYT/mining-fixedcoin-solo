@@ -1,0 +1,199 @@
+/* FIXEDCOIN // Candidate HUD layout fix
+   Final geometry layer loaded after every reference/polish stylesheet.
+   Telemetry/JS IDs remain untouched.
+*/
+
+.candidate.panel#candidate{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) 220px!important;
+  gap:0!important;
+  min-height:248px!important;
+  height:248px!important;
+  padding:0!important;
+  overflow:hidden!important;
+  isolation:isolate!important;
+}
+
+.candidate.panel#candidate .candidate-left{
+  min-width:0!important;
+  min-height:0!important;
+  height:100%!important;
+  padding:22px 24px 16px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:flex-start!important;
+  position:relative!important;
+  z-index:2!important;
+}
+
+.candidate.panel#candidate .section-heading{
+  flex:0 0 auto!important;
+  margin:0!important;
+}
+
+.candidate.panel#candidate .section-heading h2{
+  margin:1px 0 4px!important;
+}
+
+.candidate.panel#candidate .section-heading p{
+  max-width:330px!important;
+}
+
+.candidate.panel#candidate .candidate-pct{
+  margin:12px 0 0!important;
+  font-size:clamp(48px,5vw,68px)!important;
+  line-height:.9!important;
+  letter-spacing:-.075em!important;
+}
+
+.candidate.panel#candidate .caption{
+  margin:4px 0 0!important;
+}
+
+.candidate.panel#candidate .candidate-track{
+  width:100%!important;
+  height:9px!important;
+  margin:8px 0 0!important;
+}
+
+.candidate.panel#candidate .next-height{
+  width:100%!important;
+  margin:13px 0 0!important;
+  padding:9px 0 0!important;
+  flex:0 0 auto!important;
+}
+
+.candidate.panel#candidate .next-height strong{
+  font-size:20px!important;
+}
+
+.candidate.panel#candidate .candidate-core{
+  width:auto!important;
+  height:100%!important;
+  min-height:0!important;
+  margin:0!important;
+  border-left:1px solid rgba(23,73,84,.72)!important;
+  display:grid!important;
+  place-items:center!important;
+}
+
+.candidate.panel#candidate .candidate-core .core-grid{
+  opacity:.42!important;
+}
+
+.candidate.panel#candidate .candidate-core .core-ring{
+  opacity:1!important;
+}
+
+.candidate.panel#candidate .candidate-core .ring-a{width:158px!important;height:158px!important}
+.candidate.panel#candidate .candidate-core .ring-b{width:120px!important;height:120px!important}
+.candidate.panel#candidate .candidate-core .ring-c{width:82px!important;height:82px!important}
+.candidate.panel#candidate .candidate-core .core-cube{
+  width:78px!important;
+  height:78px!important;
+}
+
+.candidate.panel#candidate .candidate-core small{bottom:37px!important}
+.candidate.panel#candidate .candidate-core b{bottom:19px!important}
+.candidate.panel#candidate .activity-panel{display:none!important}
+
+@media(max-width:760px){
+  .candidate.panel#candidate{
+    grid-template-columns:minmax(0,1fr) 174px!important;
+    gap:0!important;
+    min-height:232px!important;
+    height:232px!important;
+    border-radius:13px!important;
+  }
+
+  .candidate.panel#candidate .candidate-left{
+    padding:14px 10px 12px 14px!important;
+  }
+
+  .candidate.panel#candidate .section-heading{gap:9px!important}
+  .candidate.panel#candidate .target-icon{
+    flex-basis:28px!important;
+    width:28px!important;
+    height:28px!important;
+    font-size:15px!important;
+  }
+
+  .candidate.panel#candidate .section-heading h2{
+    font-size:13px!important;
+    line-height:1.05!important;
+    margin:1px 0 3px!important;
+  }
+
+  .candidate.panel#candidate .section-heading p{
+    max-width:190px!important;
+    font-size:7px!important;
+    line-height:1.25!important;
+  }
+
+  .candidate.panel#candidate .candidate-pct{
+    margin:10px 0 0 37px!important;
+    font-size:44px!important;
+    line-height:.9!important;
+  }
+
+  .candidate.panel#candidate .caption{
+    margin:3px 0 0 37px!important;
+    font-size:7px!important;
+  }
+
+  .candidate.panel#candidate .candidate-track{
+    width:calc(100% - 8px)!important;
+    height:8px!important;
+    margin:7px 8px 0 37px!important;
+  }
+
+  .candidate.panel#candidate .next-height{
+    width:calc(100% - 8px)!important;
+    margin:12px 8px 0 37px!important;
+    padding-top:8px!important;
+  }
+
+  .candidate.panel#candidate .next-height>span{
+    max-width:82px!important;
+    font-size:6px!important;
+    line-height:1.05!important;
+  }
+
+  .candidate.panel#candidate .next-height>strong{font-size:15px!important}
+
+  .candidate.panel#candidate .candidate-core .ring-a{width:132px!important;height:132px!important}
+  .candidate.panel#candidate .candidate-core .ring-b{width:100px!important;height:100px!important}
+  .candidate.panel#candidate .candidate-core .ring-c{width:70px!important;height:70px!important}
+  .candidate.panel#candidate .candidate-core .core-cube{
+    width:68px!important;
+    height:68px!important;
+  }
+  .candidate.panel#candidate .candidate-core .core-cube span{font-size:28px!important}
+  .candidate.panel#candidate .candidate-core small{bottom:34px!important;font-size:7px!important}
+  .candidate.panel#candidate .candidate-core b{bottom:19px!important;font-size:6px!important}
+}
+
+@media(max-width:430px){
+  .candidate.panel#candidate{
+    grid-template-columns:minmax(0,1fr) 145px!important;
+    min-height:220px!important;
+    height:220px!important;
+  }
+
+  .candidate.panel#candidate .candidate-pct{
+    margin-left:31px!important;
+    font-size:38px!important;
+  }
+
+  .candidate.panel#candidate .caption,
+  .candidate.panel#candidate .candidate-track,
+  .candidate.panel#candidate .next-height{
+    margin-left:31px!important;
+  }
+
+  .candidate.panel#candidate .candidate-core .ring-a{width:112px!important;height:112px!important}
+  .candidate.panel#candidate .candidate-core .ring-b{width:84px!important;height:84px!important}
+  .candidate.panel#candidate .candidate-core .ring-c{width:58px!important;height:58px!important}
+  .candidate.panel#candidate .candidate-core .core-cube{width:58px!important;height:58px!important}
+  .candidate.panel#candidate .candidate-core .core-cube span{font-size:24px!important}
+}
