@@ -11,7 +11,7 @@ HTML = Path('/app/monitor/templates/dashboard_v4.html')
 html = HTML.read_text()
 
 CSS = '<link rel="stylesheet" href="/static/dashboard_v4_reference_rebuild.css?v=20260825-1">'
-html = re.sub(r'<link rel="stylesheet" href="/static/dashboard_v4_reference_rebuild\\.css\\?v=[^"]+">', '', html)
+html = re.sub(r'<link rel="stylesheet" href="/static/dashboard_v4_reference_rebuild\.css\?v=[^"]+">', '', html)
 html = html.replace('</head>', CSS + '</head>', 1)
 
 # The reference has no activity list between candidate and the lower metrics.
