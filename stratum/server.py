@@ -11,7 +11,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 FULL = HERE / "server_full.py"
 URL = "https://raw.githubusercontent.com/SyCzOfficialYT/freecash-coin/a88d89675b3a41cc6774e1b975e57e050d4892cc/stratum/server.py"
-ADAPT_VERSION = "fixedcoin-consensus-repair-2026-08-21-v31"
+ADAPT_VERSION = "fixedcoin-consensus-repair-2026-08-25-v35"
 
 
 def sanitize_source(source):
@@ -144,7 +144,14 @@ def adapt(t):
     marker = 'MAX_DIFF = int(cfg["pool"].get("vardiff_max", 50_000_000))'
     if marker not in t:
         raise RuntimeError('vardiff marker missing')
-    t = t.replace(marker, marker + '\nFIXED_DIFF = int(cfg["pool"].get("fixed_difficulty", 13354))', 1)
+    t = t.replace(
+        marker,
+        marker + '\n'
+        'FIXED_DIFF = int(cfg["pool"].get("fixed_difficulty", 13354))\n'
+        'MIN_DIFF = int(cfg["pool"].get("min_difficulty", cfg["pool"].get("vardiff_min", FIXED_DIFF)))\n'
+        'VARDIFF = bool(cfg["pool"].get("vardiff", False))',
+        1,
+    )
 
     fixed_parser = '''def parse_fixed_diff(*candidates):
     for raw in candidates:
@@ -244,6 +251,21 @@ def adapt(t):
         'emit("WARN", f"REJECT reason=low-difficulty worker={self.worker} job={job_id} height={job[\'height\']} share_diff={share_work:.6f} required_diff={need:.6f} fixed_diff={self.diff:.6f} ntime={ntime_hex} nonce={nonce_hex} hash={hhex[:24]}")\n            self.send({"id": mid, "result": False, "error": [23, "low difficulty", None]})',
         1,
     )
+
+    # FixedCoin solo uses a single fixed Stratum target when vardiff is off.
+    # Do this after the upstream base has been adapted so the generated
+    # server_full.py cannot silently fall back to the base's VARDIFF defaults.
+    t = t.replace(
+        'self.diff = max(START_DIFF, MIN_DIFF)',
+        'self.diff = FIXED_DIFF if not VARDIFF else max(START_DIFF, MIN_DIFF)',
+        1,
+    )
+    t = t.replace(
+        'self.diff_from_password = False',
+        'self.diff_from_password = not VARDIFF',
+        1,
+    )
+
     return t
 
 
@@ -260,6 +282,8 @@ def generate_server():
     assert 'REJECT reason=low-difficulty' in adapted
     assert 'REJECT reason=stale-job' in adapted
     assert 'keeping last valid template/job' in adapted
+    assert 'FIXED_DIFF if not VARDIFF else max(START_DIFF, MIN_DIFF)' in adapted
+    assert 'self.diff_from_password = not VARDIFF' in adapted
     ns = {"__name__": "_fixedcoin_adapter_test", "__file__": str(FULL)}
     exec(compile(adapted, "<fixedcoin-adapter-test>", "exec"), ns)
     assert ns["bip34_height"](44343) == b"\x03\x37\xad\x00", "BIP34 44343 encoding regression"
