@@ -10,6 +10,7 @@ from pathlib import Path
 import re
 
 HTML = Path('/app/monitor/templates/dashboard_v4.html')
+JS = Path('/app/monitor/static/dashboard_v4.js')
 html = HTML.read_text()
 
 css = '<link rel="stylesheet" href="/static/dashboard_v4_reference_polish.css?v=20260825-3">'
@@ -22,5 +23,15 @@ html = html.replace('</head>', css + '</head>', 1)
 activity = '''<div class="activity-panel"><div class="activity-title">RECENT ACTIVITY</div><div id="activityList"><div class="activity-empty">Waiting for live shares…</div></div></div>'''
 html = html.replace(activity, '', 1)
 
+# The legacy/reference CSS intentionally uses an important width baseline on
+# the progress fill. The live renderer must therefore set the candidate meter
+# width as an inline !important value, otherwise the visual bar stays at 0%.
+js = JS.read_text()
+old = "candidateMeter')?.style.setProperty('width',p+'%')"
+new = "candidateMeter')?.style.setProperty('width',p+'%','important')"
+if old in js:
+    js = js.replace(old, new, 1)
+JS.write_text(js)
+
 HTML.write_text(html)
-print('dashboard reference polish applied: complete candidate HUD + no activity feed')
+print('dashboard reference polish applied: complete candidate HUD + no activity feed + live progress meter')
