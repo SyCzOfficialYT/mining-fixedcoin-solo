@@ -1,12 +1,12 @@
 # FixedCoin Dashboard Agent Task
 
 **Mode:** agent / execute-to-completion
-**Scope:** `dashboard_v4`, realtime forge, block-candidate particles, animation performance, responsive reference layout, Docker build integrity.
+**Scope:** `dashboard_v4`, realtime forge, block-candidate particles, animation performance, responsive reference layout, Docker build integrity, final visual polish.
 **Date:** 2026-08-25
 
 ## Objective
 
-Bring the dashboard to the reference layout while keeping realtime telemetry intact and moving animation work onto low-overhead canvas compositor layers. The block-candidate area must have its own particle treatment, and Docker builds must not fail because a validator expects post-build DOM that is intentionally injected later.
+Bring the dashboard to the reference layout while keeping realtime telemetry intact and moving animation work onto low-overhead canvas compositor layers. The block-candidate area must have its own particle treatment, the central FIXCORE HUD must remain visible on mobile, and Docker builds must not fail because a validator expects post-build DOM that is intentionally injected later.
 
 ## Task Queue
 
@@ -23,6 +23,8 @@ Bring the dashboard to the reference layout while keeping realtime telemetry int
 - [x] Run the animation performance patch after the canonical v4 primitives exist.
 - [x] Make the v4 validator validate canonical source primitives instead of requiring post-build canvas injection.
 - [x] Ensure Docker runs the reference-layout patch and animation-performance patch during image build.
+- [x] Add final visual layer: brighter/persistent FIXCORE HUD, stronger candidate-core treatment, visible candidate particle lane, mobile core sizing, and doubled-heading suppression.
+- [x] Run the final visual layer as the last dashboard CSS patch in the Docker build chain.
 - [ ] **LOCAL VERIFICATION:** pull `main`, rebuild the image, start the container, then verify `/`, static asset versions, dashboard particle layers and clean startup logs on the target host.
 
 ## Known Failure That Triggered This Task
@@ -35,15 +37,9 @@ The root cause was validator/build-order coupling: the performance compositor cr
 
 ## Current Repository State
 
-The repository already contains the corresponding repair chain on `main`, including:
+The repair chain is on `main`. The latest visual pass adds `monitor/static/dashboard_v4_visual_final.css` and `scripts/fixcoin_dashboard_visual_final_patch.py`, and the Docker build invokes the visual patch after the reference layout patch. Mining/Stratum logic is intentionally untouched by the visual pass.
 
-- v4 validator build-order repair
-- candidate particle canvas
-- modern compositor acceptance
-- reference forge layout/responsive compositor CSS
-- animation performance compositor pinned to `v20260825-3`
-
-The latest `main` commit is expected to be used as the source of truth. The remaining unchecked item is deliberately a host-side verification step because this agent cannot execute Docker on the user's CachyOS workstation.
+The host-side runtime already verified before this final visual pass that FixedCoin Solo starts, accepts shares, VarDiff adjusts, and serves the expected pinned animation/reference assets. The remaining unchecked item is deliberately a host-side verification step because this agent cannot execute Docker on the user's CachyOS workstation.
 
 ## Verification Commands
 
@@ -53,7 +49,7 @@ sudo docker compose down
 sudo docker compose build --no-cache
 sudo docker compose up -d
 sudo docker logs --tail=200 fixedcoin-solo
-curl -s http://127.0.0.1:5050/ | grep -oE 'dashboard_v4_animation_perf\\.(css|js)[^" ]*|dashboard_v4_reference_layout\\.css[^" ]*' | sort -u
+curl -s http://127.0.0.1:5050/ | grep -oE 'dashboard_v4_animation_perf\\.(css|js)[^" ]*|dashboard_v4_reference_layout\\.css[^" ]*|dashboard_v4_visual_final\\.css[^" ]*' | sort -u
 sudo docker exec fixedcoin-solo sh -c 'grep -oE "particle-canvas|candidate-particle-canvas|candidate-core-particle-canvas|fx-animation-canvas" /app/monitor/templates/dashboard_v4.html | sort -u'
 ```
 
@@ -61,7 +57,7 @@ sudo docker exec fixedcoin-solo sh -c 'grep -oE "particle-canvas|candidate-parti
 
 1. Docker build reaches completion without the v4 primitive validator error.
 2. Container starts with FixedCoin Solo online.
-3. Dashboard serves the pinned animation/reference assets.
+3. Dashboard serves the pinned animation/reference/final-visual assets.
 4. Forge particles remain animated without a runaway per-element animation workload.
 5. Block Candidate visibly receives its own particle treatment.
 6. Mobile layout retains the central FIXCORE/HUD instead of simply hiding it.
