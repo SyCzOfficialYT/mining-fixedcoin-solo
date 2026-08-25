@@ -1,0 +1,9 @@
+/* Final metric row geometry: no sandwiching, no implicit wrapping. */
+.stats-grid{display:block!important;margin:0!important}
+.stats-row{display:grid!important;gap:10px!important;margin:0!important}
+.stats-primary{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+.stats-balance{grid-template-columns:repeat(5,minmax(0,1fr))!important;margin-top:10px!important}
+.stats-row .stat.panel,.stats-row .balance-stat{width:auto!important;min-width:0!important;grid-column:auto!important}
+.stats-row .stat.panel:nth-child(4){display:block!important;grid-column:auto!important}
+@media(max-width:900px){.stats-primary{grid-template-columns:repeat(3,minmax(0,1fr))!important}.stats-balance{grid-template-columns:repeat(3,minmax(0,1fr))!important}}
+@media(max-width:620px){.stats-primary,.stats-balance{grid-template-columns:1fr!important}.stats-balance{margin-top:8px!important}}
