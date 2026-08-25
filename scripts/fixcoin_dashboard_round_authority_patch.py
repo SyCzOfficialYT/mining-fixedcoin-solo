@@ -6,70 +6,72 @@ import re
 APP=Path('/app/monitor/app.py'); JS=Path('/app/monitor/static/dashboard_v4.js')
 app=APP.read_text(); js=JS.read_text(); changed_app=False; changed_js=False
 
-# Backend: tolerate all current patch-chain variants and converge on the
-# authoritative round_height/round_started fields produced by NEW ROUND logs.
-# IMPORTANT: anchor this to the status() indentation. A plain `height=int(...)`
-# search also matches `round_height=int(...)` inside parse_logs(), which caused
-# the round-authority patch to rewrite its own NEW ROUND state assignment and
-# produce a runtime NameError for log_job before it existed.
+# parse_logs() stores the live Stratum NEW ROUND/job height as log_job["height"].
+# stats.json may contain an older round_height after a restart and must never
+# override the live Stratum height.
 height_re=r'(?m)^    height=int\([^\n]+\);'
 height_match=re.search(height_re,app)
-if height_match and 'height=int(log_job.get("round_height") or stats.get("round_height")' not in height_match.group(0):
-    old=height_match.group(0)
-    new='    height=int(log_job.get("round_height") or stats.get("round_height") or info.get("blocks") or mininginfo.get("blocks") or 0);'
-    app=app[:height_match.start()]+new+app[height_match.end():]; changed_app=True; print('patched dashboard height precedence: NEW ROUND first')
+if height_match:
+    authoritative='    height=int(log_job.get("height") or stats.get("round_height") or info.get("blocks") or mininginfo.get("blocks") or 0);'
+    if height_match.group(0)!=authoritative:
+        app=app[:height_match.start()]+authoritative+app[height_match.end():]
+        changed_app=True
+        print('patched dashboard height precedence: live Stratum NEW ROUND/job first')
 
-# The v4 backend patch adds round_started_at/epoch to log_job. Ensure the
-# serialized round object consumes those authoritative fields.
+# Round/timer state must consume the same live log height and NEW ROUND timer
+# fields. The source marker prevents the frontend from inventing a round from
+# stale polling state.
 round_pat=r'"round":\{"height":.*?"target_seconds":ROUND_SECONDS\}'
 rm=re.search(round_pat,app)
-if rm and '"source":"stratum-log"' not in rm.group(0):
+if rm:
     old=rm.group(0)
-    h='int(log_job.get("round_height") or height)'
-    new=(old.replace('"height":int(stats.get("round_height") or height)',f'"height":{h}')
-            .replace('"started_at":stats.get("round_started_at")', '"started_at":log_job.get("round_started_at")')
-            .replace('"target_seconds":ROUND_SECONDS','"started_epoch":log_job.get("round_started_epoch"),"source":"stratum-log","target_seconds":ROUND_SECONDS'))
-    if new!=old: app=app.replace(old,new,1); changed_app=True; print('patched dashboard timer source: NEW ROUND log')
+    new=(old
+         .replace('"height":int(stats.get("round_height") or height)',
+                  '"height":int(log_job.get("height") or stats.get("round_height") or height)')
+         .replace('"height":int(log_job.get("round_height") or height)',
+                  '"height":int(log_job.get("height") or stats.get("round_height") or height)')
+         .replace('"started_at":stats.get("round_started_at")',
+                  '"started_at":log_job.get("round_started_at") or stats.get("round_started_at")')
+         .replace('"target_seconds":ROUND_SECONDS',
+                  '"started_epoch":log_job.get("round_started_epoch") or stats.get("round_started_epoch"),"source":"stratum-log","target_seconds":ROUND_SECONDS'))
+    if new!=old:
+        app=app.replace(old,new,1)
+        changed_app=True
+        print('patched dashboard timer source: NEW ROUND log')
 
-# Final convergence pass: persisted stats.json is not authoritative for the
-# current round. After a restart it can contain a stale round_height (for
-# example 34705 while the live Stratum NEW ROUND is 45113). The live log state
-# must always win, otherwise the API/dashboard can regress to an old height.
-status_height_re=r'(?m)^    height=int\([^\n]+\);'
-status_height=re.search(status_height_re,app)
-if status_height:
-    authoritative='    height=int(log_job.get("round_height") or stats.get("round_height") or info.get("blocks") or mininginfo.get("blocks") or 0);'
-    if status_height.group(0)!=authoritative:
-        app=app[:status_height.start()]+authoritative+app[status_height.end():]; changed_app=True
-        print('patched final round height authority: live NEW ROUND wins over persisted stats')
-
+# Final convergence pass: never allow a stale round_height to replace the
+# live Stratum job height in job/round payloads.
 job_re=r'job=\{"job_id":log_job\.get\("job_id"\),"height":[^\n]+,"network_diff":network_diff\}; job\.update\(log_job\)'
 job_match=re.search(job_re,app)
 if job_match:
-    authoritative_job='job={"job_id":log_job.get("job_id"),"height":log_job.get("round_height") or log_job.get("height") or stats.get("round_height") or height,"network_diff":network_diff}; job.update(log_job)'
+    authoritative_job='job={"job_id":log_job.get("job_id"),"height":log_job.get("height") or stats.get("round_height") or height,"network_diff":network_diff}; job.update(log_job)'
     if job_match.group(0)!=authoritative_job:
-        app=app[:job_match.start()]+authoritative_job+app[job_match.end():]; changed_app=True
+        app=app[:job_match.start()]+authoritative_job+app[job_match.end():]
+        changed_app=True
         print('patched final job height authority')
 
 round_re=r'"round":\{"height":[^,]+,"shares":round_shares'
 round_match=re.search(round_re,app)
 if round_match:
-    authoritative_round='"round":{"height":int(log_job.get("round_height") or stats.get("round_height") or height),"shares":round_shares'
+    authoritative_round='"round":{"height":int(log_job.get("height") or stats.get("round_height") or height),"shares":round_shares'
     if round_match.group(0)!=authoritative_round:
-        app=app[:round_match.start()]+authoritative_round+app[round_match.end():]; changed_app=True
+        app=app[:round_match.start()]+authoritative_round+app[round_match.end():]
+        changed_app=True
         print('patched final round object authority')
 
 if changed_app: APP.write_text(app)
 
-# Frontend: remove the synthetic round activity generated by every poll. The
-# real SSE round event remains authoritative; if this code was already patched,
-# leave it untouched.
+# Frontend: remove synthetic ROUND STARTED activity generated by every poll.
 old_activity="const roundKey=parseTime(r.started_epoch||r.started_at);if(roundKey&&roundKey!==lastRoundKey){lastRoundKey=roundKey;addActivity('round','ROUND STARTED','#'+Number(r.height||0).toLocaleString(),r.started_at?.slice(11)||'',`round-live-${roundKey}`)}"
 if old_activity in js:
-    js=js.replace(old_activity,"/* ROUND STARTED comes only from authoritative NEW ROUND events. */",1); changed_js=True
+    js=js.replace(old_activity,"/* ROUND STARTED comes only from authoritative NEW ROUND events. */",1)
+    changed_js=True
+
 old_timer="function updateTimer(round){const target=Number(round?.target_seconds)||600,started=parseTime(round?.started_epoch||round?.started_at);"
 new_timer="function updateTimer(round){const target=Number(round?.target_seconds)||600,started=parseTime(round?.started_epoch||round?.started_at);if(round?.source&&round.source!=='stratum-log'){$('timeRemain').textContent='00:00';$('timePct').textContent='0.0%';$('roundStatus').textContent='WAITING';$('roundStatus').className='status waiting';return}"
 if old_timer in js and "round.source!=='stratum-log'" not in js:
-    js=js.replace(old_timer,new_timer,1); changed_js=True
+    js=js.replace(old_timer,new_timer,1)
+    changed_js=True
 if changed_js: JS.write_text(js)
+
 print('dashboard round authority patch complete')
