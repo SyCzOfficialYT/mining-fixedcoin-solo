@@ -12,8 +12,8 @@ forge_js = FORGE_JS.read_text()
 forge_css = FORGE_CSS.read_text()
 
 # Validate behavior/implementation, not DOM elements injected later by the
-# animation compositor.  The animation performance patch runs AFTER this
-# validator in Docker, so requiring compositor canvases in HTML here is a
+# animation compositor. The animation performance patch runs AFTER this
+# validator in Docker, so requiring its canvases in HTML/CSS here is a
 # build-order bug.
 required = [
     'function render(s,animate=false){', 'async function poll(animate=false){',
@@ -37,11 +37,15 @@ missing += [item for item in forge_required if item not in forge_js]
 css_required = ['.forge-core{', '.core-energy{', '.forge-ring{', '.forge.hit-accept', '.forge.hit-reject']
 missing += [item for item in css_required if item not in forge_css]
 
-# Either the legacy particle styling or the modern compositor styling is valid.
-if '.particle-canvas' not in forge_css and not any(
-    token in forge_css for token in ('fx-animation-canvas', 'candidate-particle-canvas')
-):
-    missing.append('.particle-canvas|modern compositor canvas')
+# The forge already has a compositor canvas primitive at this build stage.
+# The newer performance patch later adds fx-animation-canvas and the
+# candidate-particle-canvas. Do not require those later-injected primitives
+# from this earlier validator.
+if not any(token in forge_css for token in (
+    '.fo-animation-canvas', '.particle-canvas', 'fx-animation-canvas',
+    'candidate-particle-canvas'
+)):
+    missing.append('.particle-canvas|forge compositor canvas')
 
 if missing:
     raise RuntimeError(
