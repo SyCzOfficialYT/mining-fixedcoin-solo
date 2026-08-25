@@ -120,7 +120,18 @@ def wallet_state(current_height):
     walletinfo,walletinfo_error=wallet_rpc("getwalletinfo",timeout=4)
     txs,tx_error=wallet_rpc("listtransactions",["*",200,0,True],timeout=5)
     mine=(balances or {}).get("mine") or {}
-    confirmed=as_number(mine.get("trusted")); rpc_pending=as_number(mine.get("untrusted_pending")); rpc_immature=as_number(mine.get("immature"))
+
+    # Canonical wallet buckets:
+    #   confirmed   = trusted balance
+    #   unconfirmed = untrusted pending transactions only
+    #   immature    = coinbase rewards waiting for maturity
+    #   total       = confirmed + unconfirmed + immature
+    # Do not fold immature into unconfirmed: the dashboard renders both
+    # values separately, so doing so would double-count the balance.
+    confirmed=as_number(mine.get("trusted"))
+    unconfirmed=as_number(mine.get("untrusted_pending"))
+    rpc_immature=as_number(mine.get("immature"))
+
     ledger=read_ledger(); blocks=[]; seen=set()
     for b in ledger:
         if not isinstance(b,dict): continue
@@ -128,10 +139,12 @@ def wallet_state(current_height):
         if (not txid and not bh) or key in seen: continue
         seen.add(key); confirmations=max(0,current_height-bh+1) if bh and current_height else 0; maturity_height=int(b.get("maturity_height") or (bh+MATURITY if bh else 0)); remaining=max(0,maturity_height-current_height) if maturity_height else MATURITY; orphaned=bool(b.get("orphaned") or str(b.get("status") or "").upper()=="ORPHANED"); state="ORPHANED" if orphaned else ("MATURED" if confirmations>=MATURITY else "IMMATURE")
         blocks.append({"txid":txid,"height":bh,"confirmations":confirmations,"validity_rounds":confirmations,"validity_target":MATURITY,"reward":abs(as_number(b.get("reward"))),"category":"generate","state":state,"maturity_height":maturity_height,"maturity_remaining":remaining,"time":parse_ts(b.get("found_at") or b.get("last_seen")) if isinstance(b.get("found_at") or b.get("last_seen"),str) else int(b.get("time") or 0),"blockhash":str(b.get("blockhash") or ""),"status":state})
-    immature=rpc_immature; ledger_immature=sum(x["reward"] for x in blocks if x["state"]=="IMMATURE")
+    immature=rpc_immature
+    ledger_immature=sum(x["reward"] for x in blocks if x["state"]=="IMMATURE")
     if ledger_immature>0: immature=max(immature,ledger_immature)
+    total=confirmed+unconfirmed+immature
     blocks.sort(key=lambda x:(x.get("height") or 0,x.get("time") or 0),reverse=True)
-    return {"confirmed":confirmed,"pending":rpc_pending,"immature":immature,"unconfirmed":rpc_pending+immature,"total":confirmed,"blocks":blocks,"wallet":walletinfo or {},"error":balances_error or walletinfo_error or tx_error}
+    return {"confirmed":confirmed,"pending":unconfirmed,"immature":immature,"unconfirmed":unconfirmed,"total":total,"blocks":blocks,"wallet":walletinfo or {},"error":balances_error or walletinfo_error or tx_error}
 
 def status():
     stats=read_stats(); log_shares,log_rejected,log_blocks,log_workers,log_job=parse_logs(); shares=normalize_recent(stats.get("recent_shares")) or log_shares
