@@ -33,11 +33,13 @@ if '"pool_difficulty":pool_difficulty' not in text:
             if not m:
                 raise RuntimeError('dashboard worker authority anchor missing')
             indent=m.group(1)
+            # Do not use `{}` inside an f-string: braces would be parsed as an
+            # empty f-string expression during the Docker build.
             replacement=(
                 f'{indent}active_workers=list(workers.keys())\n'
                 f'{indent}pool_difficulty=fixed_diff\n'
                 f'{indent}for worker_name in active_workers:\n'
-                f'{indent}    worker_state=workers.get(worker_name,{})\n'
+                f'{indent}    worker_state=workers.get(worker_name,dict())\n'
                 f'{indent}    worker_diff=as_number(worker_state.get("difficulty"),0)\n'
                 f'{indent}    if worker_diff>0:\n'
                 f'{indent}        pool_difficulty=worker_diff\n'
@@ -45,7 +47,7 @@ if '"pool_difficulty":pool_difficulty' not in text:
             )
             text=text[:m.start()]+replacement+text[m.end():]
         else:
-            replacement=marker+'''\n    pool_difficulty=fixed_diff\n    for worker_name in active_workers:\n        worker_state=workers.get(worker_name,{})\n        worker_diff=as_number(worker_state.get("difficulty"),0)\n        if worker_diff>0:\n            pool_difficulty=worker_diff\n            break'''
+            replacement=marker+'''\n    pool_difficulty=fixed_diff\n    for worker_name in active_workers:\n        worker_state=workers.get(worker_name,dict())\n        worker_diff=as_number(worker_state.get("difficulty"),0)\n        if worker_diff>0:\n            pool_difficulty=worker_diff\n            break'''
             text=text.replace(marker,replacement,1)
     marker='"fixed_difficulty":fixed_diff,'
     if marker not in text:
