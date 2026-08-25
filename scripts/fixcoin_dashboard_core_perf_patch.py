@@ -35,9 +35,14 @@ if css_marker not in css:
     animation:none!important;
     will-change:transform;
   }
-  .reference-dashboard .core-logo::before,
+  .reference-dashboard .core-logo::before{
+    animation:none!important;
+    transform:var(--cp-diamond-a,rotate(45deg) scale(.92))!important;
+    will-change:transform;
+  }
   .reference-dashboard .core-logo::after{
     animation:none!important;
+    transform:var(--cp-diamond-b,rotate(45deg) scale(.92))!important;
     will-change:transform;
   }
 }
@@ -151,6 +156,6 @@ if js_marker not in html:
     html = html.replace('</body>', script + '\n</body>')
 
 # Keep the CSS cache bust in sync with the performance layer.
-html = re.sub(r'(dashboard_v4_reference_final\\.css\\?v=)[^"\']+', r'\g<1>20260825-cp2', html)
+html = re.sub(r'(dashboard_v4_reference_final\.css\?v=)[^"\']+', r'\g<1>20260825-cp2', html)
 HTML.write_text(html)
 print('dashboard core mobile performance patch applied')
