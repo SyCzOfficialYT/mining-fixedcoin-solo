@@ -3,6 +3,10 @@
 
 Keeps the existing telemetry/IDs but rebuilds the visual composition around the supplied
 reference: forge instruments, candidate card, explicit metric rows and separated balance cards.
+
+This patch intentionally uses structural marker positions instead of fragile HTML regexes.
+The dashboard template is generated/minified by earlier patches, so matching a complete
+``</section><section ...>`` sequence is not reliable after those patches have run.
 """
 from pathlib import Path
 import re
@@ -10,52 +14,72 @@ import re
 HTML = Path('/app/monitor/templates/dashboard_v4.html')
 html = HTML.read_text()
 
-CSS = '<link rel="stylesheet" href="/static/dashboard_v4_reference_rebuild.css?v=20260825-1">'
+CSS = '<link rel="stylesheet" href="/static/dashboard_v4_reference_rebuild.css?v=20260825-2">'
 html = re.sub(r'<link rel="stylesheet" href="/static/dashboard_v4_reference_rebuild\.css\?v=[^"]+">', '', html)
-html = html.replace('</head>', CSS + '</head>', 1)
+head = html.find('</head>')
+if head < 0:
+    raise RuntimeError('reference rebuild: </head> not found')
+html = html[:head] + CSS + html[head:]
 
-# The reference has no activity list between candidate and the lower metrics.
-html = re.sub(r'<div class="activity-panel">.*?</div></section>', '</section>', html, count=1, flags=re.S)
+# Remove the legacy Recent Activity block but KEEP the candidate section closing tag.
+# The previous implementation could accidentally couple the activity div and section
+# boundary. Use the unique activity-panel marker and the candidate section marker.
+activity_start = html.find('<div class="activity-panel">')
+if activity_start >= 0:
+    candidate_start_for_activity = html.rfind('<section class="candidate panel" id="candidate">', 0, activity_start)
+    candidate_end_for_activity = html.find('</section>', activity_start)
+    if candidate_start_for_activity < 0 or candidate_end_for_activity < 0:
+        raise RuntimeError('reference rebuild: activity/candidate boundary not found')
+    html = html[:activity_start] + html[candidate_end_for_activity:]
 
-# Normalize the DOM after all earlier forge patches have finished touching the template.
-# The reference composition treats Forge + Block Candidate as one physical instrument:
-# .forge > .combo and .forge > .candidate. Older patches left combo inside forge-stage
-# and candidate outside forge, so the reference selectors could not control the geometry.
-combo_match = re.search(r'<div class="combo" id="combo">.*?</div>', html, flags=re.S)
-candidate_match = re.search(
-    r'<section class="candidate panel" id="candidate">.*?</section>(?=<section class="stats-grid">)',
-    html,
-    flags=re.S,
-)
-if not combo_match:
+# Extract the complete combo and candidate blocks from the post-forge-patch DOM.
+combo_start = html.find('<div class="combo" id="combo">')
+if combo_start < 0:
     raise RuntimeError('reference rebuild: combo markup not found')
-if not candidate_match:
-    raise RuntimeError('reference rebuild: candidate section not found')
+combo_end = html.find('</div>', combo_start)
+if combo_end < 0:
+    raise RuntimeError('reference rebuild: combo closing tag not found')
+combo_end += len('</div>')
+combo = html[combo_start:combo_end]
 
-combo = combo_match.group(0)
-candidate = candidate_match.group(0)
-html = html.replace(combo, '', 1)
-html = html.replace(candidate, '', 1)
+candidate_start = html.find('<section class="candidate panel" id="candidate">')
+stats_start = html.find('<section class="stats-grid">', candidate_start)
+if candidate_start < 0 or stats_start < 0:
+    raise RuntimeError('reference rebuild: candidate/stats markers not found')
+candidate_end = html.find('</section>', candidate_start)
+if candidate_end < 0 or candidate_end > stats_start:
+    raise RuntimeError('reference rebuild: candidate closing tag not found')
+candidate_end += len('</section>')
+candidate = html[candidate_start:candidate_end]
 
-# Find the forge/stats boundary structurally instead of relying on one exact minified
-# string. Previous patches may change whitespace or the final forge child markup.
-forge_stats = re.search(
-    r'(<section class="forge panel" id="forge">.*?)(</section>)(<section class="stats-grid">)',
-    html,
-    flags=re.S,
-)
-if not forge_stats:
-    raise RuntimeError('reference rebuild: forge/stats boundary not found')
+# Remove the extracted blocks from their original locations.
+html = html[:combo_start] + html[combo_end:]
+# combo removal shifts candidate; find it again rather than reusing stale indexes.
+candidate_start = html.find('<section class="candidate panel" id="candidate">')
+stats_start = html.find('<section class="stats-grid">', candidate_start)
+if candidate_start < 0 or stats_start < 0:
+    raise RuntimeError('reference rebuild: candidate/stats markers lost after combo extraction')
+candidate_end = html.find('</section>', candidate_start)
+if candidate_end < 0 or candidate_end > stats_start:
+    raise RuntimeError('reference rebuild: candidate closing tag lost after combo extraction')
+candidate_end += len('</section>')
+html = html[:candidate_start] + html[candidate_end:]
 
-forge_open_body, forge_close, stats_open = forge_stats.groups()
-html = html[:forge_stats.start()] + (
-    forge_open_body
-    + combo
-    + candidate
-    + forge_close
-    + stats_open
-    + html[forge_stats.end():]
-)
+# Locate the forge and stats sections by their unique IDs/classes. Do not depend on
+# the exact closing-tag adjacency because preceding patches may inject markup.
+forge_start = html.find('<section class="forge panel" id="forge">')
+stats_start = html.find('<section class="stats-grid">', forge_start)
+if forge_start < 0 or stats_start < 0:
+    raise RuntimeError('reference rebuild: forge/stats markers not found')
+
+forge_body = html[forge_start:stats_start]
+forge_close = forge_body.rfind('</section>')
+if forge_close < 0:
+    raise RuntimeError('reference rebuild: forge closing tag not found')
+
+# Insert combo + candidate directly before the forge's closing tag.
+forge_rebuilt = forge_body[:forge_close] + combo + candidate + forge_body[forge_close:]
+html = html[:forge_start] + forge_rebuilt + html[stats_start:]
 
 # Rebuild the lower metrics as two explicit rows: 3 mining metrics, then 5 wallet/rate cards.
 stats = '''<section class="stats-grid">
@@ -73,9 +97,14 @@ stats = '''<section class="stats-grid">
 </div>
 </section>'''
 
-html, count = re.subn(r'<section class="stats-grid">.*?</section>', stats, html, count=1, flags=re.S)
-if count != 1:
+stats_start = html.find('<section class="stats-grid">')
+if stats_start < 0:
     raise RuntimeError('reference rebuild: stats-grid section not found')
+stats_end = html.find('</section>', stats_start)
+if stats_end < 0:
+    raise RuntimeError('reference rebuild: stats-grid closing tag not found')
+stats_end += len('</section>')
+html = html[:stats_start] + stats + html[stats_end:]
 
 HTML.write_text(html)
-print('dashboard reference rebuild applied: forge + candidate DOM normalized, explicit forge/candidate composition + 3/5 metric rows')
+print('dashboard reference rebuild applied: structural forge/candidate normalization + explicit 3/5 metric rows')
