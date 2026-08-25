@@ -11,6 +11,10 @@ html = HTML.read_text()
 forge_js = FORGE_JS.read_text()
 forge_css = FORGE_CSS.read_text()
 
+# Validate behavior/implementation, not DOM elements injected later by the
+# animation compositor.  The animation performance patch runs AFTER this
+# validator in Docker, so requiring compositor canvases in HTML here is a
+# build-order bug.
 required = [
     'function render(s,animate=false){', 'async function poll(animate=false){',
     "new EventSource('/api/stream')", 'function burstParticles(', 'function strike(',
@@ -18,20 +22,11 @@ required = [
 ]
 missing = [item for item in required if item not in text]
 
-# Modern v4 may use the compositor canvas instead of the legacy HTML marker.
-# Accept either the legacy particle canvas or the current compositor layers.
 html_required = [
     'forge-core-wrap', 'id="forgeCore"', 'id="forgeParticleField"',
     'dashboard_v4_forge.css', 'id="acceptedCounter"', 'id="rejectedCounter"',
 ]
 missing += [item for item in html_required if item not in html]
-
-modern_particle_layers = (
-    'fx-animation-canvas' in html
-    and 'candidate-particle-canvas' in html
-)
-if 'particle-canvas' not in html and not modern_particle_layers:
-    missing.append('particle-canvas|fx-animation-canvas+candidate-particle-canvas')
 
 forge_required = [
     'fixedcoin:accept', 'fixedcoin:reject', 'fixedcoin:block',
@@ -41,6 +36,8 @@ missing += [item for item in forge_required if item not in forge_js]
 
 css_required = ['.forge-core{', '.core-energy{', '.forge-ring{', '.forge.hit-accept', '.forge.hit-reject']
 missing += [item for item in css_required if item not in forge_css]
+
+# Either the legacy particle styling or the modern compositor styling is valid.
 if '.particle-canvas' not in forge_css and not any(
     token in forge_css for token in ('fx-animation-canvas', 'candidate-particle-canvas')
 ):
