@@ -11,10 +11,6 @@ html = HTML.read_text()
 forge_js = FORGE_JS.read_text()
 forge_css = FORGE_CSS.read_text()
 
-# These are the canonical primitives used by the current v4 forge.  The old
-# forge-dust DOM particle emitter was intentionally removed; keeping it here
-# made the validator reject the newer particle-canvas implementation during
-# Docker builds even though the dashboard itself was valid.
 required = [
     'function render(s,animate=false){', 'async function poll(animate=false){',
     "new EventSource('/api/stream')", 'function burstParticles(', 'function strike(',
@@ -22,26 +18,33 @@ required = [
 ]
 missing = [item for item in required if item not in text]
 
+# Modern v4 may use the compositor canvas instead of the legacy HTML marker.
+# Accept either the legacy particle canvas or the current compositor layers.
 html_required = [
     'forge-core-wrap', 'id="forgeCore"', 'id="forgeParticleField"',
-    'particle-canvas', 'dashboard_v4_forge.css', 'id="acceptedCounter"',
-    'id="rejectedCounter"',
+    'dashboard_v4_forge.css', 'id="acceptedCounter"', 'id="rejectedCounter"',
 ]
 missing += [item for item in html_required if item not in html]
 
-# FIXCORE owns the share-impact state.  Do not require the removed legacy
-# forge-dust primitive; require the actual event-driven forge hooks instead.
+modern_particle_layers = (
+    'fx-animation-canvas' in html
+    and 'candidate-particle-canvas' in html
+)
+if 'particle-canvas' not in html and not modern_particle_layers:
+    missing.append('particle-canvas|fx-animation-canvas+candidate-particle-canvas')
+
 forge_required = [
     'fixedcoin:accept', 'fixedcoin:reject', 'fixedcoin:block',
     'hit-accept', 'hit-reject', 'hit-block',
 ]
 missing += [item for item in forge_required if item not in forge_js]
 
-css_required = [
-    '.forge-core{', '.core-energy{', '.forge-ring{',
-    '.forge.hit-accept', '.forge.hit-reject', '.particle-canvas',
-]
+css_required = ['.forge-core{', '.core-energy{', '.forge-ring{', '.forge.hit-accept', '.forge.hit-reject']
 missing += [item for item in css_required if item not in forge_css]
+if '.particle-canvas' not in forge_css and not any(
+    token in forge_css for token in ('fx-animation-canvas', 'candidate-particle-canvas')
+):
+    missing.append('.particle-canvas|modern compositor canvas')
 
 if missing:
     raise RuntimeError(
@@ -49,9 +52,7 @@ if missing:
         + ', '.join(missing)
     )
 
-for forbidden in (
-    'miner_reference.svg', '<img', '<image', 'dashboard_v4_miner.js',
-):
+for forbidden in ('miner_reference.svg', '<img', '<image', 'dashboard_v4_miner.js'):
     if forbidden in html:
         raise RuntimeError('legacy miner primitive found in dashboard template: ' + forbidden)
 
