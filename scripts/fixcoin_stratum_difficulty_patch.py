@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Validate and finalize FixedCoin Stratum share-difficulty enforcement."""
+import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -63,22 +64,22 @@ if telemetry_old not in text:
 text = text.replace(telemetry_old, telemetry_new, 1)
 
 # Password `x` is an explicit per-miner VarDiff opt-in. The global
-# pool.vardiff setting remains the default for all other miners. This is
-# intentionally handled after the generator has produced server_full.py so
-# the upstream VarDiff engine remains untouched; we only change who is
-# allowed to use it.
+# pool.vardiff setting remains the default for all other miners.
 class_marker = "class Client"
 class_start = text.find(class_marker)
 if class_start < 0:
     raise RuntimeError("Client class not found")
-class_end = text.find("\ndef ", class_start + len(class_marker))
-if class_end < 0:
-    class_end = len(text)
+
+# Find the next top-level declaration, not the first method inside Client.
+# This keeps the complete Client class available for the per-connection patch.
+tail = text[class_start:]
+match = re.search(r"\n(?:(?:class|def)\s+|if\s+__name__\s*==)", tail[1:])
+class_end = class_start + 1 + match.start() if match else len(text)
 client = text[class_start:class_end]
 
 # Every Client gets an explicit per-connection VarDiff switch. The generated
-# adapter may already have a global VARDIFF flag, but it must not make password
-# `x` affect other miners.
+# adapter may already have a global VARDIFF flag, but password `x` must not
+# affect other miners.
 if "self.vardiff_enabled" not in client:
     init_marker = "        self.diff_from_password = False"
     if init_marker not in client:
@@ -89,17 +90,15 @@ if "self.vardiff_enabled" not in client:
         1,
     )
 
-# Locate authorize and insert the password switch immediately after the
-# password parameter is read. Support the common generated spelling while
-# failing closed if the generator changes its authorize structure.
 password_markers = [
     '        password = params[1] if len(params) > 1 else ""',
-    '        password = params[1] if len(params) > 1 else \'\'',
+    "        password = params[1] if len(params) > 1 else ''",
 ]
 password_marker = next((m for m in password_markers if m in client), None)
 if password_marker is None:
     raise RuntimeError("authorize password marker not found")
-if "password.lower().strip() == \"x\"" not in client:
+
+if 'password.lower().strip() == "x"' not in client:
     vardiff_block = '''        # `x` is the explicit VarDiff password for this miner.
         # Global pool.vardiff remains the default for miners without it.
         self.vardiff_enabled = VARDIFF or (isinstance(password, str) and password.lower().strip() == "x")
@@ -115,22 +114,17 @@ if "password.lower().strip() == \"x\"" not in client:
 '''
     client = client.replace(password_marker, password_marker + "\n" + vardiff_block.rstrip(), 1)
 
-# Manual password d= must still win over VarDiff, exactly as before. If the
-# generated adapter contains the d= branch, make its assignment disable the
-# automatic controller for that connection.
+# Manual password d= remains an explicit fixed-difficulty override.
 d_marker = '                    self.diff_from_password = True'
 if d_marker in client and 'self.vardiff_enabled = False\n                    self.diff_from_password = True' not in client:
     client = client.replace(d_marker, '                    self.vardiff_enabled = False\n                    self.diff_from_password = True', 1)
 
-# Switch the generated per-client VarDiff decisions from the global flag to
-# the connection-local flag. Restrict the replacement to Client so module-
-# level configuration logic is not changed.
+# Use the connection-local switch for every VarDiff decision inside Client.
 client = client.replace("if VARDIFF:", "if self.vardiff_enabled:")
 client = client.replace("if not VARDIFF:", "if not self.vardiff_enabled:")
 
-# The generator initializes a fixed difficulty before authorize. Keep that
-# safe default; authorize will select fixed or VarDiff mode once the password
-# is known.
+# Before authorization, stay at the safe fixed difficulty. Authorization then
+# selects either fixed mode or VarDiff based on the supplied password.
 client = client.replace(
     "self.diff = FIXED_DIFF if not self.vardiff_enabled else max(START_DIFF, MIN_DIFF)",
     "self.diff = FIXED_DIFF",
