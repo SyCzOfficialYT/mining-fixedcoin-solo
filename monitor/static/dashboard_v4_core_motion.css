@@ -1,5 +1,5 @@
-/* FIXCOIN CORE MOTION v1 — lightweight compositor-only core
-   No canvas, no particle loop, no box-shadow animation. Designed for mobile + high-Hz displays. */
+/* FIXCOIN CORE MOTION v3 — smooth, low-cost compositor animation
+   No canvas, no particle loop, no box-shadow animation. */
 .reference-dashboard .forge-particle-field,
 .reference-dashboard .particle-canvas,
 .reference-dashboard .bar-particles{
@@ -31,6 +31,8 @@
   stroke:rgba(77,255,114,.34);
   stroke-width:1;
   vector-effect:non-scaling-stroke;
+  transform-box:fill-box;
+  transform-origin:center;
 }
 
 .reference-dashboard .fix-core-ring.r2{stroke:rgba(27,228,255,.22);stroke-dasharray:3 8}
@@ -53,11 +55,10 @@
 .reference-dashboard .fix-core-bolt{
   fill:#b7ffc9;
   filter:drop-shadow(0 0 6px rgba(77,255,114,.42));
+  will-change:opacity;
 }
 
-.reference-dashboard .fix-core-node{
-  fill:#4dff72;
-}
+.reference-dashboard .fix-core-node{fill:#4dff72}
 
 .reference-dashboard .fix-core-scanline{
   stroke:#4dff72;
@@ -71,18 +72,12 @@
 .reference-dashboard .core-logo + .core-title{top:70%!important}
 .reference-dashboard .core-status{top:76%!important}
 
-/* The only continuous motion is transform/opacity. The browser compositor can
-   synchronize it to 60/90/120/144/165/240/360/600Hz without a JS FPS loop. */
-.reference-dashboard .fix-core-mark .fix-core-ring{
-  transform-box:fill-box;
-  transform-origin:center;
-}
-
+/* Slow orbital accents only. The main logo animation is handled by Motion mini. */
 .reference-dashboard .fix-core-mark.motion-active .fix-core-ring.r2{
-  animation:fixCoreRing 18s linear infinite;
+  animation:fixCoreRing 32s linear infinite;
 }
 .reference-dashboard .fix-core-mark.motion-active .fix-core-ring.r3{
-  animation:fixCoreRingReverse 27s linear infinite;
+  animation:fixCoreRingReverse 48s linear infinite;
 }
 
 @keyframes fixCoreRing{
