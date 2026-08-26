@@ -50,13 +50,14 @@ replacement = '''    def handle_authorize(self, mid, params):
 
         if nmminer:
             # NMMiner/NerdMiner is low-hashrate hardware. The ASIC difficulty
-            # (~13k) is unsuitable; use a dedicated low target by default.
+            # (~13k) is unsuitable; use the configured low-hash target.
+            raw_nm_diff = os.getenv("FIX_NMMINER_DIFF") or str(cfg["pool"].get("nmminer_difficulty", 0.001))
             try:
-                nm_diff = float(os.getenv("FIX_NMMINER_DIFF", "1"))
+                nm_diff = float(raw_nm_diff)
             except (TypeError, ValueError):
-                raise RuntimeError("FIX_NMMINER_DIFF must be numeric")
+                raise RuntimeError("FIX_NMMINER_DIFF / pool.nmminer_difficulty must be numeric")
             if not nm_diff > 0:
-                raise RuntimeError("FIX_NMMINER_DIFF must be > 0")
+                raise RuntimeError("FIX_NMMINER_DIFF / pool.nmminer_difficulty must be > 0")
             self.vardiff_enabled = False
             self.diff_from_password = True
             self.diff = nm_diff
@@ -104,6 +105,7 @@ text = text[:start] + client_text + text[end:]
 for marker in (
     'self.vardiff_enabled = bool(VARDIFF) or password_text == "x"',
     'self.diff_from_password = True',
+    'pool"].get("nmminer_difficulty", 0.001)',
     'FIX_NMMINER_DIFF',
     'mining.set_difficulty',
     'self.push_job(clean=True, force_refresh=True)',
@@ -113,4 +115,4 @@ for marker in (
 
 compile(text, str(PATH), "exec")
 PATH.write_text(text)
-print(f"verified {PATH}: deterministic NMMiner/NerdMiner, fixed-diff, and password-x authorization")
+print(f"verified {PATH}: deterministic NMMiner/NerdMiner, configured low-hash diff, fixed-diff, and password-x authorization")
