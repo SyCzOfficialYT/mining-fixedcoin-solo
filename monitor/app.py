@@ -120,18 +120,9 @@ def wallet_state(current_height):
     walletinfo,walletinfo_error=wallet_rpc("getwalletinfo",timeout=4)
     txs,tx_error=wallet_rpc("listtransactions",["*",200,0,True],timeout=5)
     mine=(balances or {}).get("mine") or {}
-
-    # Canonical wallet buckets:
-    #   confirmed   = trusted balance
-    #   unconfirmed = untrusted pending transactions only
-    #   immature    = coinbase rewards waiting for maturity
-    #   total       = confirmed + unconfirmed + immature
-    # Do not fold immature into unconfirmed: the dashboard renders both
-    # values separately, so doing so would double-count the balance.
     confirmed=as_number(mine.get("trusted"))
     unconfirmed=as_number(mine.get("untrusted_pending"))
     rpc_immature=as_number(mine.get("immature"))
-
     ledger=read_ledger(); blocks=[]; seen=set()
     for b in ledger:
         if not isinstance(b,dict): continue
@@ -163,7 +154,7 @@ def status():
     return {"status":"online" if info or stats else "degraded","last_update":int(time.time()),"node":{"online":bool(info) or bool(stats),"synced":bool(info) and not initial_sync,"initial_block_download":initial_sync,"height":height,"headers":headers,"difficulty":network_diff,"target":mininginfo.get("target"),"bits":mininginfo.get("bits"),"connections":int(net.get("connections") or 0),"network_hashrate":network_hashrate,"chain":info.get("chain") or mininginfo.get("chain") or "unknown","verification_progress":as_number(info.get("verificationprogress"),0),"rpc_error":info_error},"mining":{"accepted":accepted,"rejected":rejected,"reject_pct":round(100*rejected/max(1,accepted+rejected),3),"hashrate_5m":h5,"hashrate_1h":h1,"fixed_difficulty":fixed_diff,"best_share":round_best,"best_share_pct":best_pct,"difficulty_remaining":remaining,"round_work":round_work,"round_shares":round_shares,"round_effort":round_effort,"workers":workers,"worker_count":len(active_workers),"active_workers":active_workers},"round":{"height":int(stats.get("round_height") or height),"shares":round_shares,"work":round_work,"best_share":round_best,"effort_pct":round_effort,"best_share_pct":best_pct,"difficulty":network_diff,"remaining":remaining,"started_at":stats.get("round_started_at"),"target_seconds":ROUND_SECONDS},"competition":{"your_hashrate":h5,"network_hashrate":network_hashrate},"wallet":{"confirmed":wallet["confirmed"],"pending":wallet["pending"],"immature":wallet["immature"],"unconfirmed":wallet["unconfirmed"],"total":wallet["total"],"total_rewards":as_number(stats.get("block_rewards_total"))},"job":job,"shares":shares[-100:],"blocks":blocks,"history_diff":DIFF_HISTORY,"payout":pool.get("payout_address",""),"maturity":MATURITY,"ts":int(time.time())}
 
 @app.get("/")
-def index(): return render_template("dashboard_v4.html",payout=config().get("payout_address",""),maturity=MATURITY)
+def index(): return render_template("dashboard_liveshare.html",payout=config().get("payout_address",""),maturity=MATURITY)
 @app.get("/api/status")
 def api_status(): return jsonify(status())
 @app.get("/api/overview")
