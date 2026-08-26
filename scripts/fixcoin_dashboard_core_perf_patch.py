@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Reduce the cost of the animated FIX core on mobile devices.
+"""Reduce the cost of the animated FIX core on mobile devices and clean up
+Python 3.12+ UTC timestamp handling in the generated Stratum runtime.
 
 The visual core is intentionally kept smooth, but expensive transform/style
 updates are capped relative to the physical display refresh rate:
@@ -10,6 +11,10 @@ updates are capped relative to the physical display refresh rate:
 
 This avoids trying to animate the logo at 90/120/600 browser frames per
 second while preserving a fluid compositor-friendly transform animation.
+The generated Stratum server is also normalized from deprecated
+``datetime.datetime.utcnow()`` to the timezone-aware
+``datetime.datetime.now(datetime.UTC)`` API.
+
 Idempotent: safe to run repeatedly in the Docker build pipeline.
 """
 from pathlib import Path
@@ -17,6 +22,7 @@ import re
 
 HTML = Path('/app/monitor/templates/dashboard_v4.html')
 CSS = Path('/app/monitor/static/dashboard_v4_reference_final.css')
+SERVER = Path('/app/stratum/server_full.py')
 
 html = HTML.read_text()
 css = CSS.read_text()
@@ -158,4 +164,22 @@ if js_marker not in html:
 # Keep the CSS cache bust in sync with the performance layer.
 html = re.sub(r'(dashboard_v4_reference_final\.css\?v=)[^"\']+', r'\g<1>20260825-cp2', html)
 HTML.write_text(html)
+
+# Python 3.12+ deprecates datetime.datetime.utcnow(). The Stratum runtime is
+# generated from the pinned upstream source during the same Docker build, so
+# normalize the generated artifact here after generation and before py_compile.
+if SERVER.exists():
+    server = SERVER.read_text()
+    deprecated = 'datetime.datetime.utcnow()'
+    replacement = 'datetime.datetime.now(datetime.UTC)'
+    count = server.count(deprecated)
+    if count:
+        server = server.replace(deprecated, replacement)
+        SERVER.write_text(server)
+        print(f'fixed Stratum UTC timestamps: {count} deprecated utcnow call(s) replaced')
+    if deprecated in server:
+        raise RuntimeError('core perf patch: deprecated datetime.utcnow remains in server_full.py')
+else:
+    raise RuntimeError('core perf patch: generated server_full.py missing')
+
 print('dashboard core mobile performance patch applied')
