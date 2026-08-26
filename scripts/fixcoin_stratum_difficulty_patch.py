@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Finalize FixedCoin Stratum difficulty handling.
 
-VarDiff is connection-local.  Password `x` must receive the configured
+VarDiff is connection-local. Password `x` must receive the configured
 VarDiff start/minimum difficulty immediately during authorization; it must
 never inherit FIXED_DIFF=13354 first and wait for a later retarget.
 """
@@ -56,6 +56,15 @@ old_tel = 'emit("WARN", f"REJECT reason=low-difficulty worker={self.worker} job=
 new_tel = 'emit("WARN", f"REJECT reason=low-difficulty worker={self.worker} job={job_id} height={job[\'height\']} share_diff={share_work:.6f} required_diff={need:.6f} current_diff={self.diff:.6f} previous_diff={self.diff_prev:.6f} vardiff={int(self.vardiff_enabled)} grace_active={int(time.time() - self.diff_changed_at < DIFF_GRACE_SEC)} ntime={ntime_hex} nonce={nonce_hex} hash={hhex[:24]}")'
 if old_tel in text:
     text = text.replace(old_tel, new_tel, 1)
+
+# Include the worker in accepted-share telemetry. The dashboard must not
+# infer ownership from the last authorize event when multiple miners submit
+# concurrently.
+accept_old = 'emit("OK", f"ACCEPT #{self.shares_ok} work={share_work:.0f} ({pct:.3f}%) "'
+accept_new = 'emit("OK", f"ACCEPT worker={self.worker} #{self.shares_ok} work={share_work:.0f} ({pct:.3f}%) "'
+if accept_old not in text:
+    raise RuntimeError("accepted-share telemetry marker not found")
+text = text.replace(accept_old, accept_new, 1)
 
 # Work only on the real Client class.
 tree = ast.parse(text)
@@ -114,10 +123,6 @@ for line in client.splitlines(keepends=True):
     converted.append(line)
 client = "".join(converted)
 
-# CRITICAL: the upstream authorize path can assign self.diff again after the
-# password selector. Apply the connection's final difficulty immediately
-# before the authorization log/response. This guarantees x starts at 1000
-# (or configured start/min) instead of 13354.
 auth_log = '        emit("INFO", f"authorize {self.worker} diff={self.diff} mode={mode}")'
 if auth_log not in client:
     raise RuntimeError("authorization log marker not found")
@@ -142,13 +147,13 @@ if mode_old in client:
 
 text = text[:class_start] + client + text[class_end:]
 
-# Hard guarantees.
 for marker in (
     'password.lower().strip() == "x"',
     "self.vardiff_enabled = VARDIFF",
     "self.vardiff_enabled = VARDIFF or",
     "self.diff = max(START_DIFF, MIN_DIFF)",
     "# Final authorization authority: password-x VarDiff",
+    'ACCEPT worker={self.worker}',
 ):
     if marker not in text:
         raise RuntimeError(f"VarDiff marker missing: {marker}")
@@ -161,4 +166,4 @@ if 'mode = "fixed" if self.diff_from_password else f"vardiff={self.vardiff_enabl
 
 compile(text, str(PATH), "exec")
 PATH.write_text(text)
-print(f"verified {PATH}: strict share difficulty, stable jobs, and password-x VarDiff starts at configured minimum")
+print(f"verified {PATH}: strict share difficulty, stable jobs, worker-specific ACCEPT telemetry, and password-x VarDiff")
