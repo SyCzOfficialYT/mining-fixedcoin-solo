@@ -17,9 +17,10 @@ pool:
   vardiff_max: 50000000
   vardiff: false
 
-  # NMMiner/NerdMiner are detected from mining.subscribe and receive this
-  # low-hash difficulty automatically. Override with FIX_NMMINER_DIFF if needed.
-  nmminer_difficulty: 1
+  # NMMiner/NerdMiner are detected from mining.subscribe and receive a
+  # dedicated low-hash target. 0.001 is intentionally far below ASIC diff.
+  # Override with FIX_NMMINER_DIFF when a different share cadence is desired.
+  nmminer_difficulty: 0.001
 
   job_interval: 30
   stratum_host: 0.0.0.0
