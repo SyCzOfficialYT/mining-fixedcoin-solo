@@ -1,49 +1,93 @@
-/* FIXCOIN FORGE ALIGNMENT v2 — right counters use the forge-stage coordinate system
-   and mirror the exact vertical rows of the left metrics. */
+/* FIXCOIN FORGE ALIGNMENT v3 — mirrored rows + explicit shared gap
+   Left and right forge cards must occupy the same vertical rows.
+   Row 1: HASHRATE      <-> ACCEPTED SHARES
+   Row 2: SHARES / MIN  <-> REJECTED SHARES
+   The shared gap is intentional and kept identical on both sides. */
+
+.reference-dashboard .forge-side.left-side,
 .reference-dashboard .forge-side.right-side{
-  position:static!important;
-  width:0!important;
-  height:0!important;
-  min-width:0!important;
-  padding:0!important;
-  margin:0!important;
-  display:block!important;
-  overflow:visible!important;
-}
-.reference-dashboard .forge-side.right-side .forge-counter{
   position:absolute!important;
-  right:32px!important;
-  left:auto!important;
-  margin:0!important;
-  z-index:24!important;
-}
-.reference-dashboard .forge-side.right-side .forge-counter.accepted{
   top:34px!important;
   bottom:auto!important;
+  width:210px!important;
+  height:auto!important;
+  min-width:210px!important;
+  min-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:flex-start!important;
+  align-items:stretch!important;
+  gap:22px!important;
+  z-index:22!important;
 }
-.reference-dashboard .forge-side.right-side .forge-counter.rejected{
-  top:204px!important;
+
+.reference-dashboard .forge-side.left-side{
+  left:32px!important;
+  right:auto!important;
+}
+
+.reference-dashboard .forge-side.right-side{
+  right:32px!important;
+  left:auto!important;
+}
+
+/* Both columns use the same card footprint. */
+.reference-dashboard .forge-side .forge-metric,
+.reference-dashboard .forge-side .forge-counter{
+  position:relative!important;
+  inset:auto!important;
+  top:auto!important;
+  right:auto!important;
   bottom:auto!important;
+  left:auto!important;
+  width:210px!important;
+  height:148px!important;
+  min-width:210px!important;
+  min-height:148px!important;
+  max-height:148px!important;
+  margin:0!important;
+  flex:0 0 148px!important;
 }
+
+/* Preserve the accepted/rejected visual language while keeping the shared geometry. */
+.reference-dashboard .forge-counter.accepted{
+  border-color:rgba(77,255,114,.75)!important;
+}
+.reference-dashboard .forge-counter.rejected{
+  border-color:rgba(255,79,97,.72)!important;
+}
+
 @media(max-width:900px){
-  .reference-dashboard .forge-side.right-side .forge-counter{
-    right:24px!important;
-  }
-  .reference-dashboard .forge-side.right-side .forge-counter.accepted{
+  .reference-dashboard .forge-side.left-side,
+  .reference-dashboard .forge-side.right-side{
     top:34px!important;
+    gap:22px!important;
   }
-  .reference-dashboard .forge-side.right-side .forge-counter.rejected{
-    top:204px!important;
-  }
+  .reference-dashboard .forge-side.left-side{left:24px!important}
+  .reference-dashboard .forge-side.right-side{right:24px!important}
 }
+
 @media(max-width:620px){
-  .reference-dashboard .forge-side.right-side .forge-counter{
-    right:12px!important;
-  }
-  .reference-dashboard .forge-side.right-side .forge-counter.accepted{
+  .reference-dashboard .forge-side.left-side,
+  .reference-dashboard .forge-side.right-side{
     top:14px!important;
+    gap:22px!important;
+    width:150px!important;
+    min-width:150px!important;
   }
-  .reference-dashboard .forge-side.right-side .forge-counter.rejected{
-    top:142px!important;
+  .reference-dashboard .forge-side.left-side{left:12px!important}
+  .reference-dashboard .forge-side.right-side{right:12px!important}
+
+  .reference-dashboard .forge-side .forge-metric,
+  .reference-dashboard .forge-side .forge-counter{
+    width:150px!important;
+    min-width:150px!important;
+    height:118px!important;
+    min-height:118px!important;
+    max-height:118px!important;
+    flex-basis:118px!important;
+    padding:12px!important;
   }
 }
