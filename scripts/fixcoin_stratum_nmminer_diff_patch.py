@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""Give NMMiner/NerdMiner low-hashrate clients a usable Stratum share difficulty.
+"""Finalize Stratum authorization for NMMiner/NerdMiner and ASICs.
 
-The pool's canonical ASIC difficulty is intentionally high for SHA-256 ASICs.
-NMMiner/NerdMiner devices are tiny miners, so the same fixed difficulty can
-make a share statistically impossible to see in a normal session. The miner
-identity is detected during mining.subscribe by the preceding miner-detection
-patch; this patch applies a dedicated difficulty during authorize.
+The earlier compatibility patch injected the NMMiner difficulty too early in
+handle_authorize. The later VarDiff/fixed-difficulty authority then overwrote
+it, so the miner could authenticate but never receive a usable low target.
+This patch replaces the generated authorize handler with one deterministic
+state machine: NMMiner/NerdMiner -> low-hash fixed diff, explicit d= -> fixed,
+password x -> per-connection VarDiff, otherwise configured pool mode.
 """
 import ast
 from pathlib import Path
@@ -13,7 +14,6 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 PATH = ROOT / "stratum" / "server_full.py"
 text = PATH.read_text()
-
 tree = ast.parse(text)
 client = next((n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == "Client"), None)
 if client is None:
@@ -25,43 +25,92 @@ end = sum(map(len, lines[:client.end_lineno]))
 client_text = text[start:end]
 client_tree = ast.parse(client_text)
 
-authorize_fn = None
-for node in ast.walk(client_tree):
-    if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == "handle_authorize":
-        authorize_fn = node
-        break
+authorize_fn = next(
+    (n for n in ast.walk(client_tree)
+     if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)) and n.name == "handle_authorize"),
+    None,
+)
 if authorize_fn is None:
     raise RuntimeError("handle_authorize not found")
 
 clines = client_text.splitlines(keepends=True)
 fn_start = sum(map(len, clines[:authorize_fn.lineno - 1]))
 fn_end = sum(map(len, clines[:authorize_fn.end_lineno]))
-fn_text = client_text[fn_start:fn_end]
 
-marker = '        self.worker = params[0] if params else "?"\n'
-if marker not in fn_text:
-    raise RuntimeError("authorize worker marker not found")
+replacement = '''    def handle_authorize(self, mid, params):
+        self.worker = params[0] if params else "?"
+        password = params[1] if len(params) > 1 else ""
+        password_text = password.lower().strip() if isinstance(password, str) else ""
 
-injection = '''
-        # NMMiner/NerdMiner has a tiny hashrate compared with the ASIC target.
-        # At the canonical FIX difficulty (~13.3K), a ~400 KH/s device would
-        # statistically need years per share. Give these detected clients a
-        # dedicated low difficulty while keeping ASICs on the canonical target.
         miner_family = str(getattr(self, "miner_family", "") or "").strip().lower()
-        if miner_family in {"nmminer", "nerdminer"}:
-            nm_diff = float(os.getenv("FIX_NMMINER_DIFF", "1"))
+        nmminer = miner_family in {"nmminer", "nerdminer"}
+
+        # Explicit fixed difficulty always wins over pool VarDiff.
+        fixed = parse_fixed_diff(password, self.worker)
+
+        if nmminer:
+            # NMMiner/NerdMiner is low-hashrate hardware. The ASIC difficulty
+            # (~13k) is unsuitable; use a dedicated low target by default.
+            try:
+                nm_diff = float(os.getenv("FIX_NMMINER_DIFF", "1"))
+            except (TypeError, ValueError):
+                raise RuntimeError("FIX_NMMINER_DIFF must be numeric")
             if not nm_diff > 0:
                 raise RuntimeError("FIX_NMMINER_DIFF must be > 0")
-            self.diff = nm_diff
-            self.diff_prev = nm_diff
+            self.vardiff_enabled = False
             self.diff_from_password = True
-            self.diff_changed_at = time.time()
-            emit("INFO", f"NMMINER DIFF worker={self.worker} diff={nm_diff:g} mode=low-hash fixed")
+            self.diff = nm_diff
+            mode = "nmminer-fixed"
+        elif fixed is not None:
+            self.vardiff_enabled = False
+            self.diff_from_password = True
+            self.diff = fixed
+            mode = "fixed"
+            emit("INFO", f"FIXED DIFF from password: {fixed} (VarDiff OFF)")
+        else:
+            # `x` explicitly opts this connection into VarDiff even when the
+            # global pool default is fixed. Otherwise honor pool.vardiff.
+            self.vardiff_enabled = bool(VARDIFF) or password_text == "x"
+            if self.vardiff_enabled:
+                self.diff_from_password = False
+                self.diff = max(START_DIFF, MIN_DIFF)
+                mode = "vardiff=True"
+            else:
+                self.diff_from_password = True
+                self.diff = FIXED_DIFF
+                mode = "fixed"
+
+        self.diff_prev = self.diff
+        self.diff_changed_at = time.time()
+        self.shares_since_retarget = 0
+        self.vardiff_buf = []
+
+        self.send({"id": mid, "result": True, "error": None})
+        self.send({"id": None, "method": "mining.set_difficulty", "params": [self.diff]})
+        if nmminer:
+            emit("INFO", f"NMMINER DIFF worker={self.worker} diff={self.diff:g} mode=low-hash fixed")
+        emit(
+            "INFO",
+            f"authorize {self.worker} diff={self.diff:g} mode={mode} "
+            f"miner={getattr(self, 'miner_family', 'unknown')}/{getattr(self, 'miner_variant', '') or 'unknown'} "
+            f"version={getattr(self, 'miner_version', '') or 'unknown'}",
+        )
+        self.push_job(clean=True, force_refresh=True)
 '''
-fn_text = fn_text.replace(marker, marker + injection, 1)
-client_text = client_text[:fn_start] + fn_text + client_text[fn_end:]
-text = text[:start] + client_text + text[end:]
+
+client_text = client_text[:fn_start] + replacement + client_text[fn_end:]
+text = text[:start] + client_text + client_text[fn_end:0] if False else text[:start] + client_text + text[end:]
+
+for marker in (
+    'self.vardiff_enabled = bool(VARDIFF) or password_text == "x"',
+    'self.diff_from_password = True',
+    'FIX_NMMINER_DIFF',
+    'mining.set_difficulty',
+    'self.push_job(clean=True, force_refresh=True)',
+):
+    if marker not in text:
+        raise RuntimeError(f"NMMiner authorization marker missing: {marker}")
 
 compile(text, str(PATH), "exec")
 PATH.write_text(text)
-print(f"patched {PATH}: NMMiner/NerdMiner low-hash difficulty enabled")
+print(f"verified {PATH}: deterministic NMMiner/NerdMiner, fixed-diff, and password-x authorization")
