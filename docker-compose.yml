@@ -43,5 +43,23 @@ services:
     networks:
       - default
 
+  swarm-connector:
+    build:
+      context: ./swarm-connector
+    container_name: fixedcoin-swarm-connector
+    restart: unless-stopped
+    environment:
+      SWARM_HOST: 0.0.0.0
+      SWARM_PORT: 5080
+      SWARM_CIDR: ${SWARM_CIDR:-192.168.50.0/24}
+      MINER_HTTP_PORT: ${MINER_HTTP_PORT:-80}
+      MINER_HTTP_TIMEOUT: ${MINER_HTTP_TIMEOUT:-0.8}
+      SWARM_SCAN_WORKERS: ${SWARM_SCAN_WORKERS:-32}
+      SWARM_ALLOW_CONTROL: ${SWARM_ALLOW_CONTROL:-false}
+    ports:
+      - "5080:5080"
+    networks:
+      - default
+
 volumes:
   fix-data:
