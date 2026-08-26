@@ -78,6 +78,7 @@ python3 /app/scripts/fixcoin_dashboard_core_perf_patch.py
 python3 /app/scripts/fixcoin_dashboard_fx_identity_patch.py
 python3 /app/scripts/fixcoin_dashboard_miner_identity_patch.py
 python3 /app/scripts/fixcoin_dashboard_miner_stats_patch.py
+python3 /app/scripts/fixcoin_dashboard_worker_attribution_patch.py
 
 # Keep the startup guard synchronized with the version produced by the
 # consensus patch itself. Do not compare against the unpatched generator
