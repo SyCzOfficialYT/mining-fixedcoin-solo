@@ -1,37 +1,49 @@
-/* FIXCOIN FORGE ALIGNMENT — right counters mirror left metric rows */
+/* FIXCOIN FORGE ALIGNMENT v2 — right counters use the forge-stage coordinate system
+   and mirror the exact vertical rows of the left metrics. */
 .reference-dashboard .forge-side.right-side{
-  top:34px!important;
-  bottom:0!important;
-  padding-top:0!important;
+  position:static!important;
+  width:0!important;
+  height:0!important;
+  min-width:0!important;
+  padding:0!important;
+  margin:0!important;
   display:block!important;
+  overflow:visible!important;
 }
 .reference-dashboard .forge-side.right-side .forge-counter{
   position:absolute!important;
-  right:0!important;
+  right:32px!important;
   left:auto!important;
   margin:0!important;
+  z-index:24!important;
 }
 .reference-dashboard .forge-side.right-side .forge-counter.accepted{
-  top:0!important;
+  top:34px!important;
   bottom:auto!important;
 }
 .reference-dashboard .forge-side.right-side .forge-counter.rejected{
-  top:170px!important;
+  top:204px!important;
   bottom:auto!important;
 }
 @media(max-width:900px){
-  .reference-dashboard .forge-side.right-side{
-    top:24px!important;
+  .reference-dashboard .forge-side.right-side .forge-counter{
+    right:24px!important;
+  }
+  .reference-dashboard .forge-side.right-side .forge-counter.accepted{
+    top:34px!important;
   }
   .reference-dashboard .forge-side.right-side .forge-counter.rejected{
-    top:128px!important;
+    top:204px!important;
   }
 }
 @media(max-width:620px){
-  .reference-dashboard .forge-side.right-side{
-    top:18px!important;
+  .reference-dashboard .forge-side.right-side .forge-counter{
+    right:12px!important;
+  }
+  .reference-dashboard .forge-side.right-side .forge-counter.accepted{
+    top:14px!important;
   }
   .reference-dashboard .forge-side.right-side .forge-counter.rejected{
-    top:103px!important;
+    top:142px!important;
   }
 }
