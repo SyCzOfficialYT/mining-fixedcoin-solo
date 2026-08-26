@@ -1,0 +1,308 @@
+/* FIXEDCOIN LIVESHARE MYTHIC v1
+ * Visual layer for Candidate + Treasury/Balance.
+ * Uses compositor-friendly transforms/opacity and Motion-driven DOM motes.
+ * No canvas, no layout animation, no polling.
+ */
+:root{
+  --myth-violet:#b982ff;
+  --myth-purple:#7c4dff;
+  --myth-cyan:#5ee7ff;
+  --myth-gold:#f6cf72;
+  --myth-emerald:#65f5a0;
+  --myth-bordeaux:#9f3658;
+  --myth-ink:#050515;
+}
+
+/* -------------------------------------------------------------------------
+   BLOCK CANDIDATE — ARCANE GATE
+   ------------------------------------------------------------------------- */
+.reference-dashboard .candidate{
+  isolation:isolate!important;
+  overflow:hidden!important;
+  background:
+    radial-gradient(circle at 82% 50%,rgba(145,78,255,.22),transparent 23%),
+    radial-gradient(circle at 68% 15%,rgba(69,213,255,.08),transparent 24%),
+    radial-gradient(circle at 17% 92%,rgba(246,207,114,.055),transparent 28%),
+    linear-gradient(135deg,rgba(8,5,25,.97),rgba(3,5,17,.96) 54%,rgba(7,3,20,.98))!important;
+  border-color:rgba(172,119,255,.38)!important;
+  box-shadow:inset 0 0 70px rgba(117,61,220,.08),0 20px 70px rgba(0,0,0,.52),0 0 34px rgba(142,79,255,.08)!important;
+}
+.reference-dashboard .candidate::before{
+  content:""!important;
+  position:absolute!important;
+  inset:-45%!important;
+  z-index:-2!important;
+  pointer-events:none!important;
+  background:conic-gradient(from 20deg,transparent 0 18%,rgba(185,130,255,.12) 20%,transparent 25% 47%,rgba(94,231,255,.08) 50%,transparent 55% 76%,rgba(246,207,114,.08) 80%,transparent 84%)!important;
+  animation:mythGateRotate 28s linear infinite!important;
+}
+.reference-dashboard .candidate::after{
+  content:""!important;
+  position:absolute!important;
+  inset:0!important;
+  z-index:1!important;
+  pointer-events:none!important;
+  background:
+    linear-gradient(115deg,transparent 0 42%,rgba(185,130,255,.055) 49%,transparent 55%),
+    repeating-linear-gradient(90deg,transparent 0 44px,rgba(185,130,255,.025) 45px,transparent 46px);
+  mix-blend-mode:screen;
+  opacity:.7;
+}
+.reference-dashboard .candidate-left{z-index:4!important}
+.reference-dashboard .candidate-left::after{
+  content:"ARCANE GATE // CANDIDATE PROXIMITY";
+  position:absolute;
+  right:30px;
+  top:26px;
+  color:rgba(190,148,255,.30);
+  font:700 7px/1 "JetBrains Mono",monospace;
+  letter-spacing:.22em;
+  text-transform:uppercase;
+  text-shadow:0 0 12px rgba(174,104,255,.35);
+  pointer-events:none;
+}
+.reference-dashboard .candidate-pct{
+  position:relative!important;
+  z-index:4!important;
+  text-shadow:0 0 14px rgba(185,130,255,.55),0 0 40px rgba(126,77,255,.20)!important;
+  animation:mythValueGlow 3.6s ease-in-out infinite!important;
+}
+.reference-dashboard .candidate-track{
+  z-index:5!important;
+  background:rgba(3,3,14,.88)!important;
+  border-color:rgba(157,107,255,.34)!important;
+  box-shadow:inset 0 0 18px rgba(0,0,0,.8),0 0 22px rgba(122,74,255,.10)!important;
+}
+.reference-dashboard .candidate-track i{
+  background:linear-gradient(90deg,#5b32b5 0%,#9f62ff 42%,#d8a4ff 72%,#f6cf72 100%)!important;
+  box-shadow:0 0 15px rgba(175,101,255,.72),0 0 34px rgba(122,74,255,.22)!important;
+}
+.reference-dashboard .candidate-core{
+  z-index:5!important;
+  overflow:hidden!important;
+  background:
+    radial-gradient(circle at 50% 50%,rgba(154,86,255,.22),transparent 27%),
+    radial-gradient(circle at 50% 50%,rgba(69,231,255,.08),transparent 51%),
+    linear-gradient(180deg,rgba(8,5,24,.62),rgba(2,4,15,.35))!important;
+  border-left-color:rgba(177,125,255,.30)!important;
+}
+.reference-dashboard .candidate-core::before{
+  content:"";
+  position:absolute;
+  width:188px;
+  height:188px;
+  border:1px solid rgba(185,130,255,.28);
+  border-radius:50%;
+  box-shadow:0 0 28px rgba(137,75,255,.14),inset 0 0 30px rgba(137,75,255,.07);
+  animation:mythOrbit 18s linear infinite;
+}
+.reference-dashboard .candidate-core::after{
+  content:"✦  ✧  ✦";
+  position:absolute;
+  top:18px;
+  color:rgba(246,207,114,.38);
+  font:700 9px "Cinzel",serif;
+  letter-spacing:.55em;
+  text-shadow:0 0 13px rgba(246,207,114,.4);
+  animation:mythStars 4.8s ease-in-out infinite;
+}
+.reference-dashboard .candidate-ring{box-shadow:0 0 30px rgba(158,91,255,.12),inset 0 0 24px rgba(158,91,255,.05)!important}
+.reference-dashboard .candidate-cube{
+  position:relative!important;
+  transform-style:preserve-3d!important;
+  background:linear-gradient(145deg,#dfc0ff 0%,#a66cff 28%,#4e269a 66%,#160b36 100%)!important;
+  filter:drop-shadow(0 0 20px rgba(174,103,255,.62)) drop-shadow(0 0 55px rgba(82,202,255,.15))!important;
+  animation:mythPrismFloat 4.8s ease-in-out infinite!important;
+}
+.reference-dashboard .candidate-cube::before{
+  content:"";
+  position:absolute;
+  inset:-14px;
+  border:1px solid rgba(94,231,255,.25);
+  clip-path:polygon(50% 0,94% 25%,94% 75%,50% 100%,6% 75%,6% 25%);
+  transform:rotate(30deg) scale(.88);
+  box-shadow:0 0 24px rgba(94,231,255,.12);
+  animation:mythPrismSpin 12s linear infinite;
+}
+.reference-dashboard .candidate-cube::after{
+  border-color:rgba(246,207,114,.42)!important;
+  box-shadow:0 0 18px rgba(246,207,114,.12);
+}
+.reference-dashboard .candidate-cube span{
+  color:#f1ddff!important;
+  text-shadow:0 0 12px rgba(230,190,255,.85),0 0 28px rgba(174,104,255,.55)!important;
+}
+.reference-dashboard .candidate-core small{color:#cba6ff!important;text-shadow:0 0 10px rgba(185,130,255,.45)}
+.reference-dashboard .candidate-core b{color:#f6cf72!important;text-shadow:0 0 10px rgba(246,207,114,.35)}
+
+/* DOM motes injected by dashboard_v4_mythic_liveshare.js */
+.reference-dashboard .mythic-candidate-motes,
+.reference-dashboard .mythic-balance-motes{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  z-index:3;
+  contain:strict;
+}
+.reference-dashboard .mythic-mote{
+  position:absolute;
+  width:3px;
+  height:3px;
+  margin:-1.5px;
+  border-radius:50%;
+  background:#c99aff;
+  box-shadow:0 0 7px rgba(201,154,255,.85),0 0 18px rgba(137,75,255,.34);
+  will-change:transform,opacity;
+}
+.reference-dashboard .mythic-mote.cyan{background:var(--myth-cyan);box-shadow:0 0 8px rgba(94,231,255,.9),0 0 18px rgba(94,231,255,.28)}
+.reference-dashboard .mythic-mote.gold{background:var(--myth-gold);box-shadow:0 0 8px rgba(246,207,114,.9),0 0 18px rgba(246,207,114,.25)}
+.reference-dashboard .mythic-mote.bordeaux{background:var(--myth-bordeaux);box-shadow:0 0 8px rgba(159,54,88,.85),0 0 18px rgba(159,54,88,.22)}
+.reference-dashboard .mythic-mote.star{width:4px;height:4px;margin:-2px}
+
+/* -------------------------------------------------------------------------
+   ARCANE TREASURY — BALANCE ROW
+   ------------------------------------------------------------------------- */
+.reference-dashboard .balance-grid{
+  position:relative!important;
+  isolation:isolate!important;
+  padding:2px!important;
+  gap:12px!important;
+}
+.reference-dashboard .balance-grid::before{
+  content:"ARCANE TREASURY";
+  position:absolute;
+  left:6px;
+  top:-11px;
+  z-index:6;
+  padding:0 8px;
+  color:rgba(207,181,255,.48);
+  background:#030514;
+  font:700 7px/1 "Cinzel",Georgia,serif;
+  letter-spacing:.26em;
+  text-transform:uppercase;
+}
+.reference-dashboard .balance-grid::after{
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  top:0;
+  height:1px;
+  background:linear-gradient(90deg,transparent,rgba(185,130,255,.34),rgba(246,207,114,.22),rgba(185,130,255,.34),transparent);
+  box-shadow:0 0 14px rgba(185,130,255,.15);
+  pointer-events:none;
+}
+.reference-dashboard .balance-card{
+  position:relative!important;
+  overflow:hidden!important;
+  isolation:isolate!important;
+  min-height:112px!important;
+  background:
+    radial-gradient(circle at 82% 20%,rgba(185,130,255,.08),transparent 30%),
+    linear-gradient(145deg,rgba(10,8,28,.96),rgba(2,5,15,.96))!important;
+  border-color:rgba(147,103,255,.28)!important;
+  box-shadow:inset 0 1px rgba(255,255,255,.045),inset 0 0 28px rgba(120,68,220,.045),0 13px 36px rgba(0,0,0,.42)!important;
+  transition:border-color .35s ease,box-shadow .35s ease,transform .35s ease!important;
+}
+.reference-dashboard .balance-card:hover{
+  border-color:rgba(185,130,255,.50)!important;
+  box-shadow:inset 0 1px rgba(255,255,255,.06),inset 0 0 34px rgba(120,68,220,.08),0 18px 44px rgba(0,0,0,.48),0 0 22px rgba(137,75,255,.10)!important;
+}
+.reference-dashboard .balance-card::before{
+  content:"";
+  position:absolute;
+  width:72px;
+  height:72px;
+  right:-24px;
+  top:-24px;
+  border:1px solid rgba(246,207,114,.20);
+  border-radius:50%;
+  box-shadow:inset 0 0 0 7px rgba(185,130,255,.025),0 0 24px rgba(185,130,255,.06);
+  transform:rotate(45deg);
+  pointer-events:none;
+}
+.reference-dashboard .balance-card::after{
+  content:"";
+  position:absolute;
+  left:14px;
+  right:14px;
+  bottom:11px;
+  height:1px;
+  background:linear-gradient(90deg,transparent,rgba(185,130,255,.22),transparent);
+  box-shadow:0 0 12px rgba(185,130,255,.12);
+  pointer-events:none;
+}
+.reference-dashboard .balance-card > span{
+  position:relative;
+  z-index:4;
+  color:#a49bbf!important;
+  text-shadow:0 0 10px rgba(185,130,255,.22);
+}
+.reference-dashboard .balance-card > strong{
+  position:relative;
+  z-index:4;
+  letter-spacing:-.045em!important;
+  text-shadow:0 0 14px currentColor!important;
+}
+.reference-dashboard .balance-card > small{
+  position:relative;
+  z-index:4;
+}
+.reference-dashboard .balance-card:nth-child(1){border-color:rgba(101,245,160,.28)!important}
+.reference-dashboard .balance-card:nth-child(1)::before{border-color:rgba(101,245,160,.22)}
+.reference-dashboard .balance-card:nth-child(2){border-color:rgba(94,231,255,.25)!important}
+.reference-dashboard .balance-card:nth-child(2)::before{border-color:rgba(94,231,255,.20)}
+.reference-dashboard .balance-card:nth-child(3){border-color:rgba(246,207,114,.28)!important}
+.reference-dashboard .balance-card:nth-child(3)::before{border-color:rgba(246,207,114,.22)}
+.reference-dashboard .balance-card:nth-child(4){border-color:rgba(185,130,255,.34)!important}
+.reference-dashboard .balance-card:nth-child(4)::before{border-color:rgba(185,130,255,.25)}
+.reference-dashboard .balance-card:nth-child(5){border-color:rgba(94,231,255,.30)!important}
+.reference-dashboard .balance-card:nth-child(5)::before{border-color:rgba(94,231,255,.22)}
+.reference-dashboard .balance-card .eta-plus{
+  display:inline-grid!important;
+  place-items:center!important;
+  min-width:24px;
+  height:18px;
+  margin-left:5px;
+  padding:0 5px;
+  border:1px solid rgba(94,231,255,.42);
+  border-radius:999px;
+  color:#67e8f9!important;
+  background:rgba(94,231,255,.07);
+  box-shadow:0 0 12px rgba(94,231,255,.14);
+  font:800 8px/1 "JetBrains Mono",monospace!important;
+  vertical-align:middle;
+}
+.reference-dashboard .balance-card:nth-child(4) strong{animation:mythTreasuryGlow 4s ease-in-out infinite}
+.reference-dashboard .balance-card:nth-child(5) strong{color:#e4f7ff!important;text-shadow:0 0 14px rgba(94,231,255,.35)!important}
+
+/* -------------------------------------------------------------------------
+   Motion-safe responsiveness: 60/90/120/144/240/360/600Hz remain compositor-only.
+   ------------------------------------------------------------------------- */
+@keyframes mythGateRotate{to{transform:rotate(360deg)}}
+@keyframes mythOrbit{to{transform:translate(-50%,-50%) rotate(360deg)}}
+@keyframes mythPrismSpin{to{transform:rotate(390deg) scale(.88)}}
+@keyframes mythPrismFloat{0%,100%{transform:translate3d(0,0,0) rotateY(-3deg) rotateZ(-1deg) scale(.98)}50%{transform:translate3d(0,-6px,0) rotateY(3deg) rotateZ(1deg) scale(1.025)}}
+@keyframes mythValueGlow{0%,100%{filter:brightness(.98)}50%{filter:brightness(1.12)}}
+@keyframes mythStars{0%,100%{opacity:.28;transform:translateY(0)}50%{opacity:.72;transform:translateY(-4px)}}
+@keyframes mythTreasuryGlow{0%,100%{filter:brightness(1)}50%{filter:brightness(1.08)}}
+
+@media(max-width:900px){
+  .reference-dashboard .candidate-left::after{right:20px;top:20px}
+  .reference-dashboard .balance-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .reference-dashboard .balance-card:nth-child(5){grid-column:1/-1}
+}
+@media(max-width:620px){
+  .reference-dashboard .candidate-left::after{display:none}
+  .reference-dashboard .candidate::before{inset:-80%}
+  .reference-dashboard .candidate-core::before{width:142px;height:142px}
+  .reference-dashboard .candidate-core::after{top:11px;font-size:7px}
+  .reference-dashboard .balance-grid{gap:8px!important}
+  .reference-dashboard .balance-card{min-height:96px!important;padding:13px 12px!important}
+  .reference-dashboard .balance-card > strong{font-size:17px!important;white-space:normal!important;overflow-wrap:anywhere!important;line-height:1.05!important}
+  .reference-dashboard .balance-card > span{font-size:7px!important;letter-spacing:.10em!important}
+  .reference-dashboard .balance-card > small{font-size:6px!important}
+}
+@media(prefers-reduced-motion:reduce){
+  .reference-dashboard .candidate::before,.reference-dashboard .candidate-pct,.reference-dashboard .candidate-core::before,.reference-dashboard .candidate-core::after,.reference-dashboard .candidate-cube,.reference-dashboard .candidate-cube::before,.reference-dashboard .balance-card:nth-child(4) strong{animation:none!important}
+}
