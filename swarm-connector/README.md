@@ -1,61 +1,56 @@
 # FixedCoin AxeOS / NMMiner Swarm Connector
 
-A small LAN adapter that discovers NMMiner/AxeOS-compatible devices and normalizes NMMiner telemetry into the AxeOS `/api/system/info` shape.
+The connector makes LAN NMMiner devices discoverable by AxeOS using the same DNS-SD service family used by ESP-Miner:
 
-## What it does
+- `_http._tcp`
+- `_axeos._sub._http._tcp`
+- `<hostname>.local`
 
-- scans the configured LAN for miner HTTP APIs
-- probes `/probe` first
-- falls back to `/api/system/info`
-- normalizes NMMiner telemetry to the AxeOS system-info contract
-- exposes per-device proxy endpoints
-- exposes CORS for the LiveShare dashboard
-- keeps control endpoints disabled by default
+NMMiner already exposes `/probe`, `/alive` and `/api/system/info`; the connector adds the AxeOS discovery identity and proxies requests back to the real miner. The NMMiner firmware does not need to be modified.
 
-AxeOS exposes its device API on HTTP port 80 and documents `/api/system/info`, `/api/swarm/scan`, `/api/swarm/find`, and `/probe` as part of its API. The connector follows that contract for the normalized data surface.
-
-## Endpoints
+## Architecture
 
 ```text
-GET  /health
-GET  /api/swarm/devices
-GET  /api/swarm/scan
-POST /api/swarm/scan
-GET  /device/<ip>/probe
-GET  /device/<ip>/api/system/info
-POST /device/<ip>/api/system/restart
-POST /device/<ip>/api/system/clearhits
-PATCH /device/<ip>/api/mining/state
-PATCH /device/<ip>/api/setting/mining
+AxeOS Swarm
+    |
+    | mDNS: _axeos._sub._http._tcp
+    v
+fixedcoin-swarm-connector:5080
+    |
+    +-- nmaxe-001.local  ---> 192.168.50.101:80
+    +-- nmaxe-002.local  ---> 192.168.50.102:80
+    +-- nmminer-003.local ---> 192.168.50.103:80
 ```
 
-Control operations are blocked unless:
+The connector runs with `network_mode: host` so multicast DNS can reach the LAN. It is intentionally read-only by default; control endpoints remain disabled until `SWARM_ALLOW_CONTROL=true` is explicitly enabled.
 
-```env
-SWARM_ALLOW_CONTROL=true
-```
-
-Targets are restricted to:
+## Configuration
 
 ```env
 SWARM_CIDR=192.168.50.0/24
+SWARM_ADVERTISE_IP=192.168.50.173
+SWARM_ADVERTISE_PORT=5080
+SWARM_SCAN_INTERVAL=15
+SWARM_ALLOW_CONTROL=false
 ```
 
-## Compose
+The advertised service points to the connector port, not the NMMiner port. The HTTP `Host` header identifies the virtual `.local` miner and selects the real target.
 
-The connector is exposed at:
-
-```text
-http://<node-ip>:5080
-```
-
-Example:
+## Verification
 
 ```bash
 curl http://192.168.50.173:5080/health
-curl http://192.168.50.173:5080/api/swarm/devices
+curl -s http://192.168.50.173:5080/api/swarm/devices | jq
 ```
 
-## Important architecture note
+On Linux with Avahi:
 
-This is a compatibility/normalization layer. It does **not** claim that a single Linux container IP can impersonate every physical NMMiner as a separate AxeOS swarm neighbor. AxeOS swarm discovery is device/IP based. The connector gives us a stable API and per-device proxy now; a firmware-side `/probe` implementation or an L2/IP-per-device bridge can be added later if native AxeOS Swarm discovery is required.
+```bash
+avahi-browse -rt _axeos._sub._http._tcp
+```
+
+A discovered NMMiner should appear with a `.local` hostname. Opening that hostname on port `5080` returns the proxied AxeOS-compatible API.
+
+## Limitations
+
+This is an API/DNS-SD compatibility bridge, not a firmware replacement. The original NMMiner IP remains the actual mining/management device; the connector supplies the AxeOS-facing discovery identity. OTA and destructive control operations are deliberately not enabled by default.
