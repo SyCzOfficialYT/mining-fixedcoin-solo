@@ -1,0 +1,44 @@
+/* FIXCOIN MYTHIC MOTION v1
+ * Motion mini + DOM particles. No canvas, no requestAnimationFrame loop.
+ * Designed for the forge, block candidate and wallet balance surfaces.
+ */
+:root{--myth-green:#4dff72;--myth-cyan:#1be4ff;--myth-blue:#4db8ff;--myth-bordeaux:#a52f4b;--myth-gold:#d6a84f}
+.reference-dashboard .myth-layer{position:absolute;inset:0;z-index:4;pointer-events:none;overflow:hidden;contain:layout paint style}
+.reference-dashboard .myth-particle{position:absolute;left:50%;top:50%;width:4px;height:4px;border-radius:50%;background:var(--myth-green);box-shadow:0 0 6px currentColor,0 0 16px currentColor;opacity:.12;transform:translate3d(var(--x),var(--y),0) scale(.5);will-change:transform,opacity}
+.reference-dashboard .myth-particle.cyan{color:var(--myth-cyan);background:var(--myth-cyan)}
+.reference-dashboard .myth-particle.blue{color:var(--myth-blue);background:var(--myth-blue)}
+.reference-dashboard .myth-particle.bordeaux{color:var(--myth-bordeaux);background:var(--myth-bordeaux)}
+.reference-dashboard .myth-particle.gold{color:var(--myth-gold);background:var(--myth-gold)}
+.reference-dashboard .myth-particle.spark{width:2px;height:12px;border-radius:2px;box-shadow:0 0 8px currentColor,0 0 18px currentColor}
+.reference-dashboard .myth-rune{position:absolute;left:50%;top:50%;width:82px;height:82px;border:1px solid rgba(77,255,114,.16);border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 0 32px rgba(77,255,114,.06),inset 0 0 24px rgba(27,228,255,.035);opacity:.45}
+.reference-dashboard .myth-rune:before,.reference-dashboard .myth-rune:after{content:"";position:absolute;inset:12px;border:1px dashed rgba(27,228,255,.16);border-radius:50%}
+.reference-dashboard .myth-rune:after{inset:23px;border-style:solid;border-color:rgba(165,47,75,.13);transform:rotate(45deg);border-radius:22%}
+.reference-dashboard .myth-zone-core .myth-rune{width:300px;height:300px;opacity:.62}
+.reference-dashboard .myth-zone-candidate .myth-rune{width:178px;height:178px;opacity:.55}
+.reference-dashboard .myth-zone-balance .myth-rune{width:92px;height:92px;opacity:.22}
+.reference-dashboard .myth-aura{position:absolute;left:50%;top:50%;width:34%;height:70%;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle,rgba(77,255,114,.12),rgba(27,228,255,.045) 34%,transparent 72%);filter:blur(10px);opacity:.55;animation:mythAura 5.5s ease-in-out infinite;will-change:transform,opacity}
+.reference-dashboard .myth-zone-candidate .myth-aura{width:55%;height:75%;animation-duration:6.5s}
+.reference-dashboard .myth-zone-balance .myth-aura{width:75%;height:95%;opacity:.22;animation-duration:7s}
+.reference-dashboard .balance-card .myth-card-glow{position:absolute;inset:1px;border-radius:inherit;pointer-events:none;background:linear-gradient(120deg,transparent 25%,rgba(77,255,114,.08) 48%,transparent 66%);background-size:220% 100%;animation:mythShimmer 7s linear infinite;opacity:.5}
+.reference-dashboard .balance-card{position:relative;overflow:hidden}
+.reference-dashboard .balance-card:nth-child(2) .myth-card-glow{background-image:linear-gradient(120deg,transparent 25%,rgba(27,228,255,.1) 48%,transparent 66%)}
+.reference-dashboard .balance-card:nth-child(3) .myth-card-glow{background-image:linear-gradient(120deg,transparent 25%,rgba(214,168,79,.1) 48%,transparent 66%)}
+.reference-dashboard .balance-card:nth-child(5) .myth-card-glow{background-image:linear-gradient(120deg,transparent 25%,rgba(77,184,255,.1) 48%,transparent 66%)}
+.reference-dashboard .candidate-core{overflow:hidden!important}
+.reference-dashboard .candidate-core .myth-layer{z-index:2}
+.reference-dashboard .candidate-core .candidate-cube{z-index:5!important}
+.reference-dashboard .candidate-core .candidate-ring{z-index:3}
+.reference-dashboard .myth-zone-core{z-index:12!important}
+@keyframes mythAura{0%,100%{transform:translate(-50%,-50%) scale(.88);opacity:.32}50%{transform:translate(-50%,-50%) scale(1.08);opacity:.72}}
+@keyframes mythShimmer{0%{background-position:220% 0}100%{background-position:-40% 0}}
+@media (max-width:620px){
+ .reference-dashboard .myth-particle{width:3px;height:3px;box-shadow:0 0 5px currentColor,0 0 11px currentColor}
+ .reference-dashboard .myth-particle.spark{height:8px}
+ .reference-dashboard .myth-zone-core .myth-rune{width:230px;height:230px}
+ .reference-dashboard .myth-zone-candidate .myth-rune{width:140px;height:140px}
+ .reference-dashboard .myth-zone-balance .myth-rune{width:72px;height:72px}
+ .reference-dashboard .myth-aura{filter:blur(7px)}
+}
+@media (prefers-reduced-motion:reduce){
+ .reference-dashboard .myth-aura,.reference-dashboard .balance-card .myth-card-glow{animation:none!important}
+}
