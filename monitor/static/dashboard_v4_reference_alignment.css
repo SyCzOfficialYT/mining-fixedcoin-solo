@@ -28,18 +28,9 @@
   z-index:22!important;
 }
 
-.reference-dashboard .forge-side.left-side{
-  left:32px!important;
-  right:auto!important;
-}
+.reference-dashboard .forge-side.left-side{left:32px!important;right:auto!important}
+.reference-dashboard .forge-side.right-side{right:32px!important;left:auto!important}
 
-.reference-dashboard .forge-side.right-side{
-  right:32px!important;
-  left:auto!important;
-}
-
-/* Match the ID + class specificity used by dashboard_v4_share_3d.css.
-   Counters are flex children now; no independent top/bottom positioning. */
 .reference-dashboard #forgeStage .forge-side .forge-metric,
 .reference-dashboard #forgeStage .forge-side .forge-counter,
 .reference-dashboard #forgeStage .forge-side .forge-counter.accepted,
@@ -59,61 +50,181 @@
   margin:0!important;
   flex:0 0 148px!important;
   box-sizing:border-box!important;
-}
-
-/* Keep the two visual counter transforms from the 3D layer; only geometry is
-   owned here. This preserves the existing cyberpunk depth without affecting
-   row alignment. */
-.reference-dashboard #forgeStage .forge-side .forge-counter.accepted,
-.reference-dashboard #forgeStage .forge-side .forge-counter.rejected{
   transform-origin:center center!important;
 }
 
-.reference-dashboard .forge-counter.accepted{
-  border-color:rgba(77,255,114,.75)!important;
-}
-.reference-dashboard .forge-counter.rejected{
-  border-color:rgba(255,79,97,.72)!important;
-}
+.reference-dashboard .forge-counter.accepted{border-color:rgba(77,255,114,.75)!important}
+.reference-dashboard .forge-counter.rejected{border-color:rgba(255,79,97,.72)!important}
 
 @media(max-width:900px){
-  .reference-dashboard .forge-side.left-side,
-  .reference-dashboard .forge-side.right-side{
-    top:34px!important;
-    gap:22px!important;
-  }
+  .reference-dashboard .forge-side.left-side,.reference-dashboard .forge-side.right-side{top:34px!important;gap:22px!important}
   .reference-dashboard .forge-side.left-side{left:24px!important}
   .reference-dashboard .forge-side.right-side{right:24px!important}
 }
 
 @media(max-width:620px){
-  .reference-dashboard .forge-side.left-side,
-  .reference-dashboard .forge-side.right-side{
-    top:14px!important;
-    gap:22px!important;
-    width:150px!important;
-    min-width:150px!important;
-  }
+  .reference-dashboard .forge-side.left-side,.reference-dashboard .forge-side.right-side{top:14px!important;gap:22px!important;width:150px!important;min-width:150px!important}
   .reference-dashboard .forge-side.left-side{left:12px!important}
   .reference-dashboard .forge-side.right-side{right:12px!important}
-
   .reference-dashboard #forgeStage .forge-side .forge-metric,
   .reference-dashboard #forgeStage .forge-side .forge-counter,
   .reference-dashboard #forgeStage .forge-side .forge-counter.accepted,
   .reference-dashboard #forgeStage .forge-side .forge-counter.rejected{
-    width:150px!important;
-    min-width:150px!important;
-    max-width:150px!important;
-    height:118px!important;
-    min-height:118px!important;
-    max-height:118px!important;
-    flex-basis:118px!important;
-    padding:12px!important;
+    width:150px!important;min-width:150px!important;max-width:150px!important;height:118px!important;min-height:118px!important;max-height:118px!important;flex-basis:118px!important;padding:12px!important;
   }
 }
 
+@media(prefers-reduced-motion:reduce){.reference-dashboard #forgeStage .forge-side .forge-counter{animation:none!important}}
+
+/* ========================================================================
+   ARCANE CYBER MYTHIC — LIVESHARE VISUAL SYSTEM
+   Keep data bindings/JS untouched; this layer owns the visual language.
+   ======================================================================== */
+:root{
+  --arcane-bg:#02030b;
+  --arcane-panel:rgba(5,8,22,.84);
+  --arcane-panel-2:rgba(9,8,28,.72);
+  --arcane-line:rgba(151,112,255,.28);
+  --arcane-violet:#a970ff;
+  --arcane-blue:#38bdf8;
+  --arcane-cyan:#67e8f9;
+  --arcane-gold:#f4c76b;
+  --arcane-green:#67f59a;
+  --arcane-red:#ff647c;
+  --arcane-text:#d9d8ef;
+  --arcane-muted:#777892;
+}
+
+html,body{background:var(--arcane-bg)!important;color:var(--arcane-text)!important}
+body{
+  background:
+    radial-gradient(circle at 50% 8%,rgba(102,56,190,.18),transparent 28%),
+    radial-gradient(circle at 7% 45%,rgba(39,98,180,.10),transparent 24%),
+    radial-gradient(circle at 94% 58%,rgba(255,180,61,.07),transparent 24%),
+    linear-gradient(135deg,#01020a 0%,#050615 48%,#02030b 100%)!important;
+  font-family:Inter,system-ui,sans-serif!important;
+}
+
+body:before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.34;
+  background-image:linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px);
+  background-size:42px 42px;
+  mask-image:radial-gradient(circle at center,#000 20%,transparent 88%);
+}
+
+.dashboard{position:relative;z-index:1;max-width:1540px!important}
+
+.panel,.glass-card,.forge-metric,.forge-counter,.stat,.balance-card{
+  background:
+    linear-gradient(145deg,rgba(12,12,32,.92),rgba(2,5,16,.90)),
+    radial-gradient(circle at 50% 0%,rgba(147,91,255,.10),transparent 65%)!important;
+  border:1px solid rgba(145,103,255,.25)!important;
+  box-shadow:inset 0 1px rgba(255,255,255,.055),0 16px 55px rgba(0,0,0,.38),0 0 28px rgba(118,72,220,.07)!important;
+}
+
+.panel{border-radius:14px!important;overflow:hidden}
+.panel:after,.glass-card:after,.forge-counter:after{content:"";pointer-events:none;position:absolute;inset:1px;border:1px solid rgba(246,200,112,.055);border-radius:inherit}
+
+.hero{background:
+  radial-gradient(circle at 9% 45%,rgba(126,76,255,.15),transparent 24%),
+  radial-gradient(circle at 90% 44%,rgba(245,177,65,.10),transparent 22%),
+  linear-gradient(140deg,rgba(5,5,20,.96),rgba(2,7,18,.95))!important;
+  border-color:rgba(171,126,255,.32)!important;
+}
+
+.eyebrow,.section-heading h2,.forge-network-label,.footer,.history-labels,.caption{letter-spacing:.16em!important}
+.eyebrow{color:#a9a1ca!important;text-shadow:0 0 14px rgba(169,112,255,.35)}
+.subtitle,.section-heading p,.stat small,.balance-card small{color:#747793!important}
+
+.hero-value.best strong,.candidate-pct{color:#bd83ff!important;text-shadow:0 0 22px rgba(174,104,255,.55)!important}
+.hero-value.network strong{color:var(--arcane-gold)!important;text-shadow:0 0 22px rgba(244,199,107,.38)!important}
+.hero-value.best span{color:#9d70e9!important}
+.hero-value.network span{color:#d4aa58!important}
+.versus{color:#8f89a9!important;text-shadow:0 0 18px rgba(169,112,255,.4)}
+
+.target-track,.candidate-track{background:rgba(12,11,29,.9)!important;border-color:rgba(151,112,255,.25)!important;box-shadow:inset 0 0 18px rgba(0,0,0,.65),0 0 20px rgba(128,75,255,.08)!important}
+.target-track i,.candidate-track i{background:linear-gradient(90deg,#5f38b8,#c879ff,#f4c76b)!important;box-shadow:0 0 18px rgba(175,102,255,.72)!important}
+
+.round-panel{background:linear-gradient(180deg,rgba(8,10,29,.94),rgba(2,4,14,.92))!important;border-left:1px solid rgba(151,112,255,.25)!important}
+.round-id{color:var(--arcane-blue)!important;text-shadow:0 0 18px rgba(56,189,248,.55)}
+.remaining{color:#60e8ff!important;text-shadow:0 0 18px rgba(56,189,248,.5)}
+.status{border-color:rgba(103,245,154,.5)!important;color:var(--arcane-green)!important;box-shadow:0 0 14px rgba(103,245,154,.18)!important}
+
+.forge{border-color:rgba(145,103,255,.32)!important;background:radial-gradient(circle at 50% 52%,rgba(102,53,191,.12),transparent 34%),linear-gradient(135deg,#030510,#050717 50%,#02030a)!important}
+.forge-head{background:linear-gradient(90deg,rgba(103,63,180,.08),transparent,rgba(240,181,73,.07))!important}
+.live{color:#72f7ad!important;text-shadow:0 0 12px rgba(103,245,154,.45)}
+.live i{background:#67f59a!important;box-shadow:0 0 14px #67f59a!important}
+
+.forge-stage{background:radial-gradient(circle at 50% 50%,rgba(120,68,255,.20),transparent 27%),radial-gradient(circle at 50% 50%,rgba(25,145,210,.10),transparent 46%)!important}
+.forge-depth-grid{opacity:.55!important;background-image:linear-gradient(rgba(144,103,255,.10) 1px,transparent 1px),linear-gradient(90deg,rgba(144,103,255,.10) 1px,transparent 1px)!important}
+
+.vardiff-badge{border-color:rgba(151,112,255,.34)!important;background:rgba(5,5,20,.74)!important;box-shadow:0 0 22px rgba(128,75,255,.12)!important}
+.vardiff-badge strong{color:#d3a4ff!important;text-shadow:0 0 15px rgba(174,104,255,.48)}
+
+.core-logo{filter:drop-shadow(0 0 20px rgba(156,92,255,.55)) drop-shadow(0 0 48px rgba(54,175,255,.18))}
+.fix-core-ring{stroke:#9b6dff!important}
+.fix-core-shell{fill:rgba(34,13,75,.38)!important;stroke:#a879ff!important}
+.fix-core-inner{fill:rgba(9,36,78,.42)!important;stroke:#4cc9ff!important}
+.fix-core-prism{fill:rgba(117,67,220,.36)!important;stroke:#d8b0ff!important}
+.fix-core-grid,.fix-core-bolt{stroke:#74e7ff!important;fill:#d8b0ff!important}
+.fix-core-node{fill:#fff!important;filter:drop-shadow(0 0 8px #fff)}
+.core-title{color:#c78cff!important;text-shadow:0 0 18px rgba(174,104,255,.55)}
+.core-title span{color:#f1c86f!important}
+.core-status{color:#70789b!important}
+
+.forge-metric span,.forge-counter span{color:#9188ae!important}
+.forge-metric strong{color:#d2a5ff!important;text-shadow:0 0 16px rgba(174,104,255,.4)}
+.forge-counter.accepted strong{color:#72f7a0!important;text-shadow:0 0 16px rgba(103,245,154,.48)!important}
+.forge-counter.rejected strong{color:#ff6b83!important;text-shadow:0 0 16px rgba(255,100,124,.42)!important}
+.forge-counter.accepted i{color:#72f7a0!important;box-shadow:0 0 16px rgba(103,245,154,.25)!important}
+.forge-counter.rejected i{color:#ff6b83!important;box-shadow:0 0 16px rgba(255,100,124,.22)!important}
+
+.core-orbit{border-color:rgba(172,111,255,.24)!important;box-shadow:0 0 20px rgba(139,83,255,.08)}
+.core-orbit-b{border-color:rgba(74,205,255,.22)!important}
+.core-orbit-c{border-color:rgba(245,199,107,.16)!important}
+
+.candidate{background:radial-gradient(circle at 86% 50%,rgba(112,59,255,.16),transparent 30%),linear-gradient(120deg,rgba(7,7,23,.95),rgba(3,6,16,.95))!important}
+.candidate-left{position:relative}
+.candidate-left:before{content:"✦";position:absolute;right:9%;top:18%;font-size:34px;color:#bd83ff;opacity:.45;text-shadow:0 0 25px #9b6dff;animation:arcaneFloat 5s ease-in-out infinite}
+.target-icon{color:#b37aff!important;text-shadow:0 0 14px rgba(179,122,255,.6)}
+.candidate-core{filter:drop-shadow(0 0 28px rgba(137,75,255,.30))}
+.candidate-cube{background:radial-gradient(circle,rgba(171,106,255,.35),rgba(20,10,52,.9))!important;border-color:#bb83ff!important;box-shadow:0 0 35px rgba(162,87,255,.55),inset 0 0 28px rgba(162,87,255,.25)!important}
+.candidate-cube span{color:#e0b8ff!important;text-shadow:0 0 20px #b06cff}
+.candidate-ring{border-color:rgba(171,112,255,.30)!important}
+
+.balance-grid .balance-card:nth-child(1) strong,.green{color:#67f59a!important;text-shadow:0 0 15px rgba(103,245,154,.34)}
+.balance-grid .balance-card:nth-child(2) strong,.cyan{color:#67e8f9!important;text-shadow:0 0 15px rgba(103,232,249,.30)}
+.balance-grid .balance-card:nth-child(3) strong,.amber{color:#f4c76b!important;text-shadow:0 0 15px rgba(244,199,107,.30)}
+.balance-card strong{font-family:"JetBrains Mono",monospace!important}
+
+.stats-grid .stat strong{color:#c79aff!important;text-shadow:0 0 14px rgba(169,112,255,.28)}
+.stats-grid .stat:nth-child(2) strong{color:#67f59a!important}
+.stats-grid .stat:nth-child(3) strong{color:#ff647c!important}
+
+.block-history{background:linear-gradient(180deg,rgba(7,7,23,.96),rgba(2,4,13,.94))!important;border-color:rgba(145,103,255,.30)!important}
+.history-head{border-bottom-color:rgba(145,103,255,.17)!important}
+.history-count{color:#c79aff!important;border-color:rgba(169,112,255,.30)!important;background:rgba(113,62,190,.08)!important}
+.history-row{border-bottom-color:rgba(145,103,255,.09)!important}
+.history-row:hover{background:rgba(137,75,255,.06)!important}
+.history-labels{color:#6f6a89!important}
+
+.footer{color:#5f6178!important;border-top-color:rgba(145,103,255,.15)!important}
+.footer strong{color:#a985df!important}
+
+/* Mythic corner filigree — pure CSS, no image assets required. */
+.panel:before{content:"";position:absolute;pointer-events:none;width:82px;height:82px;right:-34px;top:-34px;border:1px solid rgba(244,199,107,.18);border-radius:50%;box-shadow:inset 0 0 0 8px rgba(169,112,255,.025),0 0 30px rgba(169,112,255,.05);transform:rotate(45deg)}
+.hero:before,.forge:before,.candidate:before,.block-history:before{background:linear-gradient(135deg,transparent 44%,rgba(244,199,107,.22) 45%,transparent 47%),linear-gradient(45deg,transparent 44%,rgba(169,112,255,.16) 45%,transparent 47%)}
+
+@keyframes arcaneFloat{0%,100%{transform:translateY(0) rotate(0);opacity:.3}50%{transform:translateY(-9px) rotate(8deg);opacity:.72}}
+@keyframes arcanePulse{0%,100%{box-shadow:0 0 12px rgba(169,112,255,.12)}50%{box-shadow:0 0 30px rgba(169,112,255,.28)}}
+.candidate-core,.core-logo{animation:arcanePulse 4s ease-in-out infinite}
+
+@media(max-width:720px){
+  .panel{border-radius:10px!important}
+  .eyebrow{letter-spacing:.11em!important}
+  .hero:before,.forge:before,.candidate:before,.block-history:before{display:none}
+}
+
 @media(prefers-reduced-motion:reduce){
-  .reference-dashboard #forgeStage .forge-side .forge-counter{
-    animation:none!important;
-  }
+  .candidate-left:before,.candidate-core,.core-logo{animation:none!important}
 }
