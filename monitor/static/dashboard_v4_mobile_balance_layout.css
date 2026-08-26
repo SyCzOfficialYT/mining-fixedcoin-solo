@@ -1,0 +1,129 @@
+/* FIXCOIN BALANCE / STATS LAYOUT v1
+   Remove the redundant secondary stats strip and give the wallet balances
+   the space they actually need on narrow screens. The balance row remains
+   immediately after BLOCK CANDIDATE in the DOM. */
+
+/* AVG SHARE DIFFICULTY / VALID / INVALID are intentionally removed visually.
+   Their IDs remain in the DOM so the existing realtime renderer keeps working. */
+.reference-dashboard .stats-primary{
+  display:none!important;
+}
+
+/* Desktop: five equal wallet cards. */
+.reference-dashboard .balance-grid{
+  display:grid!important;
+  grid-template-columns:repeat(5,minmax(0,1fr))!important;
+  gap:12px!important;
+  align-items:stretch!important;
+}
+
+.reference-dashboard .balance-card{
+  min-width:0!important;
+  min-height:112px!important;
+  padding:18px 17px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:flex-start!important;
+}
+
+.reference-dashboard .balance-card>span{
+  font-size:9px!important;
+  line-height:1.2!important;
+  white-space:normal!important;
+}
+
+.reference-dashboard .balance-card>strong{
+  margin-top:10px!important;
+  font-size:clamp(16px,1.35vw,21px)!important;
+  line-height:1.12!important;
+  letter-spacing:-.035em!important;
+  white-space:normal!important;
+  overflow:visible!important;
+  text-overflow:clip!important;
+  overflow-wrap:anywhere!important;
+  word-break:break-word!important;
+}
+
+.reference-dashboard .balance-card>small{
+  margin-top:auto!important;
+  padding-top:8px!important;
+  font-size:8px!important;
+  line-height:1.25!important;
+  white-space:normal!important;
+}
+
+.reference-dashboard .balance-card .eta-caption{
+  white-space:normal!important;
+}
+
+.reference-dashboard .balance-card .eta-plus{
+  display:inline-flex!important;
+  vertical-align:middle!important;
+  margin-left:4px!important;
+}
+
+/* Tablet: stop compressing five cards into unreadable slivers. */
+@media(max-width:1100px){
+  .reference-dashboard .balance-grid{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  }
+}
+
+/* Mobile: two readable cards per row; ETA gets the full final row. */
+@media(max-width:760px){
+  .reference-dashboard .balance-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:10px!important;
+  }
+
+  .reference-dashboard .balance-card{
+    min-height:108px!important;
+    padding:15px 14px!important;
+    border-radius:13px!important;
+  }
+
+  .reference-dashboard .balance-card>span{
+    font-size:8px!important;
+    letter-spacing:.12em!important;
+  }
+
+  .reference-dashboard .balance-card>strong{
+    margin-top:9px!important;
+    font-size:15px!important;
+    line-height:1.15!important;
+    letter-spacing:-.045em!important;
+  }
+
+  .reference-dashboard .balance-card>small{
+    font-size:7px!important;
+  }
+
+  .reference-dashboard .balance-card:last-child{
+    grid-column:1 / -1!important;
+  }
+
+  .reference-dashboard .balance-card:last-child>strong{
+    font-size:18px!important;
+  }
+}
+
+@media(max-width:420px){
+  .reference-dashboard .balance-grid{
+    gap:8px!important;
+  }
+
+  .reference-dashboard .balance-card{
+    min-height:104px!important;
+    padding:13px 12px!important;
+  }
+
+  .reference-dashboard .balance-card>strong{
+    font-size:14px!important;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .reference-dashboard .balance-card{
+    transition:none!important;
+  }
+}
