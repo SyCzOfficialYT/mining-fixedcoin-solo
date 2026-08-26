@@ -123,6 +123,7 @@ PY
 
 python3 -m py_compile /app/stratum/server_full.py
 python3 -m py_compile /app/monitor/app.py
+python3 /app/scripts/test_stratum_authorization.py
 
 # Dashboard is started only after every dashboard patch is complete.
 python3 /app/monitor/app.py >>/app/data/dashboard.log 2>&1 &
