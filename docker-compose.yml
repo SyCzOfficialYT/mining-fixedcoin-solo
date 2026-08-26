@@ -9,20 +9,16 @@ services:
     environment:
       FIX_DATADIR: /data/fixedcoin
       FIX_RPCUSER: ${FIX_RPCUSER:-fixrpc}
-      # Leave empty: the container generates a strong RPC password on first start
-      # and persists it inside the private Docker volume.
       FIX_RPCPASS: ${FIX_RPCPASS:-}
       FIX_RPCPORT: 24761
       FIX_P2PPORT: 24768
-      FIX_DASH_PORT: 5050
-      # Leave empty: a real wallet + payout address are generated automatically.
+      FIX_DASH_PORT: 5051
       FIX_PAYOUT_ADDRESS: ${FIX_PAYOUT_ADDRESS:-}
       COINBASE_MATURITY: ${COINBASE_MATURITY:-100}
-      # Bitaxe AxeOS live hashrate (GH/s from /api/system/info)
       AXEOS_URL: ${AXEOS_URL:-http://192.168.50.133}
     ports:
       - "3333:3333"
-      - "5050:5050"
+      - "5051:5051"
       - "24768:24768"
     volumes:
       - fix-data:/data
@@ -33,5 +29,19 @@ services:
       timeout: 10s
       retries: 5
       start_period: 120s
+
+  liveshare-dashboard:
+    build:
+      context: ./frontend
+    container_name: liveshare-dashboard
+    restart: unless-stopped
+    depends_on:
+      fixedcoin-solo:
+        condition: service_healthy
+    ports:
+      - "5050:3000"
+    networks:
+      - default
+
 volumes:
   fix-data:
