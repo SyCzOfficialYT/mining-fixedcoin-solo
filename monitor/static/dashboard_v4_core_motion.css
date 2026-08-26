@@ -1,106 +1,35 @@
-/* FIXCOIN CORE MOTION v3 — smooth, low-cost compositor animation
-   No canvas, no particle loop, no box-shadow animation. */
+/* FIXCOIN CORE MOTION v4 — Prism Core + compositor-only motion.
+   Motion mini handles the main glyph; CSS handles slow orbital accents.
+   No canvas, no rAF loop, no layout animation. */
 .reference-dashboard .forge-particle-field,
 .reference-dashboard .particle-canvas,
-.reference-dashboard .bar-particles{
-  display:none!important;
-}
-
-.reference-dashboard .core-logo{
-  width:176px!important;
-  height:176px!important;
-  transform:translateZ(100px)!important;
-  filter:none!important;
-  z-index:20!important;
-  contain:layout paint style!important;
-  will-change:transform!important;
-}
-
-.reference-dashboard .fix-core-mark{
-  width:148px;
-  height:148px;
-  overflow:visible;
-  display:block;
-  transform-origin:50% 50%;
-  will-change:transform;
-  filter:drop-shadow(0 0 14px rgba(77,255,114,.22));
-}
-
-.reference-dashboard .fix-core-ring{
-  fill:none;
-  stroke:rgba(77,255,114,.34);
-  stroke-width:1;
-  vector-effect:non-scaling-stroke;
-  transform-box:fill-box;
-  transform-origin:center;
-}
-
-.reference-dashboard .fix-core-ring.r2{stroke:rgba(27,228,255,.22);stroke-dasharray:3 8}
-.reference-dashboard .fix-core-ring.r3{stroke:rgba(77,255,114,.16);stroke-dasharray:1 10}
-
-.reference-dashboard .fix-core-shell{
-  fill:rgba(2,13,10,.94);
-  stroke:#49ff82;
-  stroke-width:3;
-  vector-effect:non-scaling-stroke;
-}
-
-.reference-dashboard .fix-core-inner{
-  fill:#071b11;
-  stroke:rgba(118,255,158,.48);
-  stroke-width:1;
-  vector-effect:non-scaling-stroke;
-}
-
-.reference-dashboard .fix-core-bolt{
-  fill:#b7ffc9;
-  filter:drop-shadow(0 0 6px rgba(77,255,114,.42));
-  will-change:opacity;
-}
-
-.reference-dashboard .fix-core-node{fill:#4dff72}
-
-.reference-dashboard .fix-core-scanline{
-  stroke:#4dff72;
-  stroke-width:1.5;
-  stroke-linecap:round;
-  opacity:.6;
-  vector-effect:non-scaling-stroke;
-}
-
+.reference-dashboard .bar-particles{display:none!important}
+.reference-dashboard .core-logo{width:176px!important;height:176px!important;transform:translateZ(100px)!important;filter:none!important;z-index:20!important;contain:layout paint style!important;will-change:transform}
+.reference-dashboard .fix-core-mark{width:154px;height:154px;overflow:visible;display:block;transform-origin:50% 50%;will-change:transform;filter:drop-shadow(0 0 12px rgba(77,255,114,.24)) drop-shadow(0 0 28px rgba(27,228,255,.08))}
+.reference-dashboard .fix-core-ring{fill:none;stroke:rgba(77,255,114,.28);stroke-width:1;vector-effect:non-scaling-stroke;transform-box:fill-box;transform-origin:center}
+.reference-dashboard .fix-core-ring.r2{stroke:rgba(27,228,255,.24);stroke-dasharray:2 9}
+.reference-dashboard .fix-core-ring.r3{stroke:rgba(77,255,114,.14);stroke-dasharray:1 12}
+.reference-dashboard .fix-core-shell{fill:rgba(2,13,10,.92);stroke:#49ff82;stroke-width:3;vector-effect:non-scaling-stroke}
+.reference-dashboard .fix-core-inner{fill:#061811;stroke:rgba(118,255,158,.46);stroke-width:1;vector-effect:non-scaling-stroke}
+.reference-dashboard .fix-core-prism{fill:none;stroke:rgba(27,228,255,.24);stroke-width:1.1;vector-effect:non-scaling-stroke;stroke-dasharray:4 7}
+.reference-dashboard .fix-core-grid{fill:none;stroke:rgba(118,255,158,.18);stroke-width:.8;vector-effect:non-scaling-stroke}
+.reference-dashboard .fix-core-bolt{fill:#d5ffe0;filter:drop-shadow(0 0 7px rgba(77,255,114,.55));will-change:opacity,transform;transform-box:fill-box;transform-origin:center}
+.reference-dashboard .fix-core-node{fill:#4dff72;filter:drop-shadow(0 0 5px rgba(77,255,114,.8))}
+.reference-dashboard .fix-core-scanline{stroke:#4dff72;stroke-width:1.5;stroke-linecap:round;opacity:.58;vector-effect:non-scaling-stroke}
+.reference-dashboard .fix-core-ray{stroke:#29eaff;stroke-width:1;stroke-linecap:round;opacity:.3;vector-effect:non-scaling-stroke;stroke-dasharray:2 6}
 .reference-dashboard .core-scan{display:none!important}
 .reference-dashboard .core-logo + .core-title{top:70%!important}
 .reference-dashboard .core-status{top:76%!important}
-
-/* Slow orbital accents only. The main logo animation is handled by Motion mini. */
-.reference-dashboard .fix-core-mark.motion-active .fix-core-ring.r2{
-  animation:fixCoreRing 32s linear infinite;
-}
-.reference-dashboard .fix-core-mark.motion-active .fix-core-ring.r3{
-  animation:fixCoreRingReverse 48s linear infinite;
-}
-
-@keyframes fixCoreRing{
-  from{transform:rotate(0deg)}
-  to{transform:rotate(360deg)}
-}
-@keyframes fixCoreRingReverse{
-  from{transform:rotate(360deg)}
-  to{transform:rotate(0deg)}
-}
-
-@media(max-width:900px){
-  .reference-dashboard .core-logo{width:150px!important;height:150px!important}
-  .reference-dashboard .fix-core-mark{width:128px;height:128px}
-}
-
-@media(max-width:620px){
-  .reference-dashboard .core-logo{width:138px!important;height:138px!important}
-  .reference-dashboard .fix-core-mark{width:116px;height:116px}
-  .reference-dashboard .core-logo + .core-title{top:69%!important}
-  .reference-dashboard .core-status{top:75%!important}
-}
-
-@media(prefers-reduced-motion:reduce){
-  .reference-dashboard .fix-core-mark.motion-active .fix-core-ring{animation:none!important}
-}
+.reference-dashboard .fix-core-mark.motion-active .fix-core-ring.r2{animation:fixCoreRing 26s linear infinite}
+.reference-dashboard .fix-core-mark.motion-active .fix-core-ring.r3{animation:fixCoreRingReverse 42s linear infinite}
+.reference-dashboard .fix-core-mark.motion-active .fix-core-prism{animation:fixCorePrism 9s ease-in-out infinite}
+.reference-dashboard .fix-core-mark.motion-active .fix-core-ray{animation:fixCoreRay 3.8s ease-in-out infinite}
+.reference-dashboard .fix-core-mark.motion-active .fix-core-node{animation:fixCoreNode 2.2s ease-in-out infinite}
+@keyframes fixCoreRing{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+@keyframes fixCoreRingReverse{from{transform:rotate(360deg)}to{transform:rotate(0)}}
+@keyframes fixCorePrism{0%,100%{opacity:.28;transform:scale(.97)}50%{opacity:.72;transform:scale(1.035)}}
+@keyframes fixCoreRay{0%,100%{opacity:.16;stroke-dashoffset:0}50%{opacity:.62;stroke-dashoffset:-18}}
+@keyframes fixCoreNode{0%,100%{opacity:.55;r:2.5px}50%{opacity:1;r:4px}}
+@media(max-width:900px){.reference-dashboard .core-logo{width:150px!important;height:150px!important}.reference-dashboard .fix-core-mark{width:132px;height:132px}}
+@media(max-width:620px){.reference-dashboard .core-logo{width:138px!important;height:138px!important}.reference-dashboard .fix-core-mark{width:118px;height:118px}.reference-dashboard .core-logo + .core-title{top:69%!important}.reference-dashboard .core-status{top:75%!important}}
+@media(prefers-reduced-motion:reduce){.reference-dashboard .fix-core-mark.motion-active .fix-core-ring,.reference-dashboard .fix-core-mark.motion-active .fix-core-prism,.reference-dashboard .fix-core-mark.motion-active .fix-core-ray,.reference-dashboard .fix-core-mark.motion-active .fix-core-node{animation:none!important}}
