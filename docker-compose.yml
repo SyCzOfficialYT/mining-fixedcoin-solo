@@ -12,6 +12,8 @@ services:
       FIX_RPCPASS: ${FIX_RPCPASS:-}
       FIX_RPCPORT: 24761
       FIX_P2PPORT: 24768
+      # 5050 is reserved for the separate Next.js LiveShare container on the host.
+      # The Flask API therefore listens on 5051 inside this container.
       FIX_DASH_PORT: 5051
       FIX_PAYOUT_ADDRESS: ${FIX_PAYOUT_ADDRESS:-}
       COINBASE_MATURITY: ${COINBASE_MATURITY:-100}
@@ -24,7 +26,13 @@ services:
       - fix-data:/data
     shm_size: 1gb
     healthcheck:
-      test: ["CMD-SHELL", "RPCPASS=$$(sed -n 's/^rpcpassword=//p' /data/fixedcoin/fixedcoin.conf | head -1); fixedcoin-cli -datadir=/data/fixedcoin -rpcuser=$${FIX_RPCUSER:-fixrpc} -rpcpassword=\"$$RPCPASS\" getblockchaininfo >/dev/null 2>&1"]
+      test:
+        - CMD-SHELL
+        - >-
+          RPCPASS=$$(sed -n 's/^rpcpassword=//p' /data/fixedcoin/fixedcoin.conf | head -1);
+          fixedcoin-cli -datadir=/data/fixedcoin -rpcuser=$${FIX_RPCUSER:-fixrpc}
+          -rpcpassword="$$RPCPASS" getblockchaininfo >/dev/null 2>&1
+          && curl -fsS http://127.0.0.1:$${FIX_DASH_PORT:-5051}/api/status >/dev/null 2>&1
       interval: 30s
       timeout: 10s
       retries: 5
