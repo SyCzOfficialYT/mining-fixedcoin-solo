@@ -1,8 +1,13 @@
-/* FIXCOIN FORGE ALIGNMENT v3 — mirrored rows + explicit shared gap
-   Left and right forge cards must occupy the same vertical rows.
+/* FIXCOIN FORGE ALIGNMENT v4 — true mirrored flex rows
+   Left and right forge cards MUST share the exact same row geometry.
    Row 1: HASHRATE      <-> ACCEPTED SHARES
    Row 2: SHARES / MIN  <-> REJECTED SHARES
-   The shared gap is intentional and kept identical on both sides. */
+   The same parent top offset, card height and gap are used on both sides.
+
+   IMPORTANT: dashboard_v4_share_3d.css gives .forge-counter.accepted/.rejected
+   and #forgeStage .forge-counter.* higher specificity plus absolute top values.
+   This layer intentionally matches that specificity so the counters return to
+   the mirrored flex layout instead of being independently positioned. */
 
 .reference-dashboard .forge-side.left-side,
 .reference-dashboard .forge-side.right-side{
@@ -33,9 +38,12 @@
   left:auto!important;
 }
 
-/* Both columns use the same card footprint. */
-.reference-dashboard .forge-side .forge-metric,
-.reference-dashboard .forge-side .forge-counter{
+/* Match the ID + class specificity used by dashboard_v4_share_3d.css.
+   Counters are flex children now; no independent top/bottom positioning. */
+.reference-dashboard #forgeStage .forge-side .forge-metric,
+.reference-dashboard #forgeStage .forge-side .forge-counter,
+.reference-dashboard #forgeStage .forge-side .forge-counter.accepted,
+.reference-dashboard #forgeStage .forge-side .forge-counter.rejected{
   position:relative!important;
   inset:auto!important;
   top:auto!important;
@@ -43,15 +51,24 @@
   bottom:auto!important;
   left:auto!important;
   width:210px!important;
-  height:148px!important;
   min-width:210px!important;
+  max-width:210px!important;
+  height:148px!important;
   min-height:148px!important;
   max-height:148px!important;
   margin:0!important;
   flex:0 0 148px!important;
+  box-sizing:border-box!important;
 }
 
-/* Preserve the accepted/rejected visual language while keeping the shared geometry. */
+/* Keep the two visual counter transforms from the 3D layer; only geometry is
+   owned here. This preserves the existing cyberpunk depth without affecting
+   row alignment. */
+.reference-dashboard #forgeStage .forge-side .forge-counter.accepted,
+.reference-dashboard #forgeStage .forge-side .forge-counter.rejected{
+  transform-origin:center center!important;
+}
+
 .reference-dashboard .forge-counter.accepted{
   border-color:rgba(77,255,114,.75)!important;
 }
@@ -80,14 +97,23 @@
   .reference-dashboard .forge-side.left-side{left:12px!important}
   .reference-dashboard .forge-side.right-side{right:12px!important}
 
-  .reference-dashboard .forge-side .forge-metric,
-  .reference-dashboard .forge-side .forge-counter{
+  .reference-dashboard #forgeStage .forge-side .forge-metric,
+  .reference-dashboard #forgeStage .forge-side .forge-counter,
+  .reference-dashboard #forgeStage .forge-side .forge-counter.accepted,
+  .reference-dashboard #forgeStage .forge-side .forge-counter.rejected{
     width:150px!important;
     min-width:150px!important;
+    max-width:150px!important;
     height:118px!important;
     min-height:118px!important;
     max-height:118px!important;
     flex-basis:118px!important;
     padding:12px!important;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .reference-dashboard #forgeStage .forge-side .forge-counter{
+    animation:none!important;
   }
 }
