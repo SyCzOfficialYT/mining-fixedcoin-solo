@@ -13,7 +13,6 @@ if text.count(required_rejection) != 1:
     raise RuntimeError(
         f"generated Stratum low-difficulty rejection mismatch: expected 1, found {text.count(required_rejection)}"
     )
-
 if "ACCEPT low-difficulty" in text:
     raise RuntimeError("generated Stratum low-difficulty acceptance bypass remains")
 
@@ -47,9 +46,11 @@ same_height_new = '''            if (self.current_id and self.last_height == hei
                 job["net_diff"] = net_diff
                 return job, False
 '''
-if same_height_old not in text:
-    raise RuntimeError("generated same-height JobStore refresh block not found")
-text = text.replace(same_height_old, same_height_new, 1)
+if same_height_old in text:
+    text = text.replace(same_height_old, same_height_new, 1)
+else:
+    if "same_txs = (len(other_tx)" in text or "same_value = int(job.get(\"value\") or 0) == new_value" in text:
+        raise RuntimeError("generated same-height JobStore refresh block has an unexpected shape")
 
 if "same_value = int(job.get(\"value\") or 0) == new_value" in text:
     raise RuntimeError("same-height fee/template replacement logic remains")
@@ -60,17 +61,15 @@ if same_height_new not in text:
 
 telemetry_old = 'emit("WARN", f"REJECT reason=low-difficulty worker={self.worker} job={job_id} height={job[\'height\']} share_diff={share_work:.6f} required_diff={need:.6f} fixed_diff={self.diff:.6f} ntime={ntime_hex} nonce={nonce_hex} hash={hhex[:24]}")'
 telemetry_new = 'emit("WARN", f"REJECT reason=low-difficulty worker={self.worker} job={job_id} height={job[\'height\']} share_diff={share_work:.6f} required_diff={need:.6f} current_diff={self.diff:.6f} previous_diff={self.diff_prev:.6f} vardiff={int(self.vardiff_enabled)} grace_active={int(time.time() - self.diff_changed_at < DIFF_GRACE_SEC)} ntime={ntime_hex} nonce={nonce_hex} hash={hhex[:24]}")'
-if telemetry_old not in text:
+if telemetry_old in text:
+    text = text.replace(telemetry_old, telemetry_new, 1)
+elif "current_diff={self.diff:.6f}" not in text:
     raise RuntimeError("generated Stratum reject telemetry line not found")
-text = text.replace(telemetry_old, telemetry_new, 1)
 
-# Password `x` is an explicit per-miner VarDiff opt-in. The global
-# pool.vardiff setting remains the default for miners without it.
-class_marker = "class Client"
-try:
-    tree = ast.parse(text)
-except SyntaxError as exc:
-    raise RuntimeError(f"generated Stratum source is not valid Python: {exc}") from exc
+# Work on the complete Client class using the Python AST. This avoids the
+# previous bug where the first method definition was mistaken for the end of
+# the class and password-x logic never reached handle_authorize/retarget.
+tree = ast.parse(text)
 client_node = next((n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == "Client"), None)
 if client_node is None:
     raise RuntimeError("Client class not found")
@@ -79,11 +78,12 @@ class_start = sum(map(len, lines[:client_node.lineno - 1]))
 class_end = sum(map(len, lines[:client_node.end_lineno]))
 client = text[class_start:class_end]
 
-# Every Client gets an explicit per-connection VarDiff switch. The generated
-# adapter may already have a global VARDIFF flag, but password `x` must not
-# affect other miners.
+# Per-connection switch. Global pool.vardiff remains the default for miners
+# without password x.
 if "self.vardiff_enabled" not in client:
     init_marker = "        self.diff_from_password = False"
+    if init_marker not in client:
+        init_marker = "        self.diff_from_password = not VARDIFF"
     if init_marker not in client:
         raise RuntimeError("Client __init__ difficulty marker not found")
     client = client.replace(
@@ -102,7 +102,7 @@ if password_marker is None:
 
 if 'password.lower().strip() == "x"' not in client:
     vardiff_block = '''        # `x` explicitly enables VarDiff for this connection.
-        # The global pool.vardiff flag remains the default for all other miners.
+        # Global pool.vardiff remains the default for all other miners.
         self.vardiff_enabled = VARDIFF or (
             isinstance(password, str) and password.lower().strip() == "x"
         )
@@ -118,17 +118,24 @@ if 'password.lower().strip() == "x"' not in client:
 '''
     client = client.replace(password_marker, password_marker + "\n" + vardiff_block.rstrip(), 1)
 
-# Manual password d= remains an explicit fixed-difficulty override.
+# Explicit d=<difficulty> remains a fixed-difficulty override.
 d_marker = '                    self.diff_from_password = True'
 if d_marker in client and '                    self.vardiff_enabled = False\n                    self.diff_from_password = True' not in client:
     client = client.replace(d_marker, '                    self.vardiff_enabled = False\n                    self.diff_from_password = True', 1)
 
-# Use the connection-local switch for every VarDiff decision inside Client.
-client = client.replace("if VARDIFF:", "if self.vardiff_enabled:")
-client = client.replace("if not VARDIFF:", "if not self.vardiff_enabled:")
+# Convert every conditional VarDiff reference inside Client, including
+# compound guards such as `if not VARDIFF or self.diff_from_password:`.
+# Do not replace the initialization/selector expressions themselves.
+converted_lines = []
+for line in client.splitlines(keepends=True):
+    stripped = line.lstrip()
+    if stripped.startswith("if ") or stripped.startswith("elif "):
+        line = re.sub(r"\bVARDIFF\b", "self.vardiff_enabled", line)
+    converted_lines.append(line)
+client = "".join(converted_lines)
 
-# Before authorization, stay at the safe fixed difficulty. Authorization then
-# selects either fixed mode or VarDiff based on the supplied password.
+# Authorization must start at the fixed target before password selection;
+# password x then switches this connection to VarDiff.
 client = client.replace(
     "self.diff = FIXED_DIFF if not self.vardiff_enabled else max(START_DIFF, MIN_DIFF)",
     "self.diff = FIXED_DIFF",
@@ -140,7 +147,7 @@ client = client.replace(
 
 text = text[:class_start] + client + text[class_end:]
 
-# Hard guarantees for the opt-in behavior.
+# Hard guarantees.
 if 'password.lower().strip() == "x"' not in text:
     raise RuntimeError("password x VarDiff opt-in was not installed")
 if "self.vardiff_enabled = VARDIFF" not in text:
@@ -151,7 +158,9 @@ if "self.diff = FIXED_DIFF" not in text:
     raise RuntimeError("fixed difficulty fallback was removed")
 if "self.diff = max(START_DIFF, MIN_DIFF)" not in text:
     raise RuntimeError("VarDiff start difficulty was not installed")
-if "if not self.vardiff_enabled or self.diff_from_password:" not in text:
+if re.search(r"^\s*if\s+.*\bVARDIFF\b", client, re.M):
+    raise RuntimeError("VarDiff conditional still uses global VARDIFF instead of per-client mode")
+if not re.search(r"^\s*if\s+not\s+self\.vardiff_enabled\s+or\s+self\.diff_from_password\s*:", client, re.M):
     raise RuntimeError("VarDiff retarget guard was not converted to per-client mode")
 
 compile(text, str(PATH), "exec")
