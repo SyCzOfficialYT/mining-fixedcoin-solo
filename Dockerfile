@@ -37,5 +37,5 @@ RUN STRATUM_BUILD_ONLY=1 python3 /app/stratum/server.py \
  && python3 /app/scripts/test_stratum_authorization.py \
  && chmod +x /app/docker/entrypoint.sh /app/scripts/setup_address.py
 ENV FIX_DATADIR=/data/fixedcoin FIX_RPCPORT=24761 FIX_P2PPORT=24768 FIX_DASH_PORT=5050
-EXPOSE 3333 5050 24768
+EXPOSE 3333 5050 5051 24768
 ENTRYPOINT ["/app/docker/entrypoint.sh"]
