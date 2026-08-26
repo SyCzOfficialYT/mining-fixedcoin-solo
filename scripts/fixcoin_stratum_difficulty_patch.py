@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Validate and finalize FixedCoin Stratum share-difficulty enforcement."""
+import ast
 import re
 from pathlib import Path
 
@@ -64,17 +65,18 @@ if telemetry_old not in text:
 text = text.replace(telemetry_old, telemetry_new, 1)
 
 # Password `x` is an explicit per-miner VarDiff opt-in. The global
-# pool.vardiff setting remains the default for all other miners.
+# pool.vardiff setting remains the default for miners without it.
 class_marker = "class Client"
-class_start = text.find(class_marker)
-if class_start < 0:
+try:
+    tree = ast.parse(text)
+except SyntaxError as exc:
+    raise RuntimeError(f"generated Stratum source is not valid Python: {exc}") from exc
+client_node = next((n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == "Client"), None)
+if client_node is None:
     raise RuntimeError("Client class not found")
-
-# Find the next top-level declaration, not the first method inside Client.
-# This keeps the complete Client class available for the per-connection patch.
-tail = text[class_start:]
-match = re.search(r"\n(?:(?:class|def)\s+|if\s+__name__\s*==)", tail[1:])
-class_end = class_start + 1 + match.start() if match else len(text)
+lines = text.splitlines(keepends=True)
+class_start = sum(map(len, lines[:client_node.lineno - 1]))
+class_end = sum(map(len, lines[:client_node.end_lineno]))
 client = text[class_start:class_end]
 
 # Every Client gets an explicit per-connection VarDiff switch. The generated
@@ -86,7 +88,7 @@ if "self.vardiff_enabled" not in client:
         raise RuntimeError("Client __init__ difficulty marker not found")
     client = client.replace(
         init_marker,
-        init_marker + "\n        self.vardiff_enabled = VARDIFF\n        self.diff_prev = self.diff\n        self.diff_changed_at = time.time()",
+        init_marker + "\n        self.vardiff_enabled = VARDIFF",
         1,
     )
 
@@ -99,13 +101,15 @@ if password_marker is None:
     raise RuntimeError("authorize password marker not found")
 
 if 'password.lower().strip() == "x"' not in client:
-    vardiff_block = '''        # `x` is the explicit VarDiff password for this miner.
-        # Global pool.vardiff remains the default for miners without it.
-        self.vardiff_enabled = VARDIFF or (isinstance(password, str) and password.lower().strip() == "x")
+    vardiff_block = '''        # `x` explicitly enables VarDiff for this connection.
+        # The global pool.vardiff flag remains the default for all other miners.
+        self.vardiff_enabled = VARDIFF or (
+            isinstance(password, str) and password.lower().strip() == "x"
+        )
         if self.vardiff_enabled:
             self.diff_from_password = False
-            self.diff_prev = self.diff
             self.diff = max(START_DIFF, MIN_DIFF)
+            self.diff_prev = self.diff
             self.diff_changed_at = time.time()
         else:
             self.diff = FIXED_DIFF
@@ -116,7 +120,7 @@ if 'password.lower().strip() == "x"' not in client:
 
 # Manual password d= remains an explicit fixed-difficulty override.
 d_marker = '                    self.diff_from_password = True'
-if d_marker in client and 'self.vardiff_enabled = False\n                    self.diff_from_password = True' not in client:
+if d_marker in client and '                    self.vardiff_enabled = False\n                    self.diff_from_password = True' not in client:
     client = client.replace(d_marker, '                    self.vardiff_enabled = False\n                    self.diff_from_password = True', 1)
 
 # Use the connection-local switch for every VarDiff decision inside Client.
@@ -141,10 +145,14 @@ if 'password.lower().strip() == "x"' not in text:
     raise RuntimeError("password x VarDiff opt-in was not installed")
 if "self.vardiff_enabled = VARDIFF" not in text:
     raise RuntimeError("per-client VarDiff flag was not installed")
+if "self.vardiff_enabled = VARDIFF or" not in text:
+    raise RuntimeError("password-x VarDiff selector was not installed")
 if "self.diff = FIXED_DIFF" not in text:
     raise RuntimeError("fixed difficulty fallback was removed")
 if "self.diff = max(START_DIFF, MIN_DIFF)" not in text:
     raise RuntimeError("VarDiff start difficulty was not installed")
+if "if not self.vardiff_enabled or self.diff_from_password:" not in text:
+    raise RuntimeError("VarDiff retarget guard was not converted to per-client mode")
 
 compile(text, str(PATH), "exec")
 PATH.write_text(text)
