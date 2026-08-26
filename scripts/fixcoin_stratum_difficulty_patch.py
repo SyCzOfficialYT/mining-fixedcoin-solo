@@ -134,6 +134,14 @@ for line in client.splitlines(keepends=True):
     converted_lines.append(line)
 client = "".join(converted_lines)
 
+# The authorization log must report the connection-local switch, not the
+# global pool.vardiff value. Otherwise password=x would work but the log would
+# falsely claim `vardiff=False` whenever pool.vardiff is globally disabled.
+mode_old = 'mode = "fixed" if self.diff_from_password else f"vardiff={VARDIFF}"'
+mode_new = 'mode = "fixed" if self.diff_from_password else f"vardiff={self.vardiff_enabled}"'
+if mode_old in client:
+    client = client.replace(mode_old, mode_new, 1)
+
 # Authorization must start at the fixed target before password selection;
 # password x then switches this connection to VarDiff.
 client = client.replace(
@@ -162,6 +170,8 @@ if re.search(r"^\s*if\s+.*\bVARDIFF\b", client, re.M):
     raise RuntimeError("VarDiff conditional still uses global VARDIFF instead of per-client mode")
 if not re.search(r"^\s*if\s+not\s+self\.vardiff_enabled\s+or\s+self\.diff_from_password\s*:", client, re.M):
     raise RuntimeError("VarDiff retarget guard was not converted to per-client mode")
+if 'mode = "fixed" if self.diff_from_password else f"vardiff={self.vardiff_enabled}"' not in client:
+    raise RuntimeError("authorization mode log still uses global VARDIFF")
 
 compile(text, str(PATH), "exec")
 PATH.write_text(text)
