@@ -1,0 +1,60 @@
+/* FIXCOIN MAGIC PARTICLES v1
+ * Motion-mini / Web Animations powered particle halo.
+ * DOM particles only: no canvas, no requestAnimationFrame, no layout animation.
+ */
+.reference-dashboard .fix-magic-particles{
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:1px;
+  height:1px;
+  z-index:12;
+  pointer-events:none;
+  contain:strict;
+  transform:translate3d(-50%,-50%,0);
+}
+
+.reference-dashboard .fix-magic-particle{
+  position:absolute;
+  left:0;
+  top:0;
+  width:2px;
+  height:2px;
+  border-radius:999px;
+  background:#68ff91;
+  opacity:.7;
+  will-change:transform,opacity;
+  transform:translate3d(var(--x),var(--y),0) scale(var(--s));
+  box-shadow:0 0 5px rgba(77,255,114,.48);
+}
+
+.reference-dashboard .fix-magic-particle.cyan{
+  background:#29eaff;
+  box-shadow:0 0 5px rgba(27,228,255,.42);
+}
+
+.reference-dashboard .fix-magic-particle.spark{
+  width:3px;
+  height:3px;
+  opacity:.85;
+  box-shadow:0 0 8px rgba(118,255,158,.62);
+}
+
+.reference-dashboard .fix-magic-particle::after{
+  content:"";
+  position:absolute;
+  inset:-2px;
+  border-radius:inherit;
+  background:inherit;
+  opacity:.18;
+  filter:blur(2px);
+}
+
+@media(max-width:620px){
+  .reference-dashboard .fix-magic-particle{width:1.5px;height:1.5px}
+  .reference-dashboard .fix-magic-particle.spark{width:2px;height:2px}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .reference-dashboard .fix-magic-particle{opacity:.35!important}
+}
