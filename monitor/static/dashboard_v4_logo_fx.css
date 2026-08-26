@@ -1,0 +1,18 @@
+/* FIXCOIN FX CORE v1
+ * Geometric FX identity + compositor-only glow layers.
+ * Keep continuous motion on transform/opacity; no layout animation.
+ */
+.reference-dashboard .fix-core-mark{overflow:visible;filter:drop-shadow(0 0 10px rgba(66,255,123,.24)) drop-shadow(0 0 24px rgba(0,234,255,.10))}
+.reference-dashboard .fix-core-shell{fill:rgba(1,10,12,.96);stroke:#42ff7b;stroke-width:2.6;vector-effect:non-scaling-stroke}
+.reference-dashboard .fix-core-inner{fill:rgba(4,20,20,.92);stroke:rgba(0,234,255,.40);stroke-width:1;vector-effect:non-scaling-stroke}
+.reference-dashboard .fix-core-glyph{fill:#b9ffd0;stroke:#42ff7b;stroke-width:1;filter:drop-shadow(0 0 5px rgba(66,255,123,.55));transform-box:fill-box;transform-origin:center;will-change:transform,opacity}
+.reference-dashboard .fix-core-glyph-secondary{fill:none;stroke:#00eaff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;opacity:.72;transform-box:fill-box;transform-origin:center;will-change:transform,opacity}
+.reference-dashboard .fix-core-node{fill:#00eaff;filter:drop-shadow(0 0 5px rgba(0,234,255,.8))}
+.reference-dashboard .fix-core-scanline{stroke:#42ff7b;stroke-width:1.2;stroke-linecap:round;opacity:.5}
+.reference-dashboard .fix-core-ring.r2{stroke:rgba(0,234,255,.28);stroke-dasharray:2 9}
+.reference-dashboard .fix-core-ring.r3{stroke:rgba(66,255,123,.20);stroke-dasharray:1 12}
+.reference-dashboard .candidate-glyph{display:block;color:#b9ffd0;font:800 18px/1 "JetBrains Mono",monospace;letter-spacing:-.12em;text-shadow:0 0 8px rgba(66,255,123,.65),0 0 18px rgba(0,234,255,.22);transform:skewX(-8deg)}
+.reference-dashboard .candidate-cube::after{content:"";position:absolute;inset:18%;border:1px solid rgba(0,234,255,.18);transform:rotate(45deg);animation:fxCandidateSpin 13s linear infinite;pointer-events:none}
+@keyframes fxCandidateSpin{to{transform:rotate(405deg)}}
+@media(max-width:620px){.reference-dashboard .candidate-glyph{font-size:15px}}
+@media(prefers-reduced-motion:reduce){.reference-dashboard .candidate-cube::after{animation:none!important}}
