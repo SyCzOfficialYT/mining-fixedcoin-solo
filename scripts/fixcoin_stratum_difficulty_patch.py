@@ -22,7 +22,6 @@ if "ACCEPT low-difficulty" in text:
 if "if h_int > difficulty_to_target(need):" not in text or "if share_work >= self.diff:" not in text:
     raise RuntimeError("generated Stratum difficulty markers are missing")
 
-# Keep a stable Stratum job while the same block height/template is refreshed.
 same_height_old = '''            if (self.current_id and self.last_height == height and self.last_prevhash == prevhash
                     and self.current_id in self.jobs):
                 job = self.jobs[self.current_id]
@@ -38,9 +37,11 @@ same_height_old = '''            if (self.current_id and self.last_height == hei
 same_height_new = '''            if (self.current_id and self.last_height == height and self.last_prevhash == prevhash
                     and self.current_id in self.jobs):
                 job = self.jobs[self.current_id]
-                # Same height is the same Stratum round. Refresh ntime only;
-                # never replace the job/coinbase merely because fees changed.
-                job["ntime"] = min(int(tmpl["curtime"]), int(job.get("ntime") or tmpl["curtime"]))
+                # Same height is the same Stratum round. Refresh only mutable
+                # time/network metadata; never replace the coinbase or job id.
+                # Keep nTime monotonic so miners never receive a timestamp that
+                # moves backwards after a node clock/template refresh.
+                job["ntime"] = max(int(job.get("ntime") or 0), int(tmpl["curtime"]))
                 job["net_diff"] = net_diff
                 return job, False
 '''
@@ -51,36 +52,28 @@ if "same_txs = (len(other_tx)" in text or "same_value = int(job.get(\"value\") o
 if same_height_new not in text:
     raise RuntimeError("stable same-height job patch missing")
 
-# Every VarDiff change must be followed by a mining.notify. Stratum miners
-# apply mining.set_difficulty to the next job; without the notify, the miner
-# can continue hashing the previous work under the wrong target.
 set_diff_emit = '        emit("INFO", f"VARDIFF {self.worker} {self.diff_prev}→{self.diff} {reason} (grace {DIFF_GRACE_SEC:.0f}s)")'
 set_diff_new = set_diff_emit + '''
-        # Force the new difficulty onto a fresh work notification. The
-        # previous target remains temporarily accepted by effective_min_diff()
-        # so in-flight shares are not lost during the transition.
+        # Stratum applies a new difficulty to the next mining.notify job.
+        # Force that transition now; effective_min_diff() still protects
+        # in-flight shares during the grace interval.
         self.push_job(clean=True, force_refresh=False)'''
 if set_diff_emit not in text:
     raise RuntimeError("set_diff telemetry marker not found")
 if 'self.push_job(clean=True, force_refresh=False)' not in text:
     text = text.replace(set_diff_emit, set_diff_new, 1)
 
-# Better reject telemetry for diagnosing per-client difficulty.
 old_tel = 'emit("WARN", f"REJECT reason=low-difficulty worker={self.worker} job={job_id} height={job[\'height\']} share_diff={share_work:.6f} required_diff={need:.6f} fixed_diff={self.diff:.6f} ntime={ntime_hex} nonce={nonce_hex} hash={hhex[:24]}")'
 new_tel = 'emit("WARN", f"REJECT reason=low-difficulty worker={self.worker} job={job_id} height={job[\'height\']} share_diff={share_work:.6f} required_diff={need:.6f} current_diff={self.diff:.6f} previous_diff={self.diff_prev:.6f} vardiff={int(self.vardiff_enabled)} grace_active={int(time.time() - self.diff_changed_at < DIFF_GRACE_SEC)} ntime={ntime_hex} nonce={nonce_hex} hash={hhex[:24]}")'
 if old_tel in text:
     text = text.replace(old_tel, new_tel, 1)
 
-# Include the worker in accepted-share telemetry. The dashboard must not
-# infer ownership from the last authorize event when multiple miners submit
-# concurrently.
 accept_old = 'emit("OK", f"ACCEPT #{self.shares_ok} work={share_work:.0f} ({pct:.3f}%) "'
 accept_new = 'emit("OK", f"ACCEPT worker={self.worker} #{self.shares_ok} work={share_work:.0f} ({pct:.3f}%) "'
 if accept_old not in text:
     raise RuntimeError("accepted-share telemetry marker not found")
 text = text.replace(accept_old, accept_new, 1)
 
-# Work only on the real Client class.
 tree = ast.parse(text)
 client_node = next((n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == "Client"), None)
 if client_node is None:
@@ -90,7 +83,6 @@ class_start = sum(map(len, lines[:client_node.lineno - 1]))
 class_end = sum(map(len, lines[:client_node.end_lineno]))
 client = text[class_start:class_end]
 
-# Per-connection VarDiff switch. Global pool.vardiff remains the default.
 if "self.vardiff_enabled = VARDIFF" not in client:
     marker = "        self.diff_from_password = False"
     if marker not in client:
@@ -123,12 +115,10 @@ if 'password.lower().strip() == "x"' not in client:
 '''
     client = client.replace(password_marker, password_marker + "\n" + block.rstrip(), 1)
 
-# Explicit d=<difficulty> always wins and disables VarDiff for that connection.
 d_marker = '                    self.diff_from_password = True'
 if d_marker in client and '                    self.vardiff_enabled = False\n                    self.diff_from_password = True' not in client:
     client = client.replace(d_marker, '                    self.vardiff_enabled = False\n                    self.diff_from_password = True', 1)
 
-# Convert retarget guards to the connection-local flag.
 converted = []
 for line in client.splitlines(keepends=True):
     stripped = line.lstrip()
@@ -181,4 +171,4 @@ if 'mode = "fixed" if self.diff_from_password else f"vardiff={self.vardiff_enabl
 
 compile(text, str(PATH), "exec")
 PATH.write_text(text)
-print(f"verified {PATH}: strict share difficulty, fresh jobs on VarDiff, worker-specific ACCEPT telemetry, and password-x VarDiff")
+print(f"verified {PATH}: strict share difficulty, fresh jobs on VarDiff, monotonic same-height nTime, worker-specific telemetry, and password-x VarDiff")
