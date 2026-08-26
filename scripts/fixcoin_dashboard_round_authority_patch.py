@@ -18,6 +18,19 @@ if height_match:
         changed_app=True
         print('patched dashboard height precedence: live Stratum NEW ROUND/job first')
 
+# Capture the timestamp of the actual NEW ROUND log event.  The previous
+# authority patch exported the source marker but parse_logs() only retained
+# height/difficulty, leaving started_epoch empty. The frontend consequently
+# (correctly, from its perspective) rendered WAITING / 00:00 forever.
+new_round_re=r'(?m)^        if m: job\["height"\]=int\(m\.group\(1\)\); job\["network_diff"\]=float\(m\.group\(2\)\)'
+new_round_match=re.search(new_round_re,app)
+if new_round_match:
+    old=new_round_match.group(0)
+    new='        if m:\n            job["height"]=int(m.group(1)); job["network_diff"]=float(m.group(2)); job["round_started_at"]=line[:19]; job["round_started_epoch"]=ts'
+    app=app[:new_round_match.start()]+new+app[new_round_match.end():]
+    changed_app=True
+    print('patched NEW ROUND timestamp authority: live log timestamp exported')
+
 # Round/timer state must consume the same live log height and NEW ROUND timer
 # fields. The source marker prevents the frontend from inventing a round from
 # stale polling state.
