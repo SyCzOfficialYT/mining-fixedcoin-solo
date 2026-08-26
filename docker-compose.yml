@@ -55,11 +55,11 @@ services:
       MINER_HTTP_PORT: ${MINER_HTTP_PORT:-80}
       MINER_HTTP_TIMEOUT: ${MINER_HTTP_TIMEOUT:-0.8}
       SWARM_SCAN_WORKERS: ${SWARM_SCAN_WORKERS:-32}
+      SWARM_SCAN_INTERVAL: ${SWARM_SCAN_INTERVAL:-15}
       SWARM_ALLOW_CONTROL: ${SWARM_ALLOW_CONTROL:-false}
-    ports:
-      - "5080:5080"
-    networks:
-      - default
+      SWARM_ADVERTISE_IP: ${SWARM_ADVERTISE_IP:-192.168.50.173}
+      SWARM_ADVERTISE_PORT: ${SWARM_ADVERTISE_PORT:-5080}
+    network_mode: host
 
 volumes:
   fix-data:
