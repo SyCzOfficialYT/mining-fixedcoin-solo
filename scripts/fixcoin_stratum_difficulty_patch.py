@@ -51,6 +51,20 @@ if "same_txs = (len(other_tx)" in text or "same_value = int(job.get(\"value\") o
 if same_height_new not in text:
     raise RuntimeError("stable same-height job patch missing")
 
+# Every VarDiff change must be followed by a mining.notify. Stratum miners
+# apply mining.set_difficulty to the next job; without the notify, the miner
+# can continue hashing the previous work under the wrong target.
+set_diff_emit = '        emit("INFO", f"VARDIFF {self.worker} {self.diff_prev}→{self.diff} {reason} (grace {DIFF_GRACE_SEC:.0f}s)")'
+set_diff_new = set_diff_emit + '''
+        # Force the new difficulty onto a fresh work notification. The
+        # previous target remains temporarily accepted by effective_min_diff()
+        # so in-flight shares are not lost during the transition.
+        self.push_job(clean=True, force_refresh=False)'''
+if set_diff_emit not in text:
+    raise RuntimeError("set_diff telemetry marker not found")
+if 'self.push_job(clean=True, force_refresh=False)' not in text:
+    text = text.replace(set_diff_emit, set_diff_new, 1)
+
 # Better reject telemetry for diagnosing per-client difficulty.
 old_tel = 'emit("WARN", f"REJECT reason=low-difficulty worker={self.worker} job={job_id} height={job[\'height\']} share_diff={share_work:.6f} required_diff={need:.6f} fixed_diff={self.diff:.6f} ntime={ntime_hex} nonce={nonce_hex} hash={hhex[:24]}")'
 new_tel = 'emit("WARN", f"REJECT reason=low-difficulty worker={self.worker} job={job_id} height={job[\'height\']} share_diff={share_work:.6f} required_diff={need:.6f} current_diff={self.diff:.6f} previous_diff={self.diff_prev:.6f} vardiff={int(self.vardiff_enabled)} grace_active={int(time.time() - self.diff_changed_at < DIFF_GRACE_SEC)} ntime={ntime_hex} nonce={nonce_hex} hash={hhex[:24]}")'
@@ -154,6 +168,7 @@ for marker in (
     "self.diff = max(START_DIFF, MIN_DIFF)",
     "# Final authorization authority: password-x VarDiff",
     'ACCEPT worker={self.worker}',
+    'self.push_job(clean=True, force_refresh=False)',
 ):
     if marker not in text:
         raise RuntimeError(f"VarDiff marker missing: {marker}")
@@ -166,4 +181,4 @@ if 'mode = "fixed" if self.diff_from_password else f"vardiff={self.vardiff_enabl
 
 compile(text, str(PATH), "exec")
 PATH.write_text(text)
-print(f"verified {PATH}: strict share difficulty, stable jobs, worker-specific ACCEPT telemetry, and password-x VarDiff")
+print(f"verified {PATH}: strict share difficulty, fresh jobs on VarDiff, worker-specific ACCEPT telemetry, and password-x VarDiff")
