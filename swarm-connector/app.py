@@ -5,25 +5,20 @@ Discovers NMMiner/AxeOS-compatible miners on the configured LAN, normalizes
 NMMiner telemetry to the AxeOS /api/system/info shape, and exposes safe proxy
 endpoints for the FixedCoin dashboard and future swarm integrations.
 
-This service deliberately does not pretend to be an AxeOS firmware device on
-its own IP. AxeOS swarm discovery is neighbor/IP based; the connector instead
-provides a stable compatibility API and a per-device proxy. Direct NMMiner
-compatibility can later be enabled on the miner itself without changing the
-normalizer.
+The connector is intentionally an adapter, not a fake AxeOS firmware node:
+AxeOS swarm discovery is neighbor/IP based, so the long-term integration point
+is the same per-device API contract exposed by real AxeOS devices.
 """
 from __future__ import annotations
 
 import ipaddress
 import json
 import os
-import re
-import socket
-import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-from urllib.parse import parse_qs, urlparse
-from urllib.request import Request, urlopen
 from urllib.error import HTTPError, URLError
+from urllib.parse import urlparse
+from urllib.request import Request, urlopen
 
 HOST = os.getenv("SWARM_HOST", "0.0.0.0")
 PORT = int(os.getenv("SWARM_PORT", "5080"))
@@ -32,8 +27,8 @@ SCAN_PORT = int(os.getenv("MINER_HTTP_PORT", "80"))
 TIMEOUT = float(os.getenv("MINER_HTTP_TIMEOUT", "0.8"))
 MAX_WORKERS = int(os.getenv("SWARM_SCAN_WORKERS", "32"))
 ALLOW_CONTROL = os.getenv("SWARM_ALLOW_CONTROL", "false").lower() in {"1", "true", "yes"}
-
 NETWORK = ipaddress.ip_network(CIDR, strict=False)
+
 
 def allowed_ip(value: str) -> str:
     ip = ipaddress.ip_address(value)
@@ -42,7 +37,7 @@ def allowed_ip(value: str) -> str:
     return str(ip)
 
 
-def http_json(ip: str, path: str, method: str = "GET", body: dict | None = None):
+def http_json(ip: str, path: str, method: str = "GET", body=None):
     ip = allowed_ip(ip)
     data = json.dumps(body).encode() if body is not None else None
     req = Request(
@@ -71,7 +66,7 @@ def num(value, default=0.0):
 
 
 def normalize_system_info(raw: dict, ip: str) -> dict:
-    """Map common NMMiner telemetry into AxeOS-compatible field names."""
+    """Map common NMMiner telemetry into the AxeOS /api/system/info schema."""
     miner = raw.get("miner") if isinstance(raw.get("miner"), dict) else raw
     identity = raw.get("identity") if isinstance(raw.get("identity"), dict) else raw.get("system", {})
     temps = raw.get("temps") if isinstance(raw.get("temps"), dict) else {}
@@ -139,17 +134,13 @@ def probe(ip: str) -> dict | None:
     try:
         raw = http_json(ip, "/probe")
         text = json.dumps(raw).lower()
-        # Accept native AxeOS devices as well as NMMiner/NMAxe variants.
         if any(token in text for token in ("nmm", "nmminer", "nmaxe", "axeos", "nerdminer")):
             raw["_connector"] = "fixedcoin-swarm"
             raw["_ip"] = ip
             return raw
-        # Some NMMiner builds expose only system info; use it as a fallback.
         info = http_json(ip, "/api/system/info")
         normalized = normalize_system_info(info, ip)
-        normalized["_connector"] = "fixedcoin-swarm"
-        normalized["_ip"] = ip
-        normalized["_type"] = "NMMiner"
+        normalized.update({"_connector": "fixedcoin-swarm", "_ip": ip, "_type": "NMMiner"})
         return normalized
     except (HTTPError, URLError, TimeoutError, ValueError, json.JSONDecodeError, OSError):
         return None
@@ -173,6 +164,7 @@ def json_response(handler, payload, status=200):
     handler.send_header("Content-Type", "application/json")
     handler.send_header("Content-Length", str(len(data)))
     handler.send_header("Cache-Control", "no-store")
+    handler.send_header("Access-Control-Allow-Origin", "*")
     handler.end_headers()
     handler.wfile.write(data)
 
@@ -183,44 +175,59 @@ class Handler(BaseHTTPRequestHandler):
     def log_message(self, fmt, *args):
         print(f"[swarm] {self.address_string()} {fmt % args}", flush=True)
 
-    def do_GET(self):
+    def do_OPTIONS(self):
+        self.send_response(204)
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "GET,POST,PATCH,OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.end_headers()
+
+    def _proxy(self, method: str):
         parsed = urlparse(self.path)
         parts = [p for p in parsed.path.split("/") if p]
+        if len(parts) < 3 or parts[0] != "device":
+            return json_response(self, {"error": "not found"}, 404)
+        ip = allowed_ip(parts[1])
+        subpath = "/" + "/".join(parts[2:])
+        if subpath in {"/api/system/restart", "/api/system/clearhits"} and not ALLOW_CONTROL:
+            return json_response(self, {"error": "control disabled; set SWARM_ALLOW_CONTROL=true"}, 403)
+
+        body = None
+        length = int(self.headers.get("Content-Length", "0"))
+        if length:
+            body = json.loads(self.rfile.read(length).decode("utf-8"))
+        raw = http_json(ip, subpath, method=method, body=body)
+        if subpath == "/api/system/info":
+            raw = normalize_system_info(raw, ip)
+        return json_response(self, raw)
+
+    def do_GET(self):
+        parsed = urlparse(self.path)
         try:
             if parsed.path == "/health":
                 return json_response(self, {"status": "ok", "service": "fixedcoin-swarm", "cidr": CIDR})
-            if parsed.path == "/api/swarm/scan":
-                return json_response(self, {"devices": scan(), "count": len(scan())})
+            if parsed.path in {"/api/swarm/scan", "/api/swarm/devices"}:
+                devices = scan()
+                return json_response(self, {"devices": devices, "count": len(devices)})
+            parts = [p for p in parsed.path.split("/") if p]
             if len(parts) >= 3 and parts[0] == "device":
-                ip = allowed_ip(parts[1])
-                subpath = "/" + "/".join(parts[2:])
-                raw = http_json(ip, subpath)
-                if subpath == "/api/system/info":
-                    raw = normalize_system_info(raw, ip)
-                return json_response(self, raw)
-            if parsed.path == "/api/swarm/devices":
-                return json_response(self, {"devices": scan()})
+                return self._proxy("GET")
             return json_response(self, {"error": "not found"}, 404)
         except (HTTPError, URLError, ValueError, json.JSONDecodeError, OSError) as exc:
             return json_response(self, {"error": str(exc)}, 502)
 
     def do_POST(self):
-        parsed = urlparse(self.path)
-        parts = [p for p in parsed.path.split("/") if p]
         try:
-            if parsed.path == "/api/swarm/scan":
+            if self.path == "/api/swarm/scan":
                 devices = scan()
                 return json_response(self, {"devices": devices, "count": len(devices)})
-            if len(parts) == 4 and parts[0] == "device" and parts[2] == "api" and parts[3] == "swarm":
-                return json_response(self, {"error": "invalid swarm endpoint"}, 404)
-            if len(parts) >= 4 and parts[0] == "device":
-                ip = allowed_ip(parts[1])
-                subpath = "/" + "/".join(parts[2:])
-                if subpath == "/api/system/restart" and not ALLOW_CONTROL:
-                    return json_response(self, {"error": "control disabled; set SWARM_ALLOW_CONTROL=true"}, 403)
-                raw = http_json(ip, subpath, method="POST")
-                return json_response(self, raw)
-            return json_response(self, {"error": "not found"}, 404)
+            return self._proxy("POST")
+        except (HTTPError, URLError, ValueError, json.JSONDecodeError, OSError) as exc:
+            return json_response(self, {"error": str(exc)}, 502)
+
+    def do_PATCH(self):
+        try:
+            return self._proxy("PATCH")
         except (HTTPError, URLError, ValueError, json.JSONDecodeError, OSError) as exc:
             return json_response(self, {"error": str(exc)}, 502)
 
