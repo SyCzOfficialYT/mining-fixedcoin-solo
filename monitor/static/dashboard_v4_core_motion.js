@@ -1,6 +1,7 @@
-/* FIXCOIN CORE MOTION v1
- * Motion mini is intentionally used instead of a canvas/rAF particle renderer.
- * The animation is compositor-friendly and follows the display's native refresh cadence.
+/* FIXCOIN CORE MOTION v2
+ * Motion mini replaces the old canvas/rAF particle renderer.
+ * Only transform/opacity are animated, so the browser can synchronize the
+ * motion to the display's native refresh cadence (60/90/120/144/165/240/360/600Hz).
  */
 (async()=>{
   'use strict';
@@ -48,22 +49,14 @@
   };
 
   core.addEventListener('pointerenter',pulse,{passive:true});
+  window.addEventListener('fixedcoin:live',e=>{
+    const type=e?.detail?.type;
+    if(type==='accept'||type==='block')pulse();
+  },{passive:true});
 
   document.addEventListener('visibilitychange',()=>{
     if(!idleAnimation)return;
     if(document.hidden) idleAnimation.pause();
     else idleAnimation.play();
   });
-
-  /* Reuse the existing SSE stream for a very small, event-driven core reaction.
-     No polling and no animation loop are added here. */
-  try{
-    const es=new EventSource('/api/stream');
-    es.onmessage=e=>{
-      try{
-        const d=JSON.parse(e.data||'{}');
-        if(d.type==='accept'||d.type==='block')pulse();
-      }catch(_){ }
-    };
-  }catch(_){ }
 })();
