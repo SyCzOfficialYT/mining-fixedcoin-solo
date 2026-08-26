@@ -5,18 +5,21 @@ rpc:
   password: change-me
 pool:
   payout_address: ""
-  # Fixed-difficulty miners keep the canonical FixedCoin share difficulty.
+  # Fixed-difficulty ASIC miners keep the canonical FixedCoin share difficulty.
   fixed_difficulty: 13354
 
   # VarDiff is opt-in per connection via password `x`.
   # Keep its initial/minimum difficulty independent from fixed_difficulty.
-  # This lets low-hashrate miners (including NMMiner) submit shares immediately.
   start_difficulty: 1000
   min_difficulty: 1000
   vardiff_target_sec: 10
   vardiff_grace_sec: 15
   vardiff_max: 50000000
   vardiff: false
+
+  # NMMiner/NerdMiner are detected from mining.subscribe and receive this
+  # low-hash difficulty automatically. Override with FIX_NMMINER_DIFF if needed.
+  nmminer_difficulty: 1
 
   job_interval: 30
   stratum_host: 0.0.0.0
