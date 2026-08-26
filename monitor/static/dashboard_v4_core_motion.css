@@ -1,0 +1,111 @@
+/* FIXCOIN CORE MOTION v1 — lightweight compositor-only core
+   No canvas, no particle loop, no box-shadow animation. Designed for mobile + high-Hz displays. */
+.reference-dashboard .forge-particle-field,
+.reference-dashboard .particle-canvas,
+.reference-dashboard .bar-particles{
+  display:none!important;
+}
+
+.reference-dashboard .core-logo{
+  width:176px!important;
+  height:176px!important;
+  transform:translateZ(100px)!important;
+  filter:none!important;
+  z-index:20!important;
+  contain:layout paint style!important;
+  will-change:transform!important;
+}
+
+.reference-dashboard .fix-core-mark{
+  width:148px;
+  height:148px;
+  overflow:visible;
+  display:block;
+  transform-origin:50% 50%;
+  will-change:transform;
+  filter:drop-shadow(0 0 14px rgba(77,255,114,.22));
+}
+
+.reference-dashboard .fix-core-ring{
+  fill:none;
+  stroke:rgba(77,255,114,.34);
+  stroke-width:1;
+  vector-effect:non-scaling-stroke;
+}
+
+.reference-dashboard .fix-core-ring.r2{stroke:rgba(27,228,255,.22);stroke-dasharray:3 8}
+.reference-dashboard .fix-core-ring.r3{stroke:rgba(77,255,114,.16);stroke-dasharray:1 10}
+
+.reference-dashboard .fix-core-shell{
+  fill:rgba(2,13,10,.94);
+  stroke:#49ff82;
+  stroke-width:3;
+  vector-effect:non-scaling-stroke;
+}
+
+.reference-dashboard .fix-core-inner{
+  fill:#071b11;
+  stroke:rgba(118,255,158,.48);
+  stroke-width:1;
+  vector-effect:non-scaling-stroke;
+}
+
+.reference-dashboard .fix-core-bolt{
+  fill:#b7ffc9;
+  filter:drop-shadow(0 0 6px rgba(77,255,114,.42));
+}
+
+.reference-dashboard .fix-core-node{
+  fill:#4dff72;
+}
+
+.reference-dashboard .fix-core-scanline{
+  stroke:#4dff72;
+  stroke-width:1.5;
+  stroke-linecap:round;
+  opacity:.6;
+  vector-effect:non-scaling-stroke;
+}
+
+.reference-dashboard .core-scan{display:none!important}
+.reference-dashboard .core-logo + .core-title{top:70%!important}
+.reference-dashboard .core-status{top:76%!important}
+
+/* The only continuous motion is transform/opacity. The browser compositor can
+   synchronize it to 60/90/120/144/165/240/360/600Hz without a JS FPS loop. */
+.reference-dashboard .fix-core-mark .fix-core-ring{
+  transform-box:fill-box;
+  transform-origin:center;
+}
+
+.reference-dashboard .fix-core-mark.motion-active .fix-core-ring.r2{
+  animation:fixCoreRing 18s linear infinite;
+}
+.reference-dashboard .fix-core-mark.motion-active .fix-core-ring.r3{
+  animation:fixCoreRingReverse 27s linear infinite;
+}
+
+@keyframes fixCoreRing{
+  from{transform:rotate(0deg)}
+  to{transform:rotate(360deg)}
+}
+@keyframes fixCoreRingReverse{
+  from{transform:rotate(360deg)}
+  to{transform:rotate(0deg)}
+}
+
+@media(max-width:900px){
+  .reference-dashboard .core-logo{width:150px!important;height:150px!important}
+  .reference-dashboard .fix-core-mark{width:128px;height:128px}
+}
+
+@media(max-width:620px){
+  .reference-dashboard .core-logo{width:138px!important;height:138px!important}
+  .reference-dashboard .fix-core-mark{width:116px;height:116px}
+  .reference-dashboard .core-logo + .core-title{top:69%!important}
+  .reference-dashboard .core-status{top:75%!important}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .reference-dashboard .fix-core-mark.motion-active .fix-core-ring{animation:none!important}
+}
