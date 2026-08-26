@@ -5,10 +5,19 @@ rpc:
   password: change-me
 pool:
   payout_address: ""
-  start_difficulty: 13354
+  # Fixed-difficulty miners keep the canonical FixedCoin share difficulty.
   fixed_difficulty: 13354
-  min_difficulty: 13354
+
+  # VarDiff is opt-in per connection via password `x`.
+  # Keep its initial/minimum difficulty independent from fixed_difficulty.
+  # This lets low-hashrate miners (including NMMiner) submit shares immediately.
+  start_difficulty: 1000
+  min_difficulty: 1000
+  vardiff_target_sec: 10
+  vardiff_grace_sec: 15
+  vardiff_max: 50000000
   vardiff: false
+
   job_interval: 30
   stratum_host: 0.0.0.0
   stratum_port: 3333
