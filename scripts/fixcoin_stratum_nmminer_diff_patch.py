@@ -99,7 +99,7 @@ replacement = '''    def handle_authorize(self, mid, params):
 '''
 
 client_text = client_text[:fn_start] + replacement + client_text[fn_end:]
-text = text[:start] + client_text + client_text[fn_end:0] if False else text[:start] + client_text + text[end:]
+text = text[:start] + client_text + text[end:]
 
 for marker in (
     'self.vardiff_enabled = bool(VARDIFF) or password_text == "x"',
