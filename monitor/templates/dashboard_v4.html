@@ -13,9 +13,9 @@
 <link rel="stylesheet" href="/static/dashboard_v4_share_3d.css?v=20260825-4">
 <link rel="stylesheet" href="/static/dashboard_v4_reference_final.css?v=20260825-1">
 <link rel="stylesheet" href="/static/dashboard_v4_reference_alignment.css?v=20260826-align4">
-<link rel="stylesheet" href="/static/dashboard_v4_core_motion.css?v=20260826-core3">
-<link rel="stylesheet" href="/static/dashboard_v4_magic_particles.css?v=20260826-magic1">
-<link rel="stylesheet" href="/static/dashboard_v4_eta_plus.css?v=20260826-eta1">
+<link rel="stylesheet" href="/static/dashboard_v4_core_motion.css?v=20260826-prism4">
+<link rel="stylesheet" href="/static/dashboard_v4_magic_particles.css?v=20260826-magic3">
+<link rel="stylesheet" href="/static/dashboard_v4_eta_plus.css?v=20260826-eta2">
 </head>
 <body>
 <div class="ambient ambient-cyan"></div><div class="ambient ambient-green"></div><div class="grid-noise"></div>
@@ -41,19 +41,22 @@
       <div class="forge-center" id="forgeScene">
         <div class="vardiff-badge"><span>POOL DIFFICULTY</span><strong id="liveVarDiff">—</strong><small>STRATUM · LIVE</small></div><div class="core-orbit core-orbit-a"></div><div class="core-orbit core-orbit-b"></div><div class="core-orbit core-orbit-c"></div>
         <div class="fix-magic-particles" id="fixMagicParticles" aria-hidden="true"></div>
-        <div class="core-logo" id="forgeCore" aria-label="FixedCoin proof of work core">
-          <svg class="fix-core-mark" viewBox="0 0 160 160" role="img" aria-label="FIX core">
+        <div class="core-logo" id="forgeCore" aria-label="FixedCoin Prism Core">
+          <svg class="fix-core-mark" viewBox="0 0 160 160" role="img" aria-label="FixedCoin Prism Core">
             <circle class="fix-core-ring r1" cx="80" cy="80" r="72"></circle>
             <circle class="fix-core-ring r2" cx="80" cy="80" r="62"></circle>
             <circle class="fix-core-ring r3" cx="80" cy="80" r="51"></circle>
-            <polygon class="fix-core-shell" points="80,25 128,52 128,108 80,135 32,108 32,52"></polygon>
-            <polygon class="fix-core-inner" points="80,39 116,59 116,101 80,121 44,101 44,59"></polygon>
-            <path class="fix-core-bolt" d="M89 48 61 84h18l-8 28 28-38H81z"></path>
+            <polygon class="fix-core-shell" points="80,22 130,51 130,109 80,138 30,109 30,51"></polygon>
+            <polygon class="fix-core-inner" points="80,37 115,57 115,103 80,123 45,103 45,57"></polygon>
+            <polygon class="fix-core-prism" points="80,45 108,61 108,99 80,115 52,99 52,61"></polygon>
+            <path class="fix-core-grid" d="M45 80h70M80 37v86M55 52l50 56M105 52l-50 56"></path>
+            <path class="fix-core-bolt" d="M58 51h44v12H72v10h25v12H72v24H58z"></path>
             <circle class="fix-core-node" cx="80" cy="80" r="3"></circle>
-            <path class="fix-core-scanline" d="M54 80h16M90 80h16"></path>
+            <path class="fix-core-scanline" d="M48 80h9M103 80h9"></path>
+            <path class="fix-core-ray" d="M20 80h20M120 80h20M80 20v20M80 120v20"></path>
           </svg>
           <div class="core-scan"></div>
-        </div><div class="core-title">FIXCOIN <span>· PROOF OF WORK</span></div><div class="core-status">ENERGY CORE // LIVE HASH STREAM</div>
+        </div><div class="core-title">FIXCOIN <span>· PRISM CORE</span></div><div class="core-status">ENERGY CORE // LIVE HASH STREAM</div>
       </div>
       <div class="forge-side right-side"><div class="forge-counter accepted parallax-card" id="acceptedCounter"><span>ACCEPTED SHARES</span><strong id="acceptedCount">0</strong><b>+1</b><i>✓</i></div><div class="forge-counter rejected parallax-card" id="rejectedCounter"><span>REJECTED SHARES</span><strong id="rejectedCount">0</strong><b>-1</b><i>×</i></div></div>
       <div class="forge-bottom"><div class="combo" id="combo"><span>COMBO</span><strong id="comboValue">×0</strong><small id="comboBonus">STREAK READY</small></div><div class="forge-network-label">HASH STREAM // SHA256 // LIVE WORK // NETWORK TARGET</div></div>
@@ -61,9 +64,9 @@
   </section>
   <section class="candidate panel" id="candidate"><div class="candidate-left"><div class="section-heading"><span class="target-icon">◎</span><div><h2>BLOCK CANDIDATE // NETWORK PROXIMITY</h2><p>Best submitted share measured against the current network block target.</p></div></div><strong class="candidate-pct" id="candidatePct">0.000%</strong><span class="caption">PROGRESS TO BLOCK</span><div class="candidate-track parallax-bar" id="candidateTrack"><i id="candidateMeter"></i><canvas class="bar-particles" id="candidateParticles" aria-hidden="true"></canvas></div><div class="next-height"><span>BLOCK HEIGHT (NEXT)</span><strong id="nextHeight">#—</strong></div></div><div class="candidate-core" id="candidateCore"><div class="core-grid"></div><div class="candidate-ring ring-a"></div><div class="candidate-ring ring-b"></div><div class="candidate-ring ring-c"></div><div class="candidate-cube"><span>F</span></div><small>BLOCK</small><b>VERY LOW</b></div></section>
   <section class="stats-grid stats-primary"><div class="stat panel"><span>AVG. SHARE DIFFICULTY</span><strong id="avgDiff">—</strong><small>(LAST 10 MIN)</small><svg viewBox="0 0 180 38"><polyline id="avgSpark" points="0,31 20,27 40,29 60,21 80,25 100,15 120,21 140,12 160,18 180,8"/></svg></div><div class="stat panel"><span>VALID SHARES</span><strong id="validShares">0</strong><small id="validPct">0.0%</small></div><div class="stat panel"><span>INVALID SHARES</span><strong class="red" id="invalidShares">0</strong><small id="invalidPct">0.0%</small></div></section>
-  <section class="balance-grid"><div class="balance-card panel"><span>CONFIRMED BALANCE</span><strong class="green" id="confirmedBalance">—</strong><small>trusted / confirmed</small></div><div class="balance-card panel"><span>UNCONFIRMED / PENDING</span><strong class="cyan" id="unconfirmedBalance">—</strong><small>untrusted pending tx</small></div><div class="balance-card panel"><span>IMMATURE BALANCE</span><strong class="amber" id="immatureBalance">—</strong><small>coinbase maturity</small></div><div class="balance-card panel"><span>TOTAL WALLET BALANCE</span><strong class="green" id="totalBalance">—</strong><small>confirmed + pending + immature</small></div><div class="balance-card panel"><span>NETWORK BLOCK ETA</span><strong id="eta">—</strong><small>at current hashrate <b id="etaPlus" class="eta-plus" aria-live="polite"></b></small></div></section>
+  <section class="balance-grid"><div class="balance-card panel"><span>CONFIRMED BALANCE</span><strong class="green" id="confirmedBalance">—</strong><small>trusted / confirmed</small></div><div class="balance-card panel"><span>UNCONFIRMED / PENDING</span><strong class="cyan" id="unconfirmedBalance">—</strong><small>untrusted pending tx</small></div><div class="balance-card panel"><span>IMMATURE BALANCE</span><strong class="amber" id="immatureBalance">—</strong><small>coinbase maturity</small></div><div class="balance-card panel"><span>TOTAL WALLET BALANCE</span><strong class="green" id="totalBalance">—</strong><small>confirmed + pending + immature</small></div><div class="balance-card panel"><span>NETWORK BLOCK ETA</span><strong id="eta">—</strong><small class="eta-caption">at current hashrate <b id="etaPlus" class="eta-plus" aria-live="polite"></b></small></div></section>
   <section class="block-history panel" id="blockHistory"><div class="history-head"><div class="section-heading"><span class="target-icon">◆</span><div><h2>BLOCK HISTORY</h2><p>Solo candidates and chain validity</p></div></div><span class="history-count" id="historyCount">0 RECORDS</span></div><div class="history-table"><div class="history-row history-labels"><span>HEIGHT</span><span>VALIDITY</span><span>CONFIRMATIONS</span><span>REWARD</span><span>BLOCK HASH</span></div><div id="blockHistoryList"><div class="history-empty">No block candidates recorded yet.</div></div></div></section>
   <footer class="footer"><strong>FIXEDCOIN SOLO MINER</strong><span>UP TIME <b id="uptime">—</b></span><span>CONNECTED PEERS <b id="peers">—</b></span><span>NETWORK DIFFICULTY <b id="footerDiff">—</b></span><span>VERSION <b>v29.1.3</b></span></footer>
 </main>
-<script defer src="/static/dashboard_v4.js?v=20260825-4"></script><script defer src="/static/dashboard_v4_reference_final.js?v=20260826-core1"></script><script type="module" src="/static/dashboard_v4_core_motion.js?v=20260826-core3"></script><script type="module" src="/static/dashboard_v4_magic_particles.js?v=20260826-magic1"></script><script defer src="/static/dashboard_v4_eta_plus.js?v=20260826-eta1"></script>
+<script defer src="/static/dashboard_v4.js?v=20260825-4"></script><script defer src="/static/dashboard_v4_reference_final.js?v=20260826-core1"></script><script type="module" src="/static/dashboard_v4_core_motion.js?v=20260826-prism4"></script><script type="module" src="/static/dashboard_v4_magic_particles.js?v=20260826-magic3"></script><script defer src="/static/dashboard_v4_eta_plus.js?v=20260826-eta2"></script>
 </body></html>
