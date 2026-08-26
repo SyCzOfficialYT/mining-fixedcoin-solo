@@ -3,71 +3,63 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#01060a">
-<title>FixedCoin · Solo Mining</title>
+<meta name="theme-color" content="#02030b">
+<meta name="description" content="LiveShare — FixedCoin solo mining arcane command center">
+<title>LiveShare · FixedCoin Solo Mining</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/static/dashboard_v4.css?v=20260825-4">
-<link rel="stylesheet" href="/static/dashboard_v4_forge.css?v=20260825-6">
-<link rel="stylesheet" href="/static/dashboard_v4_share_3d.css?v=20260825-4">
-<link rel="stylesheet" href="/static/dashboard_v4_reference_final.css?v=20260825-1">
-<link rel="stylesheet" href="/static/dashboard_v4_reference_alignment.css?v=20260826-align4">
-<link rel="stylesheet" href="/static/dashboard_v4_core_motion.css?v=20260826-prism4">
-<link rel="stylesheet" href="/static/dashboard_v4_magic_particles.css?v=20260826-magic3">
-<link rel="stylesheet" href="/static/dashboard_v4_eta_plus.css?v=20260826-eta2">
-<link rel="stylesheet" href="/static/dashboard_v4_mobile_balance_layout.css?v=20260826-bal1">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/dashboard_v4.css?v=20260826-mythic1">
+<link rel="stylesheet" href="/static/dashboard_v4_forge.css?v=20260826-mythic1">
+<link rel="stylesheet" href="/static/dashboard_v4_share_3d.css?v=20260826-mythic1">
+<link rel="stylesheet" href="/static/dashboard_v4_reference_final.css?v=20260826-mythic1">
+<link rel="stylesheet" href="/static/dashboard_v4_reference_alignment.css?v=20260826-mythic2">
+<link rel="stylesheet" href="/static/dashboard_v4_core_motion.css?v=20260826-mythic1">
+<link rel="stylesheet" href="/static/dashboard_v4_magic_particles.css?v=20260826-mythic1">
+<link rel="stylesheet" href="/static/dashboard_v4_eta_plus.css?v=20260826-mythic1">
+<link rel="stylesheet" href="/static/dashboard_v4_mobile_balance_layout.css?v=20260826-mythic1">
 </head>
 <body>
 <div class="ambient ambient-cyan"></div><div class="ambient ambient-green"></div><div class="grid-noise"></div>
-<main class="dashboard reference-dashboard">
+<main class="dashboard reference-dashboard liveshare-dashboard">
   <section class="hero panel parallax-surface">
     <div class="hero-main">
-      <div class="eyebrow">BEST SHARE <b>→</b> NETWORK BLOCK TARGET</div>
-      <p class="subtitle">Your best submitted share versus the actual network block target.</p>
+      <div class="eyebrow">LIVESHARE <b>✦</b> ARCANE SOLO MINING NETWORK</div>
+      <p class="subtitle">Your best submitted work measured against the current FixedCoin network block target.</p>
       <div class="hero-values"><div class="hero-value best"><span>BEST SHARE DIFFICULTY</span><strong id="bestShare">—</strong><small id="bestRaw">≈ —</small></div><div class="versus">VS</div><div class="hero-value network"><span>NETWORK TARGET</span><strong id="networkTarget">—</strong><small id="networkRaw">≈ —</small><em id="remaining">— remaining</em></div></div>
       <div class="target-track parallax-bar" id="targetTrack"><i id="targetMeter"></i><b id="targetMarker"></b><canvas class="bar-particles" id="targetParticles" aria-hidden="true"></canvas></div>
-      <div class="track-labels"><span>0</span><strong id="targetPct">0.000%</strong><span>100% (Block Target)</span></div>
+      <div class="track-labels"><span>0</span><strong id="targetPct">0.000%</strong><span>100% · BLOCK TARGET</span></div>
     </div>
     <aside class="round-panel"><span>CURRENT ROUND</span><strong class="round-id" id="roundId">#—</strong><div class="round-sep"></div><span>ROUND TARGET</span><strong class="estimate">◷&nbsp; 10:00</strong><div class="round-sep"></div><span class="cyan">TIME REMAINING</span><strong class="remaining" id="timeRemain">00:00</strong><small id="timePct">0.0%</small><span class="status-label">ROUND STATUS</span><b class="status waiting" id="roundStatus">WAITING</b></aside>
   </section>
   <section class="forge panel" id="forge">
-    <header class="forge-head"><div class="eyebrow">LIVE SHARE FORGE <i>•</i> REALTIME PROOF OF WORK</div><div class="live"><i></i> STRATUM LIVE</div></header>
+    <header class="forge-head"><div class="eyebrow">LIVE SHARE FORGE <i>✦</i> REALTIME PROOF OF WORK</div><div class="live"><i></i> STRATUM LIVE</div></header>
     <div class="forge-stage" id="forgeStage">
       <div class="forge-depth-grid"></div><div class="forge-vignette"></div><canvas class="forge-particle-field" id="forgeParticles" aria-hidden="true"></canvas><canvas class="particle-canvas" id="particleCanvas" aria-hidden="true"></canvas>
       <div class="forge-side left-side">
-        <div class="forge-metric glass-card parallax-card"><span>HASHRATE</span><strong id="forgeHashrate">—</strong><small>AXEOS LIVE</small><svg viewBox="0 0 180 44"><polyline id="hashSpark" points="0,34 18,27 35,31 52,19 69,26 86,14 103,24 120,12 138,19 155,10 180,16"/></svg></div>
-        <div class="forge-metric glass-card parallax-card"><span>SHARES / MIN</span><strong id="sharesMin">—</strong><small>(LAST 10 MIN)</small><svg viewBox="0 0 180 44"><polyline id="shareSpark" points="0,34 18,31 35,30 52,25 69,27 86,21 103,23 120,17 138,19 155,13 180,16"/></svg></div>
+        <div class="forge-metric glass-card parallax-card"><span>HASHRATE</span><strong id="forgeHashrate">—</strong><small>LIVESHARE LIVE</small><svg viewBox="0 0 180 44"><polyline id="hashSpark" points="0,34 18,27 35,31 52,19 69,26 86,14 103,24 120,12 138,19 155,10 180,16"/></svg></div>
+        <div class="forge-metric glass-card parallax-card"><span>SHARES / MIN</span><strong id="sharesMin">—</strong><small>LAST 10 MIN</small><svg viewBox="0 0 180 44"><polyline id="shareSpark" points="0,34 18,31 35,30 52,25 69,27 86,21 103,23 120,17 138,19 155,13 180,16"/></svg></div>
       </div>
       <div class="forge-center" id="forgeScene">
         <div class="vardiff-badge"><span>POOL DIFFICULTY</span><strong id="liveVarDiff">—</strong><small>STRATUM · LIVE</small></div><div class="core-orbit core-orbit-a"></div><div class="core-orbit core-orbit-b"></div><div class="core-orbit core-orbit-c"></div>
         <div class="fix-magic-particles" id="fixMagicParticles" aria-hidden="true"></div>
         <div class="core-logo" id="forgeCore" aria-label="FixedCoin Prism Core">
           <svg class="fix-core-mark" viewBox="0 0 160 160" role="img" aria-label="FixedCoin Prism Core">
-            <circle class="fix-core-ring r1" cx="80" cy="80" r="72"></circle>
-            <circle class="fix-core-ring r2" cx="80" cy="80" r="62"></circle>
-            <circle class="fix-core-ring r3" cx="80" cy="80" r="51"></circle>
-            <polygon class="fix-core-shell" points="80,22 130,51 130,109 80,138 30,109 30,51"></polygon>
-            <polygon class="fix-core-inner" points="80,37 115,57 115,103 80,123 45,103 45,57"></polygon>
-            <polygon class="fix-core-prism" points="80,45 108,61 108,99 80,115 52,99 52,61"></polygon>
-            <path class="fix-core-grid" d="M45 80h70M80 37v86M55 52l50 56M105 52l-50 56"></path>
-            <path class="fix-core-bolt" d="M58 51h44v12H72v10h25v12H72v24H58z"></path>
-            <circle class="fix-core-node" cx="80" cy="80" r="3"></circle>
-            <path class="fix-core-scanline" d="M48 80h9M103 80h9"></path>
-            <path class="fix-core-ray" d="M20 80h20M120 80h20M80 20v20M80 120v20"></path>
-          </svg>
-          <div class="core-scan"></div>
-        </div><div class="core-title">FIXCOIN <span>· PRISM CORE</span></div><div class="core-status">ENERGY CORE // LIVE HASH STREAM</div>
+            <circle class="fix-core-ring r1" cx="80" cy="80" r="72"></circle><circle class="fix-core-ring r2" cx="80" cy="80" r="62"></circle><circle class="fix-core-ring r3" cx="80" cy="80" r="51"></circle>
+            <polygon class="fix-core-shell" points="80,22 130,51 130,109 80,138 30,109 30,51"></polygon><polygon class="fix-core-inner" points="80,37 115,57 115,103 80,123 45,103 45,57"></polygon><polygon class="fix-core-prism" points="80,45 108,61 108,99 80,115 52,99 52,61"></polygon>
+            <path class="fix-core-grid" d="M45 80h70M80 37v86M55 52l50 56M105 52l-50 56"></path><path class="fix-core-bolt" d="M58 51h44v12H72v10h25v12H72v24H58z"></path><circle class="fix-core-node" cx="80" cy="80" r="3"></circle><path class="fix-core-scanline" d="M48 80h9M103 80h9"></path><path class="fix-core-ray" d="M20 80h20M120 80h20M80 20v20M80 120v20"></path>
+          </svg><div class="core-scan"></div>
+        </div><div class="core-title">LIVESHARE <span>· ARCANE CORE</span></div><div class="core-status">MAGIC ENERGY // LIVE HASH STREAM // SHA256</div>
       </div>
       <div class="forge-side right-side"><div class="forge-counter accepted parallax-card" id="acceptedCounter"><span>ACCEPTED SHARES</span><strong id="acceptedCount">0</strong><b>+1</b><i>✓</i></div><div class="forge-counter rejected parallax-card" id="rejectedCounter"><span>REJECTED SHARES</span><strong id="rejectedCount">0</strong><b>-1</b><i>×</i></div></div>
-      <div class="forge-bottom"><div class="combo" id="combo"><span>COMBO</span><strong id="comboValue">×0</strong><small id="comboBonus">STREAK READY</small></div><div class="forge-network-label">HASH STREAM // SHA256 // LIVE WORK // NETWORK TARGET</div></div>
+      <div class="forge-bottom"><div class="combo" id="combo"><span>COMBO</span><strong id="comboValue">×0</strong><small id="comboBonus">STREAK READY</small></div><div class="forge-network-label">ANCIENT HASH STREAM // PROOF OF WORK // NETWORK TARGET</div></div>
     </div>
   </section>
-  <section class="candidate panel" id="candidate"><div class="candidate-left"><div class="section-heading"><span class="target-icon">◎</span><div><h2>BLOCK CANDIDATE // NETWORK PROXIMITY</h2><p>Best submitted share measured against the current network block target.</p></div></div><strong class="candidate-pct" id="candidatePct">0.000%</strong><span class="caption">PROGRESS TO BLOCK</span><div class="candidate-track parallax-bar" id="candidateTrack"><i id="candidateMeter"></i><canvas class="bar-particles" id="candidateParticles" aria-hidden="true"></canvas></div><div class="next-height"><span>BLOCK HEIGHT (NEXT)</span><strong id="nextHeight">#—</strong></div></div><div class="candidate-core" id="candidateCore"><div class="core-grid"></div><div class="candidate-ring ring-a"></div><div class="candidate-ring ring-b"></div><div class="candidate-ring ring-c"></div><div class="candidate-cube"><span>F</span></div><small>BLOCK</small><b>VERY LOW</b></div></section>
-  <section class="stats-grid stats-primary"><div class="stat panel"><span>AVG. SHARE DIFFICULTY</span><strong id="avgDiff">—</strong><small>(LAST 10 MIN)</small><svg viewBox="0 0 180 38"><polyline id="avgSpark" points="0,31 20,27 40,29 60,21 80,25 100,15 120,21 140,12 160,18 180,8"/></svg></div><div class="stat panel"><span>VALID SHARES</span><strong id="validShares">0</strong><small id="validPct">0.0%</small></div><div class="stat panel"><span>INVALID SHARES</span><strong class="red" id="invalidShares">0</strong><small id="invalidPct">0.0%</small></div></section>
-  <section class="balance-grid"><div class="balance-card panel"><span>CONFIRMED BALANCE</span><strong class="green" id="confirmedBalance">—</strong><small>trusted / confirmed</small></div><div class="balance-card panel"><span>UNCONFIRMED / PENDING</span><strong class="cyan" id="unconfirmedBalance">—</strong><small>untrusted pending tx</small></div><div class="balance-card panel"><span>IMMATURE BALANCE</span><strong class="amber" id="immatureBalance">—</strong><small>coinbase maturity</small></div><div class="balance-card panel"><span>TOTAL WALLET BALANCE</span><strong class="green" id="totalBalance">—</strong><small>confirmed + pending + immature</small></div><div class="balance-card panel"><span>NETWORK BLOCK ETA</span><strong id="eta">—</strong><small class="eta-caption">at current hashrate <b id="etaPlus" class="eta-plus" aria-live="polite"></b></small></div></section>
-  <section class="block-history panel" id="blockHistory"><div class="history-head"><div class="section-heading"><span class="target-icon">◆</span><div><h2>BLOCK HISTORY</h2><p>Solo candidates and chain validity</p></div></div><span class="history-count" id="historyCount">0 RECORDS</span></div><div class="history-table"><div class="history-row history-labels"><span>HEIGHT</span><span>VALIDITY</span><span>CONFIRMATIONS</span><span>REWARD</span><span>BLOCK HASH</span></div><div id="blockHistoryList"><div class="history-empty">No block candidates recorded yet.</div></div></div></section>
-  <footer class="footer"><strong>FIXEDCOIN SOLO MINER</strong><span>UP TIME <b id="uptime">—</b></span><span>CONNECTED PEERS <b id="peers">—</b></span><span>NETWORK DIFFICULTY <b id="footerDiff">—</b></span><span>VERSION <b>v29.1.3</b></span></footer>
+  <section class="candidate panel" id="candidate"><div class="candidate-left"><div class="section-heading"><span class="target-icon">✦</span><div><h2>BLOCK CANDIDATE // ARCANE PROXIMITY</h2><p>Best submitted share measured against the current network block target.</p></div></div><strong class="candidate-pct" id="candidatePct">0.000%</strong><span class="caption">PROGRESS TO BLOCK</span><div class="candidate-track parallax-bar" id="candidateTrack"><i id="candidateMeter"></i><canvas class="bar-particles" id="candidateParticles" aria-hidden="true"></canvas></div><div class="next-height"><span>BLOCK HEIGHT · NEXT</span><strong id="nextHeight">#—</strong></div></div><div class="candidate-core" id="candidateCore"><div class="core-grid"></div><div class="candidate-ring ring-a"></div><div class="candidate-ring ring-b"></div><div class="candidate-ring ring-c"></div><div class="candidate-cube"><span>F</span></div><small>BLOCK</small><b>VERY LOW</b></div></section>
+  <section class="stats-grid stats-primary"><div class="stat panel"><span>AVG. SHARE DIFFICULTY</span><strong id="avgDiff">—</strong><small>LAST 10 MIN</small><svg viewBox="0 0 180 38"><polyline id="avgSpark" points="0,31 20,27 40,29 60,21 80,25 100,15 120,21 140,12 160,18 180,8"/></svg></div><div class="stat panel"><span>VALID SHARES</span><strong id="validShares">0</strong><small id="validPct">0.0%</small></div><div class="stat panel"><span>INVALID SHARES</span><strong class="red" id="invalidShares">0</strong><small id="invalidPct">0.0%</small></div></section>
+  <section class="balance-grid"><div class="balance-card panel"><span>CONFIRMED BALANCE</span><strong class="green" id="confirmedBalance">—</strong><small>TRUSTED · CONFIRMED</small></div><div class="balance-card panel"><span>UNCONFIRMED / PENDING</span><strong class="cyan" id="unconfirmedBalance">—</strong><small>UNTRUSTED PENDING TX</small></div><div class="balance-card panel"><span>IMMATURE BALANCE</span><strong class="amber" id="immatureBalance">—</strong><small>COINBASE MATURITY</small></div><div class="balance-card panel"><span>TOTAL WALLET BALANCE</span><strong class="green" id="totalBalance">—</strong><small>CONFIRMED + PENDING + IMMATURE</small></div><div class="balance-card panel"><span>NETWORK BLOCK ETA</span><strong id="eta">—</strong><small class="eta-caption">AT CURRENT HASHRATE <b id="etaPlus" class="eta-plus" aria-live="polite"></b></small></div></section>
+  <section class="block-history panel" id="blockHistory"><div class="history-head"><div class="section-heading"><span class="target-icon">◆</span><div><h2>BLOCK HISTORY</h2><p>Chronicles of the FixedCoin chain</p></div></div><span class="history-count" id="historyCount">0 RECORDS</span></div><div class="history-table"><div class="history-row history-labels"><span>HEIGHT</span><span>VALIDITY</span><span>CONFIRMATIONS</span><span>REWARD</span><span>BLOCK HASH</span></div><div id="blockHistoryList"><div class="history-empty">No block candidates recorded yet.</div></div></div></section>
+  <footer class="footer"><strong>LIVESHARE · FIXEDCOIN SOLO</strong><span>UP TIME <b id="uptime">—</b></span><span>CONNECTED PEERS <b id="peers">—</b></span><span>NETWORK DIFFICULTY <b id="footerDiff">—</b></span><span>VERSION <b>v29.1.3</b></span></footer>
 </main>
-<script defer src="/static/dashboard_v4.js?v=20260825-4"></script><script defer src="/static/dashboard_v4_reference_final.js?v=20260826-core1"></script><script type="module" src="/static/dashboard_v4_core_motion.js?v=20260826-prism4"></script><script type="module" src="/static/dashboard_v4_magic_particles.js?v=20260826-magic3"></script><script defer src="/static/dashboard_v4_eta_plus.js?v=20260826-eta2"></script>
+<script defer src="/static/dashboard_v4.js?v=20260826-mythic1"></script><script defer src="/static/dashboard_v4_reference_final.js?v=20260826-mythic1"></script><script type="module" src="/static/dashboard_v4_core_motion.js?v=20260826-mythic1"></script><script type="module" src="/static/dashboard_v4_magic_particles.js?v=20260826-mythic1"></script><script defer src="/static/dashboard_v4_eta_plus.js?v=20260826-mythic1"></script>
 </body></html>
