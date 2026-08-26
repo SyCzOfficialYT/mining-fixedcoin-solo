@@ -3,7 +3,7 @@
 
 Idempotent build-time patch: replaces the old F/bolt mark, aligns the
 candidate mark with the forge mark, and enables the richer Motion particle
-layer. No runtime dependency beyond the existing Motion CDN import.
+layer plus the mythic Candidate/Treasury visual layer.
 """
 from pathlib import Path
 import re
@@ -41,6 +41,12 @@ if 'dashboard_v4_logo_fx.css' not in html:
 else:
     html=re.sub(r'<link rel="stylesheet" href="/static/dashboard_v4_logo_fx\.css\?v=[^"\s>]+">',css_link,html)
 
+mythic_css='<link rel="stylesheet" href="/static/dashboard_v4_mythic_liveshare.css?v=20260826-mythic3">'
+if 'dashboard_v4_mythic_liveshare.css' not in html:
+    html=html.replace('</head>',mythic_css+'\n</head>',1)
+else:
+    html=re.sub(r'<link rel="stylesheet" href="/static/dashboard_v4_mythic_liveshare\.css\?v=[^"\s>]+">',mythic_css,html)
+
 js_link='<script type="module" src="/static/dashboard_v4_logo_fx.js?v=20260826-fx1"></script>'
 if 'dashboard_v4_logo_fx.js' not in html:
     html=html.replace('</body>',js_link+'\n</body>',1)
@@ -52,5 +58,9 @@ if re.search(magic_old,html):
 elif 'dashboard_v4_magic_particles_v2.js' not in html:
     html=html.replace('</body>',magic_new+'\n</body>',1)
 
+mythic_js='<script type="module" src="/static/dashboard_v4_mythic_liveshare.js?v=20260826-mythic3"></script>'
+if 'dashboard_v4_mythic_liveshare.js' not in html:
+    html=html.replace('</body>',mythic_js+'\n</body>',1)
+
 HTML.write_text(html)
-print('dashboard FX identity patch applied: geometric FX core, matching candidate mark, enhanced Motion particles')
+print('dashboard FX identity patch applied: geometric FX core, matching candidate mark, enhanced Motion particles, mythic Candidate/Treasury layer')
