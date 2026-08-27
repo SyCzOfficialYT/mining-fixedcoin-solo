@@ -66,7 +66,12 @@ assert "net_diff = target_to_difficulty(bits_to_target(nbits))" in source, "FATA
 assert "net_diff = fixedcoin_target_to_difficulty(bits_to_target(nbits))" not in source, "FATAL: powLimit-based network difficulty is still active"
 assert source.count(low_reject) == 1, "FATAL: strict low-difficulty rejection is missing or duplicated"
 assert "ACCEPT low-difficulty" not in source, "FATAL: low-difficulty acceptance bypass is still present"
-assert "NMMINER DIFF" in source, "FATAL: NMMiner compatibility patch missing"
+# The low-hash patch was deliberately renamed from the historical NMMINER
+# marker to the shared LOW-HASH marker because NerdMiner and NerdQAxe++ use
+# the same fixed low-hash authority. Keep the runtime invariant aligned with
+# the implementation instead of checking a stale legacy log string.
+assert "LOW-HASH DIFF" in source, "FATAL: low-hash miner compatibility patch missing"
+assert "low_hash_miner = miner_family in {\"nmminer\", \"nerdminer\", \"nerdqaxe\"}" in source, "FATAL: low-hash miner family detection missing"
 assert "MINER DETECT family=" in source, "FATAL: miner detection patch missing"
 print("Verified FixedCoin runtime invariants: consensus + canonical difficulty + strict shares + miner compatibility")
 PY
