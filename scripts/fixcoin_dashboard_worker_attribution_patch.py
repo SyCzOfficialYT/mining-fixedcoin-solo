@@ -3,9 +3,7 @@
 
 The Stratum layer emits worker-aware ACCEPT/REJECT/authorize telemetry. The
 old dashboard parser kept one global ``current_worker`` and therefore merged
-shares from multiple ASICs/NMMiner connections into whichever worker happened
-to authorize last. Replace the whole parser function so attribution is based
-on the worker explicitly present in each event whenever available.
+shares from multiple connections into whichever worker authorized last.
 """
 import ast
 from pathlib import Path
@@ -39,9 +37,6 @@ replacement = r'''def parse_logs():
         return row
 
     def parse_identity(line, row):
-        # Examples:
-        # authorize ... miner=NMMiner/v2 version=2
-        # MINER DETECT family=NMMiner variant=v2 version=2 ua='...'
         m = re.search(r"miner=([^/\s]+)/([^\s]+)\s+version=([^\s]+)", line, re.I)
         if m:
             row["miner_family"], row["miner_variant"], row["miner_version"] = m.groups()
@@ -51,13 +46,13 @@ replacement = r'''def parse_logs():
             row["user_agent"] = ua.strip().strip("'")
         if re.search(r"mode=vardiff=True", line, re.I):
             row["vardiff"] = True
-        if re.search(r"mode=(?:fixed|nmminer-fixed)", line, re.I):
+        elif re.search(r"mode=(?:fixed|nmminer-fixed)", line, re.I):
             row["vardiff"] = False
 
     for line in lines(LOG):
         ts = parse_ts(line[:19])
 
-        # Always bind identity/difficulty to the worker named by the event.
+        # Authorization is worker-specific and also carries miner identity.
         m = re.search(r"authorize\s+(\S+).*?(?:diff|share_diff)\s*[=:]\s*([0-9.eE+-]+)", line, re.I)
         if m:
             name, diff = m.groups()
@@ -65,13 +60,6 @@ replacement = r'''def parse_logs():
             w = worker_row(name, ts)
             w["difficulty"] = float(diff)
             parse_identity(line, w)
-
-        # Miner detection can arrive before authorize; recover the worker from
-        # the same connection's immediately following authorization when the
-        # log includes worker= in the detection event, otherwise keep it as a
-        # connection-wide hint without inventing a worker name.
-        if "MINER DETECT" in line:
-            parse_identity(line, worker_row(current_worker, ts))
 
         m = re.search(r"NEW ROUND\s+height=(\d+)\s+netdiff=([0-9.eE+-]+)", line, re.I)
         if m:
@@ -101,9 +89,8 @@ replacement = r'''def parse_logs():
                 "hash": h[:16], "worker": worker,
             })
 
-        # Attribute rejects to their explicit worker too. This fixes the
-        # dashboard's aggregate reject count being disconnected from miner
-        # cards when several workers are active.
+        # Explicit REJECT telemetry prevents reject counts from being assigned
+        # to whichever worker happened to authorize most recently.
         m = re.search(r"REJECT\s+reason=[^\s]+\s+worker=(\S+)", line, re.I)
         if m:
             worker = m.group(1)
