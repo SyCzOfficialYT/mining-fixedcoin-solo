@@ -4,7 +4,7 @@ DATADIR="${FIX_DATADIR:-/data/fixedcoin}"
 RPCUSER="${FIX_RPCUSER:-fixrpc}"
 RPCPASS="${FIX_RPCPASS:-}"
 RPCPORT="${FIX_RPCPORT:-24761}"
-P2PPORT="${P2PPORT:-24768}"
+P2PPORT="${FIX_P2PPORT:-24768}"
 DASH_PORT="${FIX_DASH_PORT:-5050}"
 mkdir -p "$DATADIR" "$DATADIR/wallets" /app/data /app/logs
 
@@ -62,6 +62,7 @@ python3 /app/scripts/fixcoin_network_difficulty_patch.py
 python3 /app/scripts/fixcoin_stratum_difficulty_patch.py
 python3 /app/scripts/fixcoin_stratum_miner_detection_patch.py
 python3 /app/scripts/fixcoin_stratum_nmminer_diff_patch.py
+python3 /app/scripts/fixcoin_stratum_diff_job_epoch_patch.py
 
 python3 /app/scripts/fixcoin_dashboard_difficulty_patch.py
 python3 /app/scripts/fixcoin_dashboard_realtime_patch.py
