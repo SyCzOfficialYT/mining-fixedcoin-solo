@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Attach a non-blocking GhostBot webhook to network block candidates."""
+"""Attach a non-blocking NerdQAxe/AxeOS-style webhook to network block candidates."""
 from pathlib import Path
 import ast
 import re
@@ -29,7 +29,7 @@ def _fixedcoin_ghostbot_send(payload):
             data=_json.dumps(payload, separators=(",", ":")).encode("utf-8"),
             headers={
                 "Content-Type": "application/json",
-                "User-Agent": "FixedCoin-Solo/GhostBot",
+                "User-Agent": "NerdQAxe++/AxeOS",
             },
             method="POST",
         )
@@ -77,24 +77,30 @@ def _fixedcoin_ghostbot_block_event(message):
     except ValueError:
         embed_color = 5635925
 
+    # Deliberately use an AxeOS/NerdQAxe identity rather than a visible
+    # GhostBot identity. This lets the alert share the same Discord webhook
+    # destination as the miner's normal alerts without looking like a second bot.
+    username = _os.getenv("GHOSTBOT_WEBHOOK_USERNAME", "NerdQAxe++")
+    avatar = (_os.getenv("GHOSTBOT_WEBHOOK_AVATAR_URL") or "").strip()
+
     payload = {
-        "username": _os.getenv("GHOSTBOT_WEBHOOK_USERNAME", "GhostBot"),
-        "content": "👻⛏️ **FIXEDCOIN BLOCK FOUND**",
+        "username": username,
         "allowed_mentions": {"parse": []},
+        "content": "🚀 **BLOCK FOUND!**",
         "embeds": [{
-            "title": "⛏️ FixedCoin — Block Found",
-            "description": "A network-difficulty block candidate was detected by the solo stratum.",
+            "title": "⛏️ NerdQAxe++ — Block Found",
+            "description": "Network-difficulty block candidate found by solo mining.",
             "color": embed_color,
             "fields": [
-                {"name": "Height", "value": f"`#{height}`", "inline": True},
-                {"name": "Hash", "value": f"`{block_hash}`", "inline": False},
+                {"name": "Block Height", "value": f"`#{height}`", "inline": True},
                 {"name": "Miner", "value": f"`{worker}`", "inline": True},
-                {"name": "Network", "value": "`FixedCoin Solo`", "inline": True},
+                {"name": "Block Hash", "value": f"`{block_hash}`", "inline": False},
             ],
-            "footer": {"text": "LIVE SHARE • ARCANE FORGE • GhostBot"},
+            "footer": {"text": "NerdQAxe++ • AxeOS"},
             "timestamp": _time.strftime("%Y-%m-%dT%H:%M:%SZ", _time.gmtime()),
             **({"url": dashboard} if dashboard else {}),
         }],
+        **({"avatar_url": avatar} if avatar else {}),
     }
 
     _fixedcoin_ghostbot_threading.Thread(
@@ -155,4 +161,4 @@ def emit(*args, **kwargs):
 text = text[:start] + HELPER + '\n' + renamed + wrapper + text[end:]
 ast.parse(text)
 SERVER.write_text(text)
-print('GhostBot webhook installed: non-blocking block-candidate notification with deduplication')
+print('NerdQAxe/AxeOS-style webhook installed: non-blocking block-candidate notification with deduplication')
