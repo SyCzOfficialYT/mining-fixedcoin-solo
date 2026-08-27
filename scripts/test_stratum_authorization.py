@@ -39,12 +39,18 @@ def run_case(name, family, password, expected_diff, expected_vardiff, expected_f
     assert abs(float(c.diff) - float(expected_diff)) < 1e-12, (name, c.diff, expected_diff)
     assert bool(c.vardiff_enabled) is expected_vardiff, (name, c.vardiff_enabled)
     assert bool(c.diff_from_password) is expected_fixed, (name, c.diff_from_password)
-    assert any(x.get("method") == "mining.set_difficulty" and abs(float(x["params"][0]) - float(expected_diff)) < 1e-12 for x in sent), (name, sent)
+    assert any(
+        x.get("method") == "mining.set_difficulty"
+        and abs(float(x["params"][0]) - float(expected_diff)) < 1e-12
+        for x in sent
+    ), (name, sent)
 
 
 run_case("ASIC fixed", "", "", s.FIXED_DIFF, False, True)
 run_case("password-x VarDiff", "", "x", max(s.START_DIFF, s.MIN_DIFF), True, False)
 run_case("explicit fixed", "", "d=20000", 20000, False, True)
 run_case("NMMiner", "NMMiner", "x", float(s.cfg["pool"].get("nmminer_difficulty", 0.001)), False, True)
+run_case("NerdMiner", "NerdMiner", "x", float(s.cfg["pool"].get("nmminer_difficulty", 0.001)), False, True)
+run_case("NerdQAxe++", "NerdQAxe", "x", float(s.cfg["pool"].get("nmminer_difficulty", 0.001)), False, True)
 
 print("Stratum authorization regression tests: PASS")
