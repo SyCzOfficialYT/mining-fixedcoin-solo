@@ -56,9 +56,9 @@ def _fixedcoin_ghostbot_block_event(message):
         return
 
     text = str(message)
-    hm = _re.search(r"\\bheight=(\\d+)", text, _re.I)
-    xm = _re.search(r"\\bhash=([0-9a-fA-F]{16,64})", text, _re.I)
-    wm = _re.search(r"\\bworker=([^\\s]+)", text, _re.I)
+    hm = _re.search(r"\bheight=(\d+)", text, _re.I)
+    xm = _re.search(r"\bhash=([0-9a-fA-F]{16,64})", text, _re.I)
+    wm = _re.search(r"\bworker=([^\s]+)", text, _re.I)
     height = hm.group(1) if hm else "unknown"
     block_hash = xm.group(1) if xm else "unknown"
     worker = wm.group(1) if wm else "solo"
@@ -130,7 +130,7 @@ if MARKER in text:
 
 start, end = function_span(text, 'emit')
 original = text[start:end]
-renamed = re.sub(r'^def\\s+emit\\s*\\(', 'def _fixedcoin_emit_original(', original, count=1, flags=re.M)
+renamed = re.sub(r'^def\s+emit\s*\(', 'def _fixedcoin_emit_original(', original, count=1, flags=re.M)
 if renamed == original:
     raise RuntimeError('could not rename original emit function')
 
