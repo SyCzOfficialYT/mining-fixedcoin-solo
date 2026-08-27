@@ -88,12 +88,15 @@ def parse_logs():
             job.update({"job_id":m.group(1),"height":int(m.group(2))})
             if m.group(3): job["miner_value"]=float(m.group(3))
             if m.group(4): job["dev_value"]=float(m.group(4))
-        m=re.search(r"ACCEPT\s+#(\d+)\s+work=([0-9.]+).*?(?:pool|pool_diff)=([0-9.]+).*?hash=([0-9a-fA-F]+)",line,re.I)
+        m=re.search(r"ACCEPT(?:\s+worker=(\S+))?\s+#(\d+)\s+work=([0-9.]+).*?(?:pool|pool_diff)=([0-9.]+).*?hash=([0-9a-fA-F]+)",line,re.I)
         if m:
-            num,work,diff,h=m.groups(); worker=current_worker or "unknown"
+            worker_hint,num,work,diff,h=m.groups(); worker=worker_hint or current_worker or "unknown"
             accepted.append({"ts":line[:19],"epoch":ts,"num":int(num),"work":float(work),"pool_diff":float(diff),"hash":h[:16],"worker":worker})
             w=workers.setdefault(worker,{"accepted":0,"rejected":0,"difficulty":float(diff)})
             w["accepted"]+=1; w["last_seen"]=ts; w["difficulty"]=float(diff)
+        m=re.search(r"REJECT.*?worker=(\S+)",line,re.I)
+        if m:
+            worker=m.group(1); w=workers.setdefault(worker,{"accepted":0,"rejected":0,"difficulty":0.0}); w["rejected"]+=1; w["last_seen"]=ts
         if re.search(r"\bREJECT\b|\blow difficulty\b|stale job|bad params|invalid",line,re.I): rejected+=1
     for w in workers.values(): w["active"]=bool(w.get("last_seen") and now-w["last_seen"]<=WORKER_ACTIVE_SECONDS)
     return accepted[-200:],rejected,blocks[-100:],workers,job
@@ -120,9 +123,7 @@ def wallet_state(current_height):
     walletinfo,walletinfo_error=wallet_rpc("getwalletinfo",timeout=4)
     txs,tx_error=wallet_rpc("listtransactions",["*",200,0,True],timeout=5)
     mine=(balances or {}).get("mine") or {}
-    confirmed=as_number(mine.get("trusted"))
-    unconfirmed=as_number(mine.get("untrusted_pending"))
-    rpc_immature=as_number(mine.get("immature"))
+    confirmed=as_number(mine.get("trusted")); unconfirmed=as_number(mine.get("untrusted_pending")); rpc_immature=as_number(mine.get("immature"))
     ledger=read_ledger(); blocks=[]; seen=set()
     for b in ledger:
         if not isinstance(b,dict): continue
@@ -130,11 +131,9 @@ def wallet_state(current_height):
         if (not txid and not bh) or key in seen: continue
         seen.add(key); confirmations=max(0,current_height-bh+1) if bh and current_height else 0; maturity_height=int(b.get("maturity_height") or (bh+MATURITY if bh else 0)); remaining=max(0,maturity_height-current_height) if maturity_height else MATURITY; orphaned=bool(b.get("orphaned") or str(b.get("status") or "").upper()=="ORPHANED"); state="ORPHANED" if orphaned else ("MATURED" if confirmations>=MATURITY else "IMMATURE")
         blocks.append({"txid":txid,"height":bh,"confirmations":confirmations,"validity_rounds":confirmations,"validity_target":MATURITY,"reward":abs(as_number(b.get("reward"))),"category":"generate","state":state,"maturity_height":maturity_height,"maturity_remaining":remaining,"time":parse_ts(b.get("found_at") or b.get("last_seen")) if isinstance(b.get("found_at") or b.get("last_seen"),str) else int(b.get("time") or 0),"blockhash":str(b.get("blockhash") or ""),"status":state})
-    immature=rpc_immature
-    ledger_immature=sum(x["reward"] for x in blocks if x["state"]=="IMMATURE")
+    immature=rpc_immature; ledger_immature=sum(x["reward"] for x in blocks if x["state"]=="IMMATURE")
     if ledger_immature>0: immature=max(immature,ledger_immature)
-    total=confirmed+unconfirmed+immature
-    blocks.sort(key=lambda x:(x.get("height") or 0,x.get("time") or 0),reverse=True)
+    total=confirmed+unconfirmed+immature; blocks.sort(key=lambda x:(x.get("height") or 0,x.get("time") or 0),reverse=True)
     return {"confirmed":confirmed,"pending":unconfirmed,"immature":immature,"unconfirmed":unconfirmed,"total":total,"blocks":blocks,"wallet":walletinfo or {},"error":balances_error or walletinfo_error or tx_error}
 
 def status():
@@ -152,6 +151,12 @@ def status():
         workers[name]={"accepted":int(pv.get("ok") or pv.get("accepted") or pv.get("shares") or lv.get("accepted") or 0),"rejected":int(pv.get("bad") or pv.get("rejected") or lv.get("rejected") or 0),"difficulty":as_number(pv.get("difficulty") or lv.get("difficulty") or fixed_diff,fixed_diff),"active":True}
     active_workers=list(workers.keys()); blocks=wallet["blocks"] or (stats.get("blocks_log") if isinstance(stats.get("blocks_log"),list) else []) or log_blocks
     return {"status":"online" if info or stats else "degraded","last_update":int(time.time()),"node":{"online":bool(info) or bool(stats),"synced":bool(info) and not initial_sync,"initial_block_download":initial_sync,"height":height,"headers":headers,"difficulty":network_diff,"target":mininginfo.get("target"),"bits":mininginfo.get("bits"),"connections":int(net.get("connections") or 0),"network_hashrate":network_hashrate,"chain":info.get("chain") or mininginfo.get("chain") or "unknown","verification_progress":as_number(info.get("verificationprogress"),0),"rpc_error":info_error},"mining":{"accepted":accepted,"rejected":rejected,"reject_pct":round(100*rejected/max(1,accepted+rejected),3),"hashrate_5m":h5,"hashrate_1h":h1,"fixed_difficulty":fixed_diff,"best_share":round_best,"best_share_pct":best_pct,"difficulty_remaining":remaining,"round_work":round_work,"round_shares":round_shares,"round_effort":round_effort,"workers":workers,"worker_count":len(active_workers),"active_workers":active_workers},"round":{"height":int(stats.get("round_height") or height),"shares":round_shares,"work":round_work,"best_share":round_best,"effort_pct":round_effort,"best_share_pct":best_pct,"difficulty":network_diff,"remaining":remaining,"started_at":stats.get("round_started_at"),"target_seconds":ROUND_SECONDS},"competition":{"your_hashrate":h5,"network_hashrate":network_hashrate},"wallet":{"confirmed":wallet["confirmed"],"pending":wallet["pending"],"immature":wallet["immature"],"unconfirmed":wallet["unconfirmed"],"total":wallet["total"],"total_rewards":as_number(stats.get("block_rewards_total"))},"job":job,"shares":shares[-100:],"blocks":blocks,"history_diff":DIFF_HISTORY,"payout":pool.get("payout_address",""),"maturity":MATURITY,"ts":int(time.time())}
+
+@app.get("/healthz")
+@app.get("/api/health")
+def health():
+    """Cheap liveness/readiness probe; never performs wallet or mining RPCs."""
+    return jsonify({"status":"ok","service":"fixedcoin-dashboard","ts":int(time.time())})
 
 @app.get("/")
 def index(): return render_template("dashboard_liveshare.html",payout=config().get("payout_address",""),maturity=MATURITY)
