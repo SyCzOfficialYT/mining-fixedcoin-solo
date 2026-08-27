@@ -3,34 +3,58 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#07051a">
+<meta name="theme-color" content="#05031a">
 <meta name="description" content="Liveshare — FixedCoin solo mining magical network">
 <title>Liveshare · FixedCoin Solo Mining</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/static/dashboard_liveshare.css?v=20260826-fantasy1">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=JetBrains+Mono:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/dashboard_liveshare.css?v=20260827-magical1to1">
 </head>
 <body>
-<div class="ls-stars"></div>
+<div class="ls-stars" aria-hidden="true"></div>
+<div class="ls-aurora" aria-hidden="true"></div>
 <div class="ls-shell">
   <aside class="ls-side">
     <div class="ls-brand">
-      <svg width="44" height="44" viewBox="0 0 54 54" aria-hidden="true"><circle cx="27" cy="27" r="25" fill="none" stroke="#d4af5a" stroke-width="1.2"/><path d="M27 8 L40 22 L27 46 L14 22 Z" fill="#6d28d9"/><path d="M27 12 L34 22 L27 38 L20 22 Z" fill="#c4b5fd"/></svg>
-      <div><strong>FixedCoin</strong><span>Solo Node</span></div>
+      <svg class="brand-seal" width="48" height="48" viewBox="0 0 54 54" aria-hidden="true">
+        <circle cx="27" cy="27" r="25" fill="none" stroke="#d4af5a" stroke-width="1.4"/>
+        <circle cx="27" cy="27" r="21" fill="none" stroke="#a78bfa" stroke-width=".6" opacity=".5"/>
+        <path d="M27 8 L40 22 L27 46 L14 22 Z" fill="#6d28d9"/>
+        <path d="M27 12 L34 22 L27 38 L20 22 Z" fill="#c4b5fd"/>
+        <path d="M27 16 L30 22 L27 28 L24 22 Z" fill="#fff" opacity=".45"/>
+      </svg>
+      <div>
+        <strong>FIXEDCOIN</strong>
+        <span>SOLO NODE</span>
+      </div>
     </div>
     <nav>
-      <button class="active" type="button">Dashboard</button>
-      <button type="button" disabled>Mining</button>
-      <button type="button" disabled>Shares</button>
-      <button type="button" disabled>Blocks</button>
-      <button type="button" disabled>Workers</button>
-      <button type="button" disabled>Settings</button>
-      <button type="button" disabled>Logs</button>
-      <button type="button" disabled>System</button>
+      <button class="active" type="button"><i class="nav-ico">◈</i> Dashboard</button>
+      <button type="button" disabled><i class="nav-ico">⛏</i> Mining</button>
+      <button type="button" disabled><i class="nav-ico">⬡</i> Shares</button>
+      <button type="button" disabled><i class="nav-ico">▣</i> Blocks</button>
+      <button type="button" disabled><i class="nav-ico">◎</i> Workers</button>
+      <button type="button" disabled><i class="nav-ico">⚙</i> Settings</button>
+      <button type="button" disabled><i class="nav-ico">☰</i> Logs</button>
+      <button type="button" disabled><i class="nav-ico">⚡</i> System</button>
     </nav>
     <div class="ls-side-gem">
-      <svg class="gem" viewBox="0 0 120 162" width="72" height="97" aria-hidden="true"><defs><linearGradient id="gA" x1="20" y1="0" x2="100" y2="160"><stop offset="0" stop-color="#f3e8ff"/><stop offset=".25" stop-color="#c4b5fd"/><stop offset=".55" stop-color="#7c3aed"/><stop offset="1" stop-color="#2e1065"/></linearGradient></defs><ellipse cx="60" cy="150" rx="34" ry="8" fill="#7c3aed" opacity=".35"/><path d="M60 8 L96 52 L60 154 L24 52 Z" fill="url(#gA)"/><path d="M60 8 L78 52 L60 154 L42 52 Z" fill="#e0f2fe" opacity=".35"/><path d="M60 22 L70 50 L60 70 L50 50 Z" fill="#fff" opacity=".35"/></svg>
+      <svg class="gem" viewBox="0 0 120 162" width="80" height="108" aria-hidden="true">
+        <defs>
+          <linearGradient id="gA" x1="20" y1="0" x2="100" y2="160">
+            <stop offset="0" stop-color="#f3e8ff"/>
+            <stop offset=".25" stop-color="#c4b5fd"/>
+            <stop offset=".55" stop-color="#7c3aed"/>
+            <stop offset="1" stop-color="#2e1065"/>
+          </linearGradient>
+          <filter id="glow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+        <ellipse cx="60" cy="150" rx="34" ry="8" fill="#7c3aed" opacity=".35"/>
+        <path d="M60 8 L96 52 L60 154 L24 52 Z" fill="url(#gA)" filter="url(#glow)"/>
+        <path d="M60 8 L78 52 L60 154 L42 52 Z" fill="#e0f2fe" opacity=".35"/>
+        <path d="M60 22 L70 50 L60 70 L50 50 Z" fill="#fff" opacity=".4"/>
+      </svg>
     </div>
     <div class="ls-node">
       <span class="ls-label">Node Status</span>
@@ -43,75 +67,130 @@
   <main class="ls-main">
     <header class="ls-hero panel">
       <div class="ls-hero-art left">
-        <svg class="dragon" viewBox="0 0 220 280" aria-hidden="true"><defs><linearGradient id="drL" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c4b5fd"/><stop offset=".4" stop-color="#6d28d9"/><stop offset="1" stop-color="#1e1b4b"/></linearGradient></defs><path d="M40 250 C20 210 18 170 38 140 C22 128 18 104 36 88 C28 70 42 52 64 58 C72 36 102 28 118 52 C138 44 158 58 154 80 C176 86 186 112 170 132 C188 150 184 186 160 204 C178 222 168 248 140 252 C120 268 78 270 40 250 Z" fill="url(#drL)"/><circle cx="108" cy="78" r="4" fill="#67e8f9"/><path d="M96 92 L128 98 L108 108 Z" fill="#0f172a"/><path d="M150 92 L186 70 L158 104" fill="#7c3aed"/><path d="M36 168 C8 150 4 118 28 104" stroke="#a78bfa" stroke-width="6" stroke-linecap="round" fill="none"/></svg>
-        <svg class="hero-gem" viewBox="0 0 120 162" width="70" height="94" aria-hidden="true"><path d="M60 8 L96 52 L60 154 L24 52 Z" fill="url(#gA)"/></svg>
+        <svg class="dragon" viewBox="0 0 220 280" aria-hidden="true">
+          <defs>
+            <linearGradient id="drL" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#c4b5fd"/>
+              <stop offset=".4" stop-color="#6d28d9"/>
+              <stop offset="1" stop-color="#1e1b4b"/>
+            </linearGradient>
+          </defs>
+          <path d="M40 250 C20 210 18 170 38 140 C22 128 18 104 36 88 C28 70 42 52 64 58 C72 36 102 28 118 52 C138 44 158 58 154 80 C176 86 186 112 170 132 C188 150 184 186 160 204 C178 222 168 248 140 252 C120 268 78 270 40 250 Z" fill="url(#drL)"/>
+          <circle cx="108" cy="78" r="4" fill="#67e8f9"/>
+          <path d="M96 92 L128 98 L108 108 Z" fill="#0f172a"/>
+          <path d="M150 92 L186 70 L158 104" fill="#7c3aed"/>
+          <path d="M36 168 C8 150 4 118 28 104" stroke="#a78bfa" stroke-width="6" stroke-linecap="round" fill="none"/>
+        </svg>
+        <svg class="hero-gem" viewBox="0 0 120 162" width="64" height="86" aria-hidden="true">
+          <path d="M60 8 L96 52 L60 154 L24 52 Z" fill="url(#gA)"/>
+          <path d="M60 8 L78 52 L60 154 L42 52 Z" fill="#e0f2fe" opacity=".35"/>
+        </svg>
       </div>
       <div class="ls-hero-center">
         <p class="kicker">Solo Mining · Magical Network</p>
-        <h1>Liveshare</h1>
+        <h1>LIVESHARE</h1>
+        <div class="ornament" aria-hidden="true">✦ · · · · ✦</div>
         <div class="versus">
           <div class="stat purple">
             <span class="ls-label">Best Share Difficulty</span>
             <strong id="bestShare">—</strong>
-            <small id="bestRaw">≈ —</small>
+            <small id="bestDelta" class="delta">—</small>
+            <small id="bestRaw">Best: —</small>
             <div class="bar"><i id="targetMeter"></i><b id="targetMarker"></b></div>
-            <span class="bar-cap" id="targetPct">0.000%</span>
+            <span class="bar-cap" id="targetPct">0.00% of Network Target</span>
           </div>
-          <div class="compass" aria-hidden="true"><span>VS</span></div>
+          <div class="compass" aria-hidden="true">
+            <div class="compass-ring"></div>
+            <span>VS</span>
+          </div>
           <div class="stat gold">
             <span class="ls-label">Network Target Difficulty</span>
             <strong id="networkTarget">—</strong>
-            <small id="networkRaw">≈ —</small>
-            <em id="remaining">— remaining</em>
+            <small id="netDelta" class="delta gold">—</small>
+            <small id="networkRaw">—</small>
+            <div class="bar gold-bar"><i id="netMeter" style="width:100%"></i></div>
+            <em id="remaining">— remaining (—%)</em>
           </div>
         </div>
       </div>
       <div class="ls-hero-art right">
-        <svg class="hero-gem gold" viewBox="0 0 120 162" width="70" height="94" aria-hidden="true"><defs><linearGradient id="gG" x1="20" y1="0" x2="100" y2="160"><stop offset="0" stop-color="#fff7d6"/><stop offset=".3" stop-color="#f5d76e"/><stop offset=".7" stop-color="#c9a227"/><stop offset="1" stop-color="#6b4f12"/></linearGradient></defs><path d="M60 8 L96 52 L60 154 L24 52 Z" fill="url(#gG)"/></svg>
-        <svg class="dragon flip" viewBox="0 0 220 280" aria-hidden="true"><path d="M40 250 C20 210 18 170 38 140 C22 128 18 104 36 88 C28 70 42 52 64 58 C72 36 102 28 118 52 C138 44 158 58 154 80 C176 86 186 112 170 132 C188 150 184 186 160 204 C178 222 168 248 140 252 C120 268 78 270 40 250 Z" fill="url(#drL)"/><circle cx="108" cy="78" r="4" fill="#67e8f9"/><path d="M96 92 L128 98 L108 108 Z" fill="#0f172a"/></svg>
+        <svg class="hero-gem gold" viewBox="0 0 120 162" width="64" height="86" aria-hidden="true">
+          <defs>
+            <linearGradient id="gG" x1="20" y1="0" x2="100" y2="160">
+              <stop offset="0" stop-color="#fff7d6"/>
+              <stop offset=".3" stop-color="#f5d76e"/>
+              <stop offset=".7" stop-color="#c9a227"/>
+              <stop offset="1" stop-color="#6b4f12"/>
+            </linearGradient>
+          </defs>
+          <path d="M60 8 L96 52 L60 154 L24 52 Z" fill="url(#gG)"/>
+          <path d="M60 8 L78 52 L60 154 L42 52 Z" fill="#fff" opacity=".25"/>
+        </svg>
+        <svg class="dragon flip" viewBox="0 0 220 280" aria-hidden="true">
+          <path d="M40 250 C20 210 18 170 38 140 C22 128 18 104 36 88 C28 70 42 52 64 58 C72 36 102 28 118 52 C138 44 158 58 154 80 C176 86 186 112 170 132 C188 150 184 186 160 204 C178 222 168 248 140 252 C120 268 78 270 40 250 Z" fill="url(#drL)"/>
+          <circle cx="108" cy="78" r="4" fill="#67e8f9"/>
+          <path d="M96 92 L128 98 L108 108 Z" fill="#0f172a"/>
+        </svg>
       </div>
     </header>
 
     <section class="ls-forge panel" id="forge">
-      <div class="col">
+      <div class="col left-col">
         <div class="card">
           <span class="ls-label">Hashrate</span>
           <strong id="forgeHashrate">—</strong>
           <small>Live Performance</small>
-          <svg viewBox="0 0 180 28" class="spark"><polyline id="hashSpark" points="0,20 30,16 60,18 90,10 120,14 150,8 180,12" fill="none" stroke="#c4b5fd" stroke-width="1.8"/></svg>
+          <svg viewBox="0 0 180 28" class="spark" aria-hidden="true"><polyline id="hashSpark" points="0,20 30,16 60,18 90,10 120,14 150,8 180,12" fill="none" stroke="#c4b5fd" stroke-width="1.8"/></svg>
         </div>
         <div class="card">
           <span class="ls-label">Shares / Min</span>
           <strong id="sharesMin">—</strong>
           <small>Last 10 Min</small>
-          <svg viewBox="0 0 180 28" class="spark"><polyline id="shareSpark" points="0,22 40,20 80,16 120,14 160,10 180,12" fill="none" stroke="#67e8f9" stroke-width="1.8"/></svg>
+          <svg viewBox="0 0 180 28" class="spark" aria-hidden="true"><polyline id="shareSpark" points="0,22 40,20 80,16 120,14 160,10 180,12" fill="none" stroke="#67e8f9" stroke-width="1.8"/></svg>
         </div>
-        <div class="card">
-          <span class="ls-label">Network Luck / Effort</span>
+        <div class="card luck">
+          <span class="ls-label">Network Luck</span>
           <strong id="roundEffort">—</strong>
-          <small>Round Effort</small>
+          <small id="luckLabel">Round Effort</small>
+          <svg viewBox="0 0 180 28" class="spark" aria-hidden="true"><polyline points="0,18 40,14 80,16 120,10 160,12 180,8" fill="none" stroke="#f5d76e" stroke-width="1.8"/></svg>
         </div>
       </div>
+
       <div class="core">
-        <span class="ls-label">Pool Diff · Live</span>
-        <strong id="liveVarDiff">—</strong>
+        <div class="core-workers">
+          <span class="ls-label">Live Workers</span>
+          <strong id="liveWorkersDisplay">—</strong>
+        </div>
         <div class="core-stage">
+          <div class="platform" aria-hidden="true"></div>
           <div class="orbit"></div>
           <div class="orbit slow"></div>
-          <svg class="core-gem" viewBox="0 0 120 162" width="110" height="148" aria-hidden="true"><path d="M60 8 L96 52 L60 154 L24 52 Z" fill="url(#gA)"/><path d="M60 8 L78 52 L60 154 L42 52 Z" fill="#e0f2fe" opacity=".4"/><path d="M60 22 L70 50 L60 68 L52 50 Z" fill="#fff" opacity=".4"/></svg>
+          <div class="orbit reverse"></div>
+          <div class="core-particles" id="coreParticles" aria-hidden="true"></div>
+          <svg class="core-gem" viewBox="0 0 120 162" width="120" height="162" aria-hidden="true">
+            <ellipse cx="60" cy="148" rx="40" ry="10" fill="#7c3aed" opacity=".4"/>
+            <path d="M60 8 L96 52 L60 154 L24 52 Z" fill="url(#gA)"/>
+            <path d="M60 8 L78 52 L60 154 L42 52 Z" fill="#e0f2fe" opacity=".4"/>
+            <path d="M60 22 L70 50 L60 68 L52 50 Z" fill="#fff" opacity=".45"/>
+            <path d="M48 70 L72 70 L60 110 Z" fill="#a78bfa" opacity=".3"/>
+          </svg>
         </div>
-        <div class="core-title">Liveshare · Arcane Core</div>
+        <div class="core-title">LIVESHARE · ARCANE CORE</div>
+        <div class="core-status">MAGIC ENERGY // LIVE HASH STREAM // SHA256</div>
       </div>
-      <div class="col">
+
+      <div class="col right-col">
         <div class="card ok" id="acceptedCounter">
           <span class="ls-label">Accepted Shares</span>
           <strong id="acceptedCount">0</strong>
           <small>This Round</small>
+          <svg viewBox="0 0 180 28" class="spark" aria-hidden="true"><polyline points="0,22 40,18 80,14 120,10 160,8 180,6" fill="none" stroke="#4ade80" stroke-width="1.8"/></svg>
         </div>
         <div class="card bad" id="rejectedCounter">
           <span class="ls-label">Rejected Shares</span>
           <strong id="rejectedCount">0</strong>
           <small>This Round</small>
+          <svg viewBox="0 0 180 28" class="spark" aria-hidden="true"><polyline points="0,10 40,12 80,11 120,14 160,13 180,15" fill="none" stroke="#f87171" stroke-width="1.8"/></svg>
         </div>
         <div class="card combo" id="combo">
           <span class="ls-label">Combo</span>
@@ -123,44 +202,103 @@
 
     <section class="ls-mid">
       <div class="panel candidate" id="candidate">
-        <div>
+        <div class="candidate-body">
           <span class="ls-label">Block Candidate</span>
           <p class="sub">Magical Probability of a New Block</p>
           <strong class="huge" id="candidatePct">0.000%</strong>
           <span class="caption">Progress to Block</span>
           <div class="bar wide"><i id="candidateMeter"></i></div>
-          <div class="next"><span>Block Height (Next)</span><b id="nextHeight">#—</b></div>
+          <div class="next">
+            <span>Best Block Ever</span>
+            <b id="nextHeight">#—</b>
+          </div>
         </div>
-        <svg class="side-gem" viewBox="0 0 120 162" width="88" height="118" aria-hidden="true"><path d="M60 8 L96 52 L60 154 L24 52 Z" fill="url(#gA)"/></svg>
+        <div class="candidate-art">
+          <svg class="side-gem" viewBox="0 0 120 162" width="90" height="122" aria-hidden="true">
+            <path d="M60 8 L96 52 L60 154 L24 52 Z" fill="url(#gA)"/>
+            <path d="M60 8 L78 52 L60 154 L42 52 Z" fill="#e0f2fe" opacity=".35"/>
+          </svg>
+        </div>
         <div class="candidate-core" id="candidateCore" hidden></div>
       </div>
       <div class="panel balance">
-        <div>
+        <div class="balance-body">
           <span class="ls-label">Balance</span>
           <p class="sub">Your Magical Earnings</p>
           <strong class="huge gold" id="totalBalance">—</strong>
-          <span class="liveshare-tag">Liveshare</span>
+          <span class="liveshare-tag">LIVESHARE</span>
+          <span class="usd-approx" id="usdApprox">≈ — USD</span>
           <div class="bal-grid">
             <div><span>Confirmed</span><b id="confirmedBalance">—</b></div>
             <div><span>Pending</span><b id="unconfirmedBalance">—</b></div>
             <div><span>Immature</span><b id="immatureBalance">—</b></div>
           </div>
         </div>
-        <svg class="scales" viewBox="0 0 220 180" aria-hidden="true"><defs><linearGradient id="goldM" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fde68a"/><stop offset=".5" stop-color="#d4af5a"/><stop offset="1" stop-color="#8a6a22"/></linearGradient></defs><rect x="104" y="70" width="12" height="90" rx="3" fill="url(#goldM)"/><path d="M70 160 H150 L140 170 H80 Z" fill="url(#goldM)"/><circle cx="110" cy="62" r="10" fill="url(#goldM)"/><path d="M110 62 L28 78" stroke="#d4af5a" stroke-width="3"/><path d="M110 62 L192 78" stroke="#d4af5a" stroke-width="3"/><path d="M28 78 L12 118 Q28 132 44 118 Z" fill="#1e1b4b" stroke="#d4af5a" stroke-width="2"/><path d="M192 78 L176 118 Q192 132 208 118 Z" fill="#1e1b4b" stroke="#d4af5a" stroke-width="2"/><circle cx="28" cy="108" r="7" fill="#86efac"/><circle cx="192" cy="108" r="7" fill="#67e8f9"/></svg>
+        <svg class="scales" viewBox="0 0 220 180" aria-hidden="true">
+          <defs>
+            <linearGradient id="goldM" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#fde68a"/>
+              <stop offset=".5" stop-color="#d4af5a"/>
+              <stop offset="1" stop-color="#8a6a22"/>
+            </linearGradient>
+          </defs>
+          <rect x="104" y="70" width="12" height="90" rx="3" fill="url(#goldM)"/>
+          <path d="M70 160 H150 L140 170 H80 Z" fill="url(#goldM)"/>
+          <circle cx="110" cy="62" r="12" fill="url(#goldM)"/>
+          <path d="M110 62 L28 78" stroke="#d4af5a" stroke-width="3"/>
+          <path d="M110 62 L192 78" stroke="#d4af5a" stroke-width="3"/>
+          <path d="M28 78 L12 118 Q28 132 44 118 Z" fill="#1e1b4b" stroke="#d4af5a" stroke-width="2"/>
+          <path d="M192 78 L176 118 Q192 132 208 118 Z" fill="#1e1b4b" stroke="#d4af5a" stroke-width="2"/>
+          <circle cx="28" cy="108" r="8" fill="#86efac"/>
+          <circle cx="192" cy="108" r="8" fill="#67e8f9"/>
+          <circle cx="20" cy="150" r="4" fill="#d4af5a" opacity=".6"/>
+          <circle cx="36" cy="155" r="3" fill="#d4af5a" opacity=".5"/>
+          <circle cx="200" cy="152" r="4" fill="#d4af5a" opacity=".6"/>
+          <circle cx="184" cy="156" r="3" fill="#d4af5a" opacity=".5"/>
+        </svg>
       </div>
     </section>
 
-    <section class="stats-row">
-      <div class="panel card"><span class="ls-label">Avg. Share Difficulty</span><strong id="avgDiff">—</strong><small>Last 10 min</small></div>
-      <div class="panel card"><span class="ls-label">Valid Shares</span><strong id="validShares">0</strong><small id="validPct">0.0%</small></div>
-      <div class="panel card"><span class="ls-label">Invalid Shares</span><strong class="bad" id="invalidShares">0</strong><small id="invalidPct">0.0%</small></div>
-      <div class="panel card"><span class="ls-label">Est. Time to Block</span><strong id="eta">—</strong><small>At current rate</small></div>
+    <section class="stats-row earnings-row">
+      <div class="panel card earn">
+        <span class="ls-label">Estimated Earnings</span>
+        <strong id="estEarn">—</strong>
+        <small id="estEarnUsd">≈ — USD</small>
+      </div>
+      <div class="panel card earn">
+        <span class="ls-label">Pending Payout</span>
+        <strong id="pendingPayout">—</strong>
+        <small id="pendingUsd">≈ — USD</small>
+      </div>
+      <div class="panel card earn">
+        <span class="ls-label">Total Paid / Rewards</span>
+        <strong id="totalPaid">—</strong>
+        <small id="totalPaidUsd">≈ — USD</small>
+      </div>
+      <div class="panel card">
+        <span class="ls-label">Est. Time to Block</span>
+        <strong id="eta">—</strong>
+        <small>At current rate</small>
+      </div>
     </section>
 
     <section class="panel history" id="blockHistory">
-      <div class="history-head"><h2>Block History</h2><p>Chronicles of the Eternal Chain</p><span class="count" id="historyCount">0 RECORDS</span></div>
+      <div class="history-head">
+        <h2>✦ Block History ✦</h2>
+        <p>Chronicles of the Eternal Chain</p>
+        <span class="count" id="historyCount">0 RECORDS</span>
+      </div>
       <div class="table">
-        <div class="tr head"><span>Height</span><span>Validity</span><span>Confirmations</span><span>Reward</span><span>Block Hash</span></div>
+        <div class="tr head">
+          <span>Height</span>
+          <span>Time</span>
+          <span>Difficulty</span>
+          <span>Luck</span>
+          <span>Shares</span>
+          <span>Miner</span>
+          <span>Magic Hash</span>
+          <span>Reward</span>
+        </div>
         <div id="blockHistoryList"><div class="empty">No block candidates recorded yet.</div></div>
       </div>
     </section>
@@ -178,7 +316,7 @@
       <span class="ls-label">Current Round</span>
       <strong class="round-id" id="roundId">#—</strong>
       <span class="ls-label">Round Time</span>
-      <b>10:00</b>
+      <b class="mono">10:00</b>
       <span class="ls-label">Time Remaining</span>
       <strong class="remain" id="timeRemain">00:00</strong>
       <small id="timePct">0.0%</small>
@@ -190,17 +328,37 @@
       <strong id="workerCount">0</strong>
       <small>Connected</small>
     </div>
+    <div class="panel">
+      <span class="ls-label">Network Uptime</span>
+      <strong id="netUptime" class="mono">—</strong>
+    </div>
+    <div class="panel">
+      <span class="ls-label">Server Time</span>
+      <strong id="serverTime" class="mono">—</strong>
+      <small>UTC</small>
+    </div>
     <div class="panel bless">
-      <svg viewBox="0 0 120 162" width="36" height="48" aria-hidden="true"><path d="M60 8 L96 52 L60 154 L24 52 Z" fill="url(#gA)"/></svg>
+      <svg viewBox="0 0 120 162" width="40" height="54" aria-hidden="true">
+        <path d="M60 8 L96 52 L60 154 L24 52 Z" fill="url(#gA)"/>
+      </svg>
       <div>
         <span class="ls-label">Temple Blessing</span>
         <strong class="ok">ACTIVE</strong>
-        <small>Stratum Live</small>
+        <small id="blessDetail">Stratum Live</small>
       </div>
+    </div>
+    <div class="panel">
+      <span class="ls-label">Pool Diff · Live</span>
+      <strong id="liveVarDiff">—</strong>
+      <small>Stratum</small>
     </div>
   </aside>
 </div>
-<script defer src="/static/dashboard_v4.js?v=20260826-fantasy1"></script>
-<script defer src="/static/dashboard_liveshare.js?v=20260826-fantasy1"></script>
+<div hidden aria-hidden="true">
+  <span id="avgDiff"></span><span id="validShares"></span><span id="validPct"></span>
+  <span id="invalidShares"></span><span id="invalidPct"></span>
+</div>
+<script defer src="/static/dashboard_v4.js?v=20260827-magical1to1"></script>
+<script defer src="/static/dashboard_liveshare.js?v=20260827-magical1to1"></script>
 </body>
 </html>
