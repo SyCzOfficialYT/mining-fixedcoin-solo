@@ -4,7 +4,7 @@
 
 Send one rich notification to the configured Discord-compatible incoming webhook whenever the Stratum detects a network-difficulty block candidate.
 
-Discord incoming webhooks accept JSON payloads containing content and embeds, so the integration does not require a persistent bot connection. urlDiscord Webhook APIhttps://docs.discord.com/developers/resources/webhook
+Discord incoming webhooks accept JSON payloads containing content and embeds, so the integration does not require a persistent bot connection.
 
 ## Configuration
 
