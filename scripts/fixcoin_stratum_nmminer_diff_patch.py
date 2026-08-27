@@ -1,12 +1,9 @@
 #!/usr/bin/env python3
-"""Finalize Stratum authorization for NMMiner/NerdMiner and ASICs.
+"""Finalize Stratum low-hash difficulty authority.
 
-The earlier compatibility patch injected the NMMiner difficulty too early in
-handle_authorize. The later VarDiff/fixed-difficulty authority then overwrote
-it, so the miner could authenticate but never receive a usable low target.
-This patch replaces the generated authorize handler with one deterministic
-state machine: NMMiner/NerdMiner -> low-hash fixed diff, explicit d= -> fixed,
-password x -> per-connection VarDiff, otherwise configured pool mode.
+NMMiner, NerdMiner and NerdQAxe++ are low-hashrate miners. Their difficulty
+must not be overwritten by the normal ASIC/VarDiff path. Explicit ``d=``
+password difficulty remains authoritative for every other miner.
 """
 import ast
 from pathlib import Path
@@ -43,25 +40,32 @@ replacement = '''    def handle_authorize(self, mid, params):
         password_text = password.lower().strip() if isinstance(password, str) else ""
 
         miner_family = str(getattr(self, "miner_family", "") or "").strip().lower()
-        nmminer = miner_family in {"nmminer", "nerdminer"}
+        low_hash_miner = miner_family in {"nmminer", "nerdminer", "nerdqaxe"}
 
-        # Explicit fixed difficulty always wins over pool VarDiff.
+        # Low-hash miner families use the configured low-hash target and are
+        # never handed to the normal ASIC VarDiff controller.
         fixed = parse_fixed_diff(password, self.worker)
 
-        if nmminer:
-            # NMMiner/NerdMiner is low-hashrate hardware. The ASIC difficulty
-            # (~13k) is unsuitable; use the configured low-hash target.
-            raw_nm_diff = os.getenv("FIX_NMMINER_DIFF") or str(cfg["pool"].get("nmminer_difficulty", 0.001))
+        if low_hash_miner:
+            raw_low_diff = (
+                os.getenv("FIX_NMMINER_DIFF")
+                or os.getenv("FIX_LOW_HASH_DIFF")
+                or str(cfg["pool"].get("nmminer_difficulty", 0.001))
+            )
             try:
-                nm_diff = float(raw_nm_diff)
+                low_diff = float(raw_low_diff)
             except (TypeError, ValueError):
-                raise RuntimeError("FIX_NMMINER_DIFF / pool.nmminer_difficulty must be numeric")
-            if not nm_diff > 0:
-                raise RuntimeError("FIX_NMMINER_DIFF / pool.nmminer_difficulty must be > 0")
+                raise RuntimeError(
+                    "FIX_NMMINER_DIFF / FIX_LOW_HASH_DIFF / pool.nmminer_difficulty must be numeric"
+                )
+            if not low_diff > 0:
+                raise RuntimeError(
+                    "FIX_NMMINER_DIFF / FIX_LOW_HASH_DIFF / pool.nmminer_difficulty must be > 0"
+                )
             self.vardiff_enabled = False
             self.diff_from_password = True
-            self.diff = nm_diff
-            mode = "nmminer-fixed"
+            self.diff = low_diff
+            mode = "low-hash-fixed"
         elif fixed is not None:
             self.vardiff_enabled = False
             self.diff_from_password = True
@@ -88,8 +92,12 @@ replacement = '''    def handle_authorize(self, mid, params):
 
         self.send({"id": mid, "result": True, "error": None})
         self.send({"id": None, "method": "mining.set_difficulty", "params": [self.diff]})
-        if nmminer:
-            emit("INFO", f"NMMINER DIFF worker={self.worker} diff={self.diff:g} mode=low-hash fixed")
+        if low_hash_miner:
+            emit(
+                "INFO",
+                f"LOW-HASH DIFF worker={self.worker} diff={self.diff:g} "
+                f"miner={getattr(self, 'miner_family', 'unknown')} mode=low-hash fixed",
+            )
         emit(
             "INFO",
             f"authorize {self.worker} diff={self.diff:g} mode={mode} "
@@ -103,16 +111,15 @@ client_text = client_text[:fn_start] + replacement + client_text[fn_end:]
 text = text[:start] + client_text + text[end:]
 
 for marker in (
-    'self.vardiff_enabled = bool(VARDIFF) or password_text == "x"',
-    'self.diff_from_password = True',
-    'pool"].get("nmminer_difficulty", 0.001)',
-    'FIX_NMMINER_DIFF',
+    'low_hash_miner = miner_family in {"nmminer", "nerdminer", "nerdqaxe"}',
+    'os.getenv("FIX_LOW_HASH_DIFF")',
+    'nmminer_difficulty',
     'mining.set_difficulty',
     'self.push_job(clean=True, force_refresh=True)',
 ):
     if marker not in text:
-        raise RuntimeError(f"NMMiner authorization marker missing: {marker}")
+        raise RuntimeError(f"low-hash authorization marker missing: {marker}")
 
 compile(text, str(PATH), "exec")
 PATH.write_text(text)
-print(f"verified {PATH}: deterministic NMMiner/NerdMiner, configured low-hash diff, fixed-diff, and password-x authorization")
+print(f"verified {PATH}: NMMiner/NerdMiner/NerdQAxe low-hash difficulty authority installed")
