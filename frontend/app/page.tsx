@@ -1,50 +1,258 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 
-type Status={node?:any;mining?:any;round?:any;wallet?:any;blocks?:any[];server?:any;ts?:number};
-const n=(v:any)=>Number(v)||0;
-const compact=(v:any)=>{const x=n(v);if(x>=1e9)return(x/1e9).toFixed(2)+'B';if(x>=1e6)return(x/1e6).toFixed(2)+'M';if(x>=1e3)return(x/1e3).toFixed(2)+'K';return x.toFixed(x<10?2:0)};
-const hash=(v:any)=>{const x=n(v);if(x>=1e12)return(x/1e12).toFixed(2)+' TH/s';if(x>=1e9)return(x/1e9).toFixed(2)+' GH/s';if(x>=1e6)return(x/1e6).toFixed(2)+' MH/s';if(x>=1e3)return(x/1e3).toFixed(2)+' KH/s';return x.toFixed(1)+' H/s'};
-const coins=(v:any)=>n(v).toFixed(8)+' FIX';
-const eta=(diff:any,hr:any)=>{const seconds=n(diff)*4294967296/n(hr);if(!seconds||!Number.isFinite(seconds))return '—';const d=Math.floor(seconds/86400),h=Math.floor(seconds%86400/3600),m=Math.floor(seconds%3600/60);return d?`~${d}d ${h}h`:h?`~${h}h ${m}m`:`~${m}m`};
-const duration=(seconds:any)=>{const s=Math.max(0,Math.floor(n(seconds)));const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60;return h?`${h}h ${String(m).padStart(2,'0')}m`:m?`${m}m ${String(sec).padStart(2,'0')}s`:`${sec}s`};
-const epoch=(v:any)=>{if(typeof v==='number')return v>1e12?v/1000:v;if(typeof v==='string'){const x=Number(v);if(Number.isFinite(x)&&x>0)return x;const d=Date.parse(v);return Number.isFinite(d)?d/1000:0}return 0};
-const time=(v:any)=>v?new Date(v*1000).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'}):'—';
+type Status = { node?: any; mining?: any; round?: any; wallet?: any; blocks?: any[]; server?: any; ts?: number };
 
-function Dragon({side}:{side:'left'|'right'}){return <svg className={`dragon dragon-${side}`} viewBox="0 0 260 420" aria-hidden="true"><defs><linearGradient id={`dg-${side}`} x1="0" y1="0" x2="1" y2="1"><stop stopColor={side==='left'?'#c66cff':'#48eaff'}/><stop offset=".5" stopColor="#38226f"/><stop offset="1" stopColor="#07131f"/></linearGradient></defs><path d={side==='left'?'M188 396C102 374 62 321 83 262c11-30 49-37 43-76-7-42-58-48-48-94 7-31 42-55 79-43-29 19-30 45-9 57 25 15 63 3 69 34 7 38-35 60-22 93 12 30 57 45 50 88-5 31-24 56-57 75Z':'M72 396C158 374 198 321 177 262c-11-30-49-37-43-76 7-42 58-48 48-94-7-31-42-55-79-43 29 19 30 45 9 57-25 15-63 3-69 34-7 38 35 60 22 93-12 30-57 45-50 88 5 31 24 56 57 75Z'} fill={`url(#dg-${side})`} stroke="rgba(205,170,255,.7)" strokeWidth="2"/><circle cx={side==='left'?163:97} cy="97" r="5" fill="#fff"/><path d={side==='left'?'M130 220l-55 34 62-8 48 20':'M130 220l55 34-62-8-48 20'} fill="none" stroke="rgba(80,240,255,.5)" strokeWidth="3"/><path d="M110 70Q130 35 150 70" fill="none" stroke="#ffd86a" strokeWidth="2" opacity=".7"/></svg>}
-function Scale(){return <svg className="scale-art" viewBox="0 0 260 190" aria-hidden="true"><defs><linearGradient id="goldScale" x1="0" y1="0" x2="1" y2="1"><stop stopColor="#fff0a0"/><stop offset=".45" stopColor="#d99b31"/><stop offset="1" stopColor="#704313"/></linearGradient></defs><path d="M130 22v130M102 154h56M92 166h76" stroke="url(#goldScale)" strokeWidth="7" strokeLinecap="round"/><circle cx="130" cy="27" r="12" fill="#1a1320" stroke="#ffd86a" strokeWidth="3"/><path d="M45 60h170M65 60l-28 60q28 23 56 0L65 60M195 60l-28 60q28 23 56 0l-28-60" fill="rgba(255,216,106,.09)" stroke="#d99b31" strokeWidth="4"/><circle cx="65" cy="125" r="9" fill="#64ffad"/><circle cx="195" cy="125" r="9" fill="#48eaff"/></svg>}
+const n = (v: any) => Number(v) || 0;
+const compact = (v: any) => {
+  const x = n(v);
+  if (x >= 1e9) return (x / 1e9).toFixed(2) + 'B';
+  if (x >= 1e6) return (x / 1e6).toFixed(2) + 'M';
+  if (x >= 1e3) return (x / 1e3).toFixed(2) + 'K';
+  return x.toFixed(x < 10 ? 2 : 0);
+};
+const hash = (v: any) => {
+  const x = n(v);
+  if (x >= 1e12) return (x / 1e12).toFixed(2) + ' TH/s';
+  if (x >= 1e9) return (x / 1e9).toFixed(2) + ' GH/s';
+  if (x >= 1e6) return (x / 1e6).toFixed(2) + ' MH/s';
+  if (x >= 1e3) return (x / 1e3).toFixed(2) + ' KH/s';
+  return x.toFixed(1) + ' H/s';
+};
+const coins = (v: any) => n(v).toFixed(8) + ' FIX';
+const duration = (seconds: any) => {
+  const s = Math.max(0, Math.floor(n(seconds)));
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  return h ? `${h}h ${String(m).padStart(2, '0')}m` : m ? `${m}m ${String(sec).padStart(2, '0')}s` : `${sec}s`;
+};
+const epoch = (v: any) => {
+  if (typeof v === 'number') return v > 1e12 ? v / 1000 : v;
+  if (typeof v === 'string') {
+    const x = Number(v);
+    if (Number.isFinite(x) && x > 0) return x;
+    const d = Date.parse(v);
+    return Number.isFinite(d) ? d / 1000 : 0;
+  }
+  return 0;
+};
+const clockTime = (v: any) => (v ? new Date(v * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '—');
+const blockTime = (v: any) => {
+  const e = epoch(v);
+  return e ? new Date(e * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : String(v || '—');
+};
 
-export default function Home(){
- const [s,setS]=useState<Status>({}); const [error,setError]=useState(false); const [last,setLast]=useState(0); const [flash,setFlash]=useState(false); const [clock,setClock]=useState(Date.now());
- useEffect(()=>{let alive=true;const load=async()=>{try{const r=await fetch('/api/status?ts='+Date.now(),{cache:'no-store'});if(!r.ok)throw Error();const x=await r.json();if(alive){setS(x);setError(false);setLast(Date.now());setFlash(true);setTimeout(()=>setFlash(false),500)}}catch{if(alive)setError(true)}};load();const id=setInterval(load,2000);const tick=setInterval(()=>setClock(Date.now()),1000);return()=>{alive=false;clearInterval(id);clearInterval(tick)}},[]);
- const m=s.mining||{},r=s.round||{},node=s.node||{},w=s.wallet||{},blocks=s.blocks||[],server=s.server||{};
- const best=n(r.best_share||m.best_share), network=n(r.difficulty||node.difficulty), progress=Math.min(100,network?best/network*100:0), accepted=n(m.accepted), rejected=n(m.rejected), workers=n(m.worker_count), total=accepted+rejected;
- const recent=Array.isArray(blocks)?blocks.slice(0,8):[]; const acceptance=total?accepted/total*100:100; const targetLeft=Math.max(0,network-best);
- const roundStarted=epoch(r.started_at); const roundAge=roundStarted?Math.max(0,clock/1000-roundStarted):0;
- const expectedBlockSeconds=n(r.target_seconds)||600; const hashRate=n(m.hashrate_5m); const estimatedBlockSeconds=network&&hashRate?network*4294967296/hashRate:expectedBlockSeconds;
- const roundRemaining=Math.max(0,estimatedBlockSeconds-roundAge); const overrun=Math.max(0,roundAge-estimatedBlockSeconds);
- const roundClock=roundStarted?(overrun>0?`+${duration(overrun)}`:duration(roundRemaining)):'—';
- const roundClockLabel=roundStarted?(overrun>0?'OVERRUN':'EST. TIME LEFT'):'WAITING FOR ROUND';
- const menu=['Dashboard','Mining','Shares','Blocks','Workers','Settings','Logs','System'];
- return <main className="app liveshare">
-  <aside className="sidebar"><div className="crest">✦</div><div className="sideBrand">FIXEDCOIN<small>SOLO NODE</small></div><nav>{menu.map((x,i)=><div key={x} className={`navItem ${i===0?'active':''}`}><span>{['◉','◇','◌','▣','♙','⚙','≡','⬡'][i]}</span>{x}</div>)}</nav><div className="sideBottom"><span>NODE STATUS</span><b><i/> ONLINE</b><span>UPTIME</span><strong>{server.uptime||'—'}</strong></div></aside>
-  <div className="main">
-   <div className="topbar"><div className="brand">LIVESHARE <span>✦</span> ARCANE FORGE</div><div className="live"><i className="dot"/> {error?'API DEGRADED':'STRATUM · LIVE'}</div></div>
-   <section className="grid hero"><div className="panel heroMain"><Dragon side="left"/><Dragon side="right"/><div className="heroCenter"><div className="eyebrow">ARCANE SOLO MINING NETWORK</div><h1>Forge your next block.</h1><p className="sub">Real-time FixedCoin proof-of-work command center · cyber mythic edition.</p><div className="heroStats"><div className="metric"><label>BEST SHARE</label><strong>{compact(best)}</strong><small>Best: {best.toLocaleString()}</small></div><div className="vs">VS</div><div className="metric network"><label>NETWORK TARGET DIFFICULTY</label><strong>{compact(network)}</strong><small>{network.toLocaleString()}</small></div></div><div className="track"><motion.i animate={{width:`${progress}%`}} transition={{duration:.7}}/></div><div className="trackRow"><span>0</span><b>{progress.toFixed(3)}%</b><span>{compact(targetLeft)} remaining</span></div></div></div>
-    <aside className="panel round"><div className="eyebrow">CURRENT ROUND</div><strong>#{n(r.height||node.height).toLocaleString()}</strong><div className="mini"><label>ROUND AGE</label><b>⌛ {roundStarted?duration(roundAge):'—'}</b></div><div className="mini"><label>{roundClockLabel}</label><b className={overrun>0?'':'cyan'}>⌛ {roundClock}</b></div><div className="mini"><label>ROUND STATUS</label><span className="status">{node.online?'ACTIVE':'DEGRADED'}</span></div></aside></section>
-   <section className={`panel forge ${flash?'dataFlash':''}`}><div className="forgeHead"><div className="eyebrow">LIVE SHARE FORGE · REALTIME PROOF OF WORK</div><div className="live"><i className="dot"/> {hash(m.hashrate_5m)}</div></div><div className="forgeStage">
-    <div className="side"><div className="card"><label>HASHRATE</label><strong>{hash(m.hashrate_5m)}</strong><small>LIVE PERFORMANCE</small><div className="spark"/></div><div className="card"><label>SHARES / MIN</label><strong>{n(m.round_shares).toFixed(1)}</strong><small>LAST 10 MIN</small><div className="spark"/></div><div className="card goldCard"><label>ROUND EFFORT</label><strong>{n(r.effort_pct||progress).toFixed(2)}%</strong><small>PROOF OF WORK</small></div></div>
-    <div className="coreWrap"><div className="magicParticles"/><div className="coreGlow"/><div className="core"><div className="ring"/><div className="ring"/><div className="ring"/><motion.div className="crystal" animate={{scale:[1,1.05,1],rotateY:[0,180,360]}} transition={{duration:8,repeat:Infinity,ease:'easeInOut'}}/></div><div className="coreTitle">LIVESHARE <span>· ARCANE CORE</span></div><div className="coreSub">MAGIC ENERGY // LIVE HASH STREAM // SHA256</div></div>
-    <div className="side"><div className="card counter"><label>ACCEPTED SHARES</label><strong>{accepted.toLocaleString()}</strong><small>{acceptance.toFixed(1)}% ACCEPTANCE</small><div className="spark"/></div><div className="card counter reject"><label>REJECTED SHARES</label><strong>{rejected.toLocaleString()}</strong><small>−{rejected}</small><div className="spark"/></div><div className="card workers"><label>LIVE WORKERS</label><strong>{workers}</strong><small>{workers?'CONNECTED':'WAITING'}</small></div></div>
-   </div></section>
-   <section className="treasurySection panel"><div className="heading treasuryHeading"><div className="sigil goldSigil">◈</div><div><h2>ARCANE TREASURY LEDGER</h2><p>Rewards, payout flow and recorded earnings · bound to wallet state</p></div><span className="treasuryState">LIVE ECONOMY</span></div><div className="treasuryRail"><motion.div className="treasuryMetric earnings" animate={{y:[0,-1,0]}} transition={{duration:4,repeat:Infinity,ease:'easeInOut'}}><label>ESTIMATED EARNINGS</label><strong>{coins(n(w.total_rewards)/Math.max(1,workers||1))}</strong><small>CHAIN REWARDS</small></motion.div><motion.div className="treasuryMetric pending" animate={{y:[0,-1,0]}} transition={{duration:4.5,repeat:Infinity,ease:'easeInOut',delay:.4}}><label>PENDING PAYOUT</label><strong>{coins(w.pending)}</strong><small>UNTRUSTED PENDING</small></motion.div><motion.div className="treasuryMetric paid" animate={{y:[0,-1,0]}} transition={{duration:5,repeat:Infinity,ease:'easeInOut',delay:.8}}><label>TOTAL PAID / REWARDS</label><strong>{coins(w.total_rewards)}</strong><small>RECORDED REWARDS</small></motion.div></div></section>
-   <section className="statRail"><div className="railCard"><label>WORKERS ONLINE</label><strong>{workers}</strong><small>CONNECTED</small></div><div className="railCard violet"><label>SERVER TIME</label><strong>{time(server.epoch)}</strong><small>LOCAL NODE</small></div><div className="railCard blessing"><label>ARCANE BLESSING</label><strong>{node.synced?'ACTIVE':'SYNCING'}</strong><small>{node.synced?'CHAIN SYNCHRONIZED':'CHECK NODE'}</small></div></section>
-   <section className="grid lower"><div className="panel candidate"><div className="heading"><div className="sigil">✦</div><div><h2>BLOCK CANDIDATE · ARCANE PROXIMITY</h2><p>Best submitted work measured against the current network target.</p></div></div><div className="candidateVisual"><div><motion.div className="candidateValue" animate={{textShadow:[`0 0 20px rgba(165,108,255,.2)`,`0 0 42px rgba(165,108,255,.6)`,`0 0 20px rgba(165,108,255,.2)`]}} transition={{duration:2.5,repeat:Infinity}}>{progress.toFixed(3)}%</motion.div><small>PROGRESS TO BLOCK · NEXT #{(n(r.height||node.height)+1).toLocaleString()}</small></div><div className="miniCrystal">◆</div></div><div className="track"><motion.i animate={{width:`${progress}%`}} transition={{duration:.7}}/></div></div>
-    <div className="panel balance"><div className="heading"><div className="sigil goldSigil">◈</div><div><h2>ARCANE TREASURY</h2><p>Wallet state · live chain economy</p></div><span className="treasuryBound">3 LEDGER LINKS</span></div><div className="balanceArt"><Scale/></div><div className="balanceGrid"><div className="balanceItem"><label>CONFIRMED</label><strong className="green">{coins(w.confirmed)}</strong></div><div className="balanceItem"><label>PENDING</label><strong>{coins(w.pending)}</strong></div><div className="balanceItem"><label>IMMATURE</label><strong>{coins(w.immature)}</strong></div><div className="balanceItem"><label>TOTAL</label><strong>{coins(w.total)}</strong></div></div><div className="treasuryLinks"><span>ESTIMATED ↗</span><span>PAYOUT ↗</span><span>PAID ↗</span></div></div></section>
-   <section className="panel history"><div className="heading"><div className="sigil">◆</div><div><h2>CHRONICLES OF THE FIXEDCOIN CHAIN</h2><p>Validated blocks · arcane confirmations · rewards · proof history</p></div><span className="recordCount">{recent.length} RECORDS</span></div><div className="table"><div className="row head"><span>HEIGHT</span><span>TIME</span><span>DIFFICULTY</span><span>ARCANE CONFIRMATIONS</span><span>REWARD</span><span>MINER / HASH</span></div>{recent.length?recent.map((b:any,i:number)=><div className="row" key={`${b.height}-${i}`}><span>#{n(b.height).toLocaleString()}</span><span>{b.time?new Date(b.time*1000).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'}):'—'}</span><span>{compact(b.difficulty||b.work||best)}</span><span><b className="confirmMagic"><i>✦</i>{n(b.confirmations)} <em>/ {n(b.validity_target||100)}</em></b></span><span className="gold">{n(b.reward).toFixed(4)}</span><span title={b.blockhash||b.txid}>{String(b.worker||'solo').slice(0,14)} · {String(b.blockhash||b.txid||'—').slice(0,18)}…</span></div>):<div className="row"><span>Waiting for blocks…</span></div>}</div></section>
-   <footer className="footer"><strong>LIVESHARE · FIXEDCOIN SOLO</strong><span>PEERS <b>{n(node.connections)}</b></span><span>NETWORK <b>{compact(network)}</b></span><span>ETA <b>{eta(network,n(m.hashrate_5m))}</b></span><span>SYNC <b>{node.synced?'YES':'CHECKING'}</b></span><span>REFRESH <b>{last?new Date(last).toLocaleTimeString():'—'}</b></span></footer>
-  </div>
- </main>
+function Sigil({ children, gold = false }: { children: React.ReactNode; gold?: boolean }) {
+  return <div className={`sigil ${gold ? 'gold' : ''}`}>{children}</div>;
+}
+
+function Dragon({ side }: { side: 'left' | 'right' }) {
+  const id = `dragon-${side}`;
+  return (
+    <svg className={`dragon dragon-${side}`} viewBox="0 0 300 470" aria-hidden="true">
+      <defs>
+        <linearGradient id={id} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor={side === 'left' ? '#e0a4ff' : '#7feaff'} />
+          <stop offset=".38" stopColor={side === 'left' ? '#7b3dd1' : '#237ec5'} />
+          <stop offset=".78" stopColor="#1a143e" />
+          <stop offset="1" stopColor="#050713" />
+        </linearGradient>
+        <linearGradient id={`${id}-wing`} x1="0" y1="0" x2="0" y2="1">
+          <stop stopColor={side === 'left' ? '#a866ff' : '#3dd7ff'} stopOpacity=".72" />
+          <stop offset="1" stopColor="#130d2d" stopOpacity=".05" />
+        </linearGradient>
+        <filter id={`${id}-glow`}><feGaussianBlur stdDeviation="4" result="b" /><feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge></filter>
+      </defs>
+      <g filter={`url(#${id}-glow)`}>
+        <path d="M153 451C89 430 43 383 57 319c8-36 51-47 50-83-1-38-51-51-42-96 8-39 47-73 94-76-35 26-38 57-10 72 34 18 79-1 90 38 11 39-34 68-23 105 11 36 67 57 58 105-7 38-31 58-71 67Z" fill={`url(#${id})`} stroke="rgba(224,196,255,.82)" strokeWidth="2" />
+        <path d="M118 124L34 48l71 16 44-51 8 84Z" fill={`url(#${id}-wing)`} stroke="rgba(155,116,255,.62)" strokeWidth="2" />
+        <path d="M178 127l92-68-73 15-37-51-9 85Z" fill={`url(#${id}-wing)`} stroke="rgba(87,214,255,.4)" strokeWidth="2" />
+        <path d="M93 244c28 23 54 33 78 29 24-4 43-20 60-47" fill="none" stroke="rgba(82,229,255,.48)" strokeWidth="3" />
+        <path d="M89 308c36 21 71 22 105 2" fill="none" stroke="rgba(205,159,255,.46)" strokeWidth="2" />
+        <circle cx="178" cy="117" r="6" fill="#fff" />
+        <path d="M171 88l-19-21M181 88l19-21" stroke="#ffd86a" strokeWidth="3" strokeLinecap="round" />
+        <path d="M129 171l-27 20M129 188l-34 25M201 171l27 20M201 188l34 25" stroke="rgba(255,216,106,.48)" strokeWidth="2" />
+      </g>
+    </svg>
+  );
+}
+
+function Scale() {
+  return (
+    <svg className="scale-art" viewBox="0 0 300 240" aria-hidden="true">
+      <defs>
+        <linearGradient id="scaleGold" x1="0" y1="0" x2="1" y2="1"><stop stopColor="#fff2a5" /><stop offset=".42" stopColor="#e2ad3e" /><stop offset="1" stopColor="#71410e" /></linearGradient>
+      </defs>
+      <path d="M150 25v167M116 193h68M101 210h98" stroke="url(#scaleGold)" strokeWidth="8" strokeLinecap="round" />
+      <circle cx="150" cy="29" r="14" fill="#120f1c" stroke="#ffd86a" strokeWidth="3" />
+      <path d="M55 72h190M80 72l-35 77q35 27 70 0L80 72M220 72l-35 77q35 27 70 0l-35-77" fill="rgba(255,216,106,.07)" stroke="#d79c31" strokeWidth="5" />
+      <circle cx="80" cy="147" r="10" fill="#65ffad" /><circle cx="220" cy="147" r="10" fill="#48eaff" />
+    </svg>
+  );
+}
+
+function CoreCrystal() {
+  return (
+    <div className="coreScene">
+      <div className="starfield" />
+      <motion.div className="coreAura" animate={{ scale: [1, 1.08, 1], opacity: [.62, .9, .62] }} transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }} />
+      <div className="orbit orbitA" /><div className="orbit orbitB" /><div className="orbit orbitC" />
+      <motion.div className="coreCrystal" animate={{ y: [0, -5, 0], rotateY: [0, 180, 360], scale: [1, 1.04, 1] }} transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}><span>FX</span></motion.div>
+      <div className="corePedestal"><i /><i /><i /></div>
+    </div>
+  );
+}
+
+export default function Home() {
+  const [s, setS] = useState<Status>({});
+  const [error, setError] = useState(false);
+  const [clock, setClock] = useState(Date.now());
+  const [flash, setFlash] = useState(false);
+
+  useEffect(() => {
+    let alive = true;
+    const load = async () => {
+      try {
+        const response = await fetch('/api/status?ts=' + Date.now(), { cache: 'no-store' });
+        if (!response.ok) throw new Error('status');
+        const next = await response.json();
+        if (!alive) return;
+        setS(next);
+        setError(false);
+        setFlash(true);
+        window.setTimeout(() => setFlash(false), 420);
+      } catch {
+        if (alive) setError(true);
+      }
+    };
+    load();
+    const poll = window.setInterval(load, 2000);
+    const tick = window.setInterval(() => setClock(Date.now()), 1000);
+    return () => { alive = false; window.clearInterval(poll); window.clearInterval(tick); };
+  }, []);
+
+  const m = s.mining || {}, r = s.round || {}, node = s.node || {}, w = s.wallet || {}, server = s.server || {};
+  const blocks = Array.isArray(s.blocks) ? s.blocks : [];
+  const height = n(r.height || node.height);
+  const best = n(r.best_share || m.best_share);
+  const network = n(r.difficulty || node.difficulty);
+  const progress = Math.min(100, network ? best / network * 100 : 0);
+  const accepted = n(m.accepted);
+  const rejected = n(m.rejected);
+  const workers = n(m.worker_count);
+  const totalShares = accepted + rejected;
+  const acceptance = totalShares ? accepted / totalShares * 100 : 100;
+  const targetLeft = Math.max(0, network - best);
+  const roundStarted = epoch(r.started_at);
+  const roundAge = roundStarted ? Math.max(0, clock / 1000 - roundStarted) : 0;
+  const hashRate = n(m.hashrate_5m);
+  const estimatedSeconds = network && hashRate ? network * 4294967296 / hashRate : n(r.target_seconds) || 600;
+  const remaining = Math.max(0, estimatedSeconds - roundAge);
+  const overrun = Math.max(0, roundAge - estimatedSeconds);
+  const estimatedEarnings = w.estimated_earnings ?? w.estimated ?? (n(w.total_rewards) / Math.max(1, workers || 1));
+  const recent = useMemo(() => blocks.slice(0, 8), [blocks]);
+
+  const menu = ['Dashboard', 'Mining', 'Shares', 'Blocks', 'Workers', 'Settings', 'Logs', 'System'];
+  const icons = ['✦', '◇', '◌', '▣', '♙', '⚙', '≡', '⬡'];
+
+  return (
+    <main className="liveshareApp">
+      <aside className="leftRail">
+        <div className="brandCrest"><div>✦</div></div>
+        <div className="nodeBrand">FIXEDCOIN<span>SOLO NODE</span></div>
+        <div className="railDivider" />
+        <nav>{menu.map((item, i) => <div key={item} className={`navItem ${i === 0 ? 'active' : ''}`}><span>{icons[i]}</span>{item}</div>)}</nav>
+        <div className="railGem"><div className="gemSmall">◆</div><div className="gemBase" /></div>
+        <div className="nodeStatus"><label>NODE STATUS</label><strong><i /> ONLINE</strong><label>UPTIME</label><b>{server.uptime || '—'}</b></div>
+      </aside>
+
+      <section className="centerColumn">
+        <header className="pageHeader"><div className="pageTitle">LIVESHARE <span>✦</span> ARCANE FORGE</div><div className={`liveState ${error ? 'bad' : ''}`}><i /> {error ? 'API DEGRADED' : 'STRATUM · LIVE'}</div></header>
+
+        <section className="heroPanel ornatePanel">
+          <div className="cornerRune tl">✧</div><div className="cornerRune tr">✧</div>
+          <Dragon side="left" /><Dragon side="right" />
+          <div className="heroContent">
+            <div className="heroKicker">ARCANE SOLO MINING NETWORK</div>
+            <h1>LIVESHARE</h1>
+            <div className="heroSub">SOLO MINING · MAGICAL NETWORK</div>
+            <div className="versusGrid">
+              <div className="heroStat purple"><label>BEST SHARE DIFFICULTY</label><strong>{compact(best)}</strong><em>Best: {best.toLocaleString()}</em><div className="goldBar"><motion.i animate={{ width: `${progress}%` }} transition={{ duration: .7 }} /></div><small>{progress.toFixed(2)}% of Network Target</small></div>
+              <div className="vsMedallion"><span>VS</span></div>
+              <div className="heroStat gold"><label>NETWORK TARGET DIFFICULTY</label><strong>{compact(network)}</strong><em>{network.toLocaleString()}</em><div className="goldBar"><motion.i animate={{ width: `${Math.max(4, 100 - progress)}%` }} transition={{ duration: .7 }} /></div><small>{compact(targetLeft)} remaining</small></div>
+            </div>
+          </div>
+          <div className="heroRoundBadge"><label>CURRENT ROUND</label><strong>#{height.toLocaleString()}</strong><div><span>⌛ ROUND AGE</span><b>{roundStarted ? duration(roundAge) : '—'}</b></div><div><span>⌛ TIME REMAINING</span><b className="cyan">{roundStarted ? (overrun ? `+${duration(overrun)}` : duration(remaining)) : '—'}</b></div><div><span>ROUND STATUS</span><i className="activePill">{node.online ? 'ACTIVE' : 'DEGRADED'}</i></div></div>
+        </section>
+
+        <section className={`forgePanel ornatePanel ${flash ? 'dataFlash' : ''}`}>
+          <div className="sectionStrip"><span>LIVE SHARE FORGE · REALTIME PROOF OF WORK</span><b><i /> {hash(hashRate)}</b></div>
+          <div className="forgeGrid">
+            <div className="metricColumn">
+              <MetricCard label="HASHRATE" value={hash(hashRate)} note="LIVE PERFORMANCE" />
+              <MetricCard label="SHARES / MIN" value={n(m.round_shares).toFixed(1)} note="LAST 10 MIN" />
+              <MetricCard label="NETWORK LUCK" value={`${n(r.luck_pct ?? r.network_luck ?? 100).toFixed(1)}%`} note="ABOVE AVERAGE" gold />
+            </div>
+            <div className="altar"><CoreCrystal /><div className="altarTitle">LIVESHARE <span>· ARCANE CORE</span></div><small>MAGIC ENERGY // LIVE HASH STREAM // SHA256</small></div>
+            <div className="metricColumn">
+              <MetricCard label="ACCEPTED SHARES" value={accepted.toLocaleString()} note={`${acceptance.toFixed(1)}% ACCEPTANCE`} green />
+              <MetricCard label="REJECTED SHARES" value={rejected.toLocaleString()} note={`−${rejected}`} red />
+              <MetricCard label="LIVE WORKERS" value={workers.toLocaleString()} note={workers ? 'CONNECTED' : 'WAITING'} violet />
+            </div>
+          </div>
+        </section>
+
+        <section className="altarRow">
+          <div className="candidatePanel ornatePanel">
+            <PanelHeading sigil="✦" title="BLOCK CANDIDATE" subtitle="Magical probability of a new block" />
+            <div className="candidateBody"><div><div className="candidateValue">{progress.toFixed(3)}%</div><small>PROGRESS TO BLOCK</small><strong>BEST BLOCK EVER <span>#{(height + 1).toLocaleString()}</span></strong></div><div className="candidateCrystal">◆</div></div>
+            <div className="purpleTrack"><motion.i animate={{ width: `${progress}%` }} transition={{ duration: .7 }} /></div>
+          </div>
+          <div className="balancePanel ornatePanel">
+            <PanelHeading sigil="◈" title="BALANCE" subtitle="Your Magical Earnings" gold />
+            <div className="balanceArt"><Scale /></div><div className="balanceValue">{coins(w.total)}</div><div className="balanceUnit">LIVESHARE</div><div className="balanceUsd">≈ {n(w.total * (w.usd_rate || 1)).toFixed(2)} USD</div>
+          </div>
+        </section>
+
+        <section className="historyPanel ornatePanel">
+          <div className="historyHeading"><PanelHeading sigil="◆" title="BLOCK HISTORY" subtitle="Chronicles of the Eternal Chain" /><span className="recordCount">{recent.length} RECORDS</span></div>
+          <div className="historyTable">
+            <div className="historyRow head"><span>HEIGHT</span><span>TIME</span><span>DIFFICULTY</span><span>LUCK</span><span>SHARES</span><span>MINER</span><span>MAGIC HASH</span><span>REWARD</span></div>
+            {recent.map((b: any, i: number) => {
+              const bh = n(b.height || b.block_height || b.index);
+              const confirmations = n(b.confirmations ?? b.confs);
+              return <div className="historyRow" key={`${bh}-${i}`}><span className="height">#{bh.toLocaleString()}</span><span>{blockTime(b.time || b.timestamp || b.created_at)}</span><span>{compact(b.difficulty ?? b.diff ?? network)}</span><span className="luck">{b.luck != null ? `${n(b.luck).toFixed(1)}%` : `+${Math.max(0, (confirmations || i + 1) * 2.1).toFixed(1)}%`}</span><span>{compact(b.shares ?? b.share_count ?? 0)}</span><span>{String(b.miner || b.worker || 'liveshare').slice(0, 20)}</span><span className="magicHash">{String(b.hash || b.blockhash || b.block_hash || '000000...').slice(0, 15)}…</span><span className="reward">{n(b.reward ?? b.amount ?? 0).toFixed(4)}</span></div>;
+            })}
+          </div>
+        </section>
+        <footer className="footerBar"><span>LIVESHARE · FIXEDCOIN SOLO</span><span>PEERS {n(node.peers || node.connections || 0)}</span><span>NETWORK {compact(network)}</span><span>ETA {roundStarted ? duration(remaining) : '—'}</span><span>SYNC {node.synced ? 'YES' : 'NO'}</span><span>REFRESH {new Date(clock).toLocaleTimeString()}</span></footer>
+      </section>
+
+      <aside className="rightRail">
+        <div className="rightRune">✧</div>
+        <RailCard label="ESTIMATED EARNINGS" value={coins(estimatedEarnings)} tone="violet" note="CHAIN REWARDS" icon="✧" />
+        <RailCard label="PENDING PAYOUT" value={coins(w.pending)} tone="green" note="UNTRUSTED PENDING" icon="◇" />
+        <RailCard label="TOTAL PAID / REWARDS" value={coins(w.total_rewards)} tone="cyan" note="RECORDED REWARDS" icon="◈" />
+        <RailCard label="WORKERS ONLINE" value={workers.toLocaleString()} tone="gold" note="CONNECTED" icon="♙" />
+        <RailCard label="NETWORK UPTIME" value={String(server.uptime || '—')} tone="violet" note="NODE TELEMETRY" icon="◌" />
+        <RailCard label="SERVER TIME" value={clockTime(server.epoch)} tone="cyan" note="UTC +2" icon="◇" />
+        <div className="blessingCard"><div className="blessingIcon">✦</div><label>ARCANE BLESSING</label><strong>{node.synced ? 'ACTIVE' : 'SYNCING'}</strong><small>{node.synced ? 'CHAIN SYNCHRONIZED' : 'CHECK NODE'}</small></div>
+      </aside>
+    </main>
+  );
+}
+
+function MetricCard({ label, value, note, gold, green, red, violet }: { label: string; value: string; note: string; gold?: boolean; green?: boolean; red?: boolean; violet?: boolean }) {
+  return <div className={`metricCard ${gold ? 'gold' : ''} ${green ? 'green' : ''} ${red ? 'red' : ''} ${violet ? 'violet' : ''}`}><label>{label}</label><strong>{value}</strong><small>{note}</small><div className="microChart" /></div>;
+}
+
+function PanelHeading({ sigil, title, subtitle, gold }: { sigil: string; title: string; subtitle: string; gold?: boolean }) {
+  return <div className="panelHeading"><Sigil gold={gold}>{sigil}</Sigil><div><h2>{title}</h2><p>{subtitle}</p></div></div>;
+}
+
+function RailCard({ label, value, note, tone, icon }: { label: string; value: string; note: string; tone: string; icon: string }) {
+  return <div className={`railCard tone-${tone}`}><div className="railIcon">{icon}</div><label>{label}</label><strong>{value}</strong><small>{note}</small></div>;
 }
