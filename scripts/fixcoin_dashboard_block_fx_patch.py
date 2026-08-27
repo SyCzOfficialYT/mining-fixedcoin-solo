@@ -1,25 +1,23 @@
 #!/usr/bin/env python3
-"""Wire the dashboard's SSE block events to a visible block-found animation.
-
-The backend already emits ``type=block`` for BLOCK CANDIDATE log entries. The
-v4 reference UI handled accept/reject events but ignored block events, so a
-real candidate could reach 100% without any visual celebration.
-"""
+"""Wire dashboard block SSE events to an independent block-found animation."""
 from pathlib import Path
 
 JS = Path('/app/monitor/static/dashboard_v4_reference_final.js')
 HTML = Path('/app/monitor/templates/dashboard_v4.html')
 text = JS.read_text()
 
-if 'FIXEDCOIN_BLOCK_FX_V1' in text:
-    print('dashboard block FX already patched')
-    raise SystemExit(0)
+V1 = 'FIXEDCOIN_BLOCK_FX_V1'
+V2 = 'FIXEDCOIN_BLOCK_FX_V2'
 
-needle = "const handleLiveEvent=d=>{if(!d||!d.type)return;if(d.type==='accept'){hitCard(acceptedCard,'accept');hitCard(combo,'accept')}else if(d.type==='reject'){hitCard(rejectedCard,'reject')}window.dispatchEvent(new CustomEvent('fixedcoin:live',{detail:d}))};"
-if needle not in text:
-    raise RuntimeError('dashboard block FX: live event handler anchor not found')
+# V1 is the original forge/candidate celebration. Keep it intact, but add a
+# second, deliberately independent failsafe listener. The Discord/GhostBot
+# webhook is asynchronous and must never gate dashboard rendering.
+if V1 not in text:
+    needle = "const handleLiveEvent=d=>{if(!d||!d.type)return;if(d.type==='accept'){hitCard(acceptedCard,'accept');hitCard(combo,'accept')}else if(d.type==='reject'){hitCard(rejectedCard,'reject')}window.dispatchEvent(new CustomEvent('fixedcoin:live',{detail:d}))};"
+    if needle not in text:
+        raise RuntimeError('dashboard block FX: live event handler anchor not found')
 
-replacement = r'''const blockEvents=new Set();
+    replacement = r'''const blockEvents=new Set();
 const blockHit=()=>{
  const forge=document.getElementById('forge'),candidate=document.getElementById('candidate'),core=document.getElementById('candidateCore');
  const replay=(el,frames,opts)=>{if(!el||typeof el.animate!=='function')return;try{el.animate(frames,opts)}catch(_) {}};
@@ -53,17 +51,38 @@ const handleLiveEvent=d=>{
  window.dispatchEvent(new CustomEvent('fixedcoin:live',{detail:d}))
 };
 /* FIXEDCOIN_BLOCK_FX_V1 */'''
+    text = text.replace(needle, replacement, 1)
 
-text = text.replace(needle, replacement, 1)
+# V2 is intentionally attached after the normal event handler. It provides a
+# DOM-level visual signal even if a future UI refactor replaces blockHit().
+# It only consumes the dashboard's own SSE event and has zero dependency on
+# Discord/webhook completion.
+if V2 not in text:
+    failsafe = r'''
+/* FIXEDCOIN_BLOCK_FX_V2: webhook-independent visual failsafe */
+window.addEventListener('fixedcoin:block',e=>{
+ const d=e&&e.detail||{};
+ document.documentElement.classList.remove('fixedcoin-block-flash');
+ void document.documentElement.offsetWidth;
+ document.documentElement.classList.add('fixedcoin-block-flash');
+ setTimeout(()=>document.documentElement.classList.remove('fixedcoin-block-flash'),2200);
+});
+'''
+    text += failsafe
+
 JS.write_text(text)
 
+# Bump the browser cache key every time this patch is installed/updated.
 html = HTML.read_text()
-old = '/static/dashboard_v4_reference_final.js?v=20260826-mythic1'
-new = '/static/dashboard_v4_reference_final.js?v=20260827-blockfx1'
-if old in html:
-    html = html.replace(old, new, 1)
-else:
+import re
+html, count = re.subn(
+    r'/static/dashboard_v4_reference_final\.js\?v=[^"\']+',
+    '/static/dashboard_v4_reference_final.js?v=20260827-blockfx2',
+    html,
+    count=1,
+)
+if count == 0:
     raise RuntimeError('dashboard block FX: reference JS cache marker not found')
 HTML.write_text(html)
 
-print('dashboard block FX applied: SSE block events now trigger forge/candidate celebration')
+print('dashboard block FX installed: block animation is independent of Discord/GhostBot')
