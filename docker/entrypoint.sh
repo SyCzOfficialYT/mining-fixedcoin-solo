@@ -44,35 +44,11 @@ fixedcoin-cli -datadir="$DATADIR" -rpcuser="$RPCUSER" -rpcpassword="$RPCPASS" ge
 python3 /app/scripts/setup_address.py
 ln -sfn "$DATADIR/solo-blocks.json" /app/data/blocks.json
 
-STRATUM_BUILD_ONLY=1 python3 /app/stratum/server.py
-python3 /app/scripts/fixcoin_consensus_patch.py
-python3 /app/scripts/fixcoin_network_difficulty_patch.py
-python3 /app/scripts/fixcoin_stratum_difficulty_patch.py
-python3 /app/scripts/fixcoin_stratum_miner_detection_patch.py
-python3 /app/scripts/fixcoin_stratum_nmminer_diff_patch.py
-python3 /app/scripts/fixcoin_stratum_diff_job_epoch_patch.py
-python3 /app/scripts/fixcoin_dashboard_difficulty_patch.py
-python3 /app/scripts/fixcoin_dashboard_realtime_patch.py
-python3 /app/scripts/fixcoin_dashboard_v4_patch.py
-python3 /app/scripts/fixcoin_dashboard_v4_js_patch.py
-python3 /app/scripts/fixcoin_dashboard_round_authority_patch.py
-python3 /app/scripts/fixcoin_dashboard_forge_patch.py
-python3 /app/scripts/fixcoin_dashboard_balance_activity_patch.py
-python3 /app/scripts/fixcoin_dashboard_activity_authority_patch.py
-python3 /app/scripts/fixcoin_axeos_hashrate_patch.py
-python3 /app/scripts/fixcoin_dashboard_reference_final_patch.py
-python3 /app/scripts/fixcoin_dashboard_cyberpunk_patch.py
-python3 /app/scripts/fixcoin_dashboard_core_perf_patch.py
-python3 /app/scripts/fixcoin_dashboard_fx_identity_patch.py
-python3 /app/scripts/fixcoin_dashboard_miner_identity_patch.py
-python3 /app/scripts/fixcoin_dashboard_miner_stats_patch.py
-python3 /app/scripts/fixcoin_dashboard_worker_attribution_patch.py
-
-EXPECTED_ADAPT_VERSION="$(sed -n 's/^new_version = [\"'"'"']\([^\"'"'"']*\)[\"'"'"']$/\1/p' /app/scripts/fixcoin_consensus_patch.py | head -n 1)"
-if [[ -z "$EXPECTED_ADAPT_VERSION" ]]; then echo "FATAL: could not determine expected patched Stratum adapter version" >&2; exit 1; fi
-ACTUAL_ADAPT_VERSION="$(sed -n '1s/^# ADAPT_VERSION=//p' /app/stratum/server_full.py)"
-if [[ "$ACTUAL_ADAPT_VERSION" != "$EXPECTED_ADAPT_VERSION" ]]; then echo "FATAL: generated Stratum adapter version mismatch: expected=$EXPECTED_ADAPT_VERSION actual=$ACTUAL_ADAPT_VERSION" >&2; exit 1; fi
-
+# All source mutations/patches are performed at IMAGE BUILD TIME in the
+# Dockerfile. Never rewrite the application on every container restart:
+# startup-time patching made the container non-deterministic and could fail on
+# an already-patched source tree, leaving the node unhealthy even though the
+# image itself had passed every build-time invariant.
 python3 - <<'PY'
 from pathlib import Path
 import sys
