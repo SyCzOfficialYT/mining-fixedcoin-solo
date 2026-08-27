@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Install Stratum miner/user-agent detection safely.
+"""Install Stratum miner/user-agent detection without rewriting Client.run().
 
-Detection must run inside Client.run()'s request loop, after ``params`` is
-assigned from the decoded JSON message and immediately before
-``mining.subscribe`` is dispatched.  The previous implementation attempted
-AST line-offset surgery on the Client class and could leave server_full.py
-syntactically invalid after repeated/generated patches.
+server.py regenerates server_full.py from a clean pinned upstream source on
+every build. Therefore this patch only performs a single, exact textual
+insertion after the request loop has assigned ``params``. The previous
+versions attempted to remove/rewrite generated blocks and could corrupt
+unrelated code around Client.run().
 """
 from pathlib import Path
 
@@ -13,11 +13,29 @@ ROOT = Path(__file__).resolve().parent.parent
 PATH = ROOT / "stratum" / "server_full.py"
 text = PATH.read_text()
 
-DETECTION_START = "        # FIXCOIN MINER DETECTION START\n"
-DETECTION_END = "        # FIXCOIN MINER DETECTION END\n"
+START = "        # FIXCOIN MINER DETECTION START\n"
+END = "        # FIXCOIN MINER DETECTION END\n"
+PARAMS = '                    mid, method, params = msg.get("id"), msg.get("method"), msg.get("params") or []\n'
+SUBSCRIBE = '                    if method == "mining.subscribe":\n'
 
-# Full detector body. It intentionally references `params` only at the point
-# where the request loop has already assigned it.
+# server.py always generates a fresh server_full.py, but fail loudly rather
+# than creating a second detector if that invariant ever changes.
+if START in text or END in text:
+    raise RuntimeError("miner detection block already present in generated server_full.py")
+
+if PARAMS not in text:
+    raise RuntimeError("Stratum request params assignment not found")
+if SUBSCRIBE not in text:
+    raise RuntimeError("mining.subscribe dispatch not found")
+
+params_pos = text.find(PARAMS)
+subscribe_pos = text.find(SUBSCRIBE)
+if params_pos >= subscribe_pos:
+    raise RuntimeError("invalid request-loop ordering: subscribe precedes params assignment")
+
+# Do not touch Client.__init__ or any other generated function. The detector
+# initializes all telemetry fields when the first subscribe request arrives,
+# which is exactly before authorization on normal Stratum v1 clients.
 detection = '''        # FIXCOIN MINER DETECTION START
         # Stratum v1 exposes miner firmware/user-agent in mining.subscribe[0].
         ua = str(params[0]).strip() if params and isinstance(params, (list, tuple)) else ""
@@ -52,68 +70,16 @@ detection = '''        # FIXCOIN MINER DETECTION START
         # FIXCOIN MINER DETECTION END
 '''
 
-# Remove any previous detector block, including the broken pre-loop version.
-if DETECTION_START in text:
-    before, rest = text.split(DETECTION_START, 1)
-    if DETECTION_END not in rest:
-        raise RuntimeError("incomplete existing miner detection block")
-    _, after = rest.split(DETECTION_END, 1)
-    text = before + after
-else:
-    # Remove the exact legacy block installed by the earlier patch revision.
-    legacy_start = '        # Stratum v1 exposes the miner firmware/user-agent in the first\n'
-    if legacy_start in text:
-        before, rest = text.split(legacy_start, 1)
-        legacy_end = '        with _clients_lock:\n'
-        if legacy_end not in rest:
-            raise RuntimeError("legacy miner detection block has unexpected shape")
-        _, after = rest.split(legacy_end, 1)
-        text = before + legacy_end + after
+patched = text.replace(SUBSCRIBE, detection + SUBSCRIBE, 1)
 
-# Initialize telemetry fields once in Client.__init__, if the generated base
-# does not already define them. This keeps dashboard access safe before the
-# first subscribe request.
-if 'self.miner_user_agent = ""' not in text:
-    marker = '        self.worker = "?"\n'
-    if marker not in text:
-        raise RuntimeError("Client worker initialization marker not found")
-    init_fields = '''        self.worker = "?"
-        self.miner_user_agent = ""
-        self.miner_family = "unknown"
-        self.miner_version = ""
-        self.miner_variant = ""
-        self.miner_is_nmminer_v2 = False
-        self.miner_is_nerdminer_v2 = False
-'''
-    text = text.replace(marker, init_fields, 1)
+# The generated file must remain valid Python before it is written.
+compile(patched, str(PATH), "exec")
 
-# Find the request-loop params assignment and the subscribe dispatch. Insert
-# only after params exists, eliminating the original UnboundLocalError.
-params_marker = '                    mid, method, params = msg.get("id"), msg.get("method"), msg.get("params") or []\n'
-subscribe_marker = '                    if method == "mining.subscribe":\n'
-if params_marker not in text:
-    raise RuntimeError("Stratum request params assignment not found")
-if subscribe_marker not in text:
-    raise RuntimeError("mining.subscribe dispatch not found")
-
-if text.find(params_marker) > text.find(subscribe_marker):
-    raise RuntimeError("invalid request-loop ordering: subscribe precedes params assignment")
-
-text = text.replace(subscribe_marker, detection + subscribe_marker, 1)
-
-# Compile before writing. Also verify the detector is no longer at run() entry
-# and that params assignment precedes every detector insertion.
-compile(text, str(PATH), "exec")
-
-run_pos = text.find('    def run(self):\n')
-detect_pos = text.find(DETECTION_START)
-params_pos = text.find(params_marker)
-subscribe_pos = text.find(subscribe_marker)
-if run_pos < 0 or not (params_pos < detect_pos < subscribe_pos):
+# Verify the insertion is exactly between params assignment and subscribe.
+detect_pos = patched.find(START)
+if not (params_pos < detect_pos < patched.find(SUBSCRIBE)):
     raise RuntimeError("miner detection placement verification failed")
-if detect_pos - run_pos < 200:
-    raise RuntimeError("miner detection unexpectedly remains at run() entry")
 
-PATH.write_text(text)
-print(f"patched {PATH}: miner detection is scoped to mining.subscribe params")
+PATH.write_text(patched)
+print(f"patched {PATH}: miner detection scoped to mining.subscribe params")
 print(f"verified {PATH}: syntax valid; params -> detection -> subscribe ordering")
