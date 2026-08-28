@@ -1,10 +1,5 @@
 #!/usr/bin/env python3
-"""Install the repository-owned responsive Arcane dashboard layer.
-
-The patch is intentionally self-contained and build-safe. It owns only the
-reference presentation layer; live data remains supplied by the dashboard
-runtime and animations never depend on Discord/GhostBot.
-"""
+"""Install the repository-owned responsive Arcane dashboard layer."""
 from pathlib import Path
 
 ROOT = Path('/app')
@@ -21,7 +16,6 @@ ORNAMENTS = '''
   <div class="arcane-vignette"></div>
 </div>
 '''
-
 if 'id="referenceOrnaments"' not in html:
     marker = '<main class="dashboard reference-dashboard liveshare-dashboard">'
     if marker in html:
@@ -45,7 +39,6 @@ TREASURY = '''
   <div class="activity-reference-grid" id="activityReferenceGrid"><div class="activity-reference-empty">Waiting for live share events…</div></div>
 </section>
 '''
-
 if 'id="arcaneTreasury"' not in html:
     marker = '<section class="block-history panel" id="blockHistory">'
     if marker in html:
@@ -55,12 +48,12 @@ OLD = '<div class="history-row history-labels"><span>HEIGHT</span><span>VALIDITY
 NEW = '<div class="history-row history-labels"><span>HEIGHT</span><span>TIME</span><span>DIFFICULTY</span><span>LUCK</span><span>SHARES</span><span>MINER</span><span>BLOCK HASH</span><span>REWARD</span></div>'
 html = html.replace(OLD, NEW, 1)
 
-css_tag = '<link rel="stylesheet" href="/static/dashboard_v4_reference_complete.css?v=20260829-2">'
-if css_tag not in html:
+css_tag = '<link rel="stylesheet" href="/static/dashboard_v4_reference_complete.css?v=20260829-3">'
+if '/static/dashboard_v4_reference_complete.css' not in html:
     html = html.replace('</head>', css_tag + '\n</head>', 1)
 
-js_tag = '<script defer src="/static/dashboard_v4_reference_complete.js?v=20260829-2"></script>'
-if js_tag not in html:
+js_tag = '<script defer src="/static/dashboard_v4_reference_complete.js?v=20260829-3"></script>'
+if '/static/dashboard_v4_reference_complete.js' not in html:
     html = html.replace('</body>', js_tag + '\n</body>', 1)
 
 HTML_PATH.write_text(html, encoding='utf-8')
@@ -100,14 +93,13 @@ JS = r'''(() => {
     set('estimatedEarnings',estimated==null?'—':fmt(estimated)+' FX');
     set('pendingOutput',pending==null?'—':fmt(pending)+' FX');
     set('totalPaidRewards',paid==null?'—':fmt(paid)+' FX');
-    const balance=total!=null?total:(confirmed!=null?num(confirmed)+num(pending)+num(immature):null);
-    set('treasuryBalance',balance==null?'—':fmt(balance)+' FX');
+    set('treasuryBalance',total==null?([confirmed,pending,immature].some(v=>v!=null)?fmt(num(confirmed)+num(pending)+num(immature))+' FX':'—'):fmt(total)+' FX');
   }
   function activity(s){
     const grid=$('activityReferenceGrid'); if(!grid)return;
-    const items=pick(s,['activity','recent_activity','events','recentActivity']);
-    if(!Array.isArray(items))return;
-    grid.replaceChildren(...items.slice(0,12).map((x,i)=>{
+    const items=pick(s,['activity','recent_activity','events','shares'])||[];
+    if(!Array.isArray(items)||!items.length)return;
+    grid.replaceChildren(...items.slice(0,12).map(x=>{
       const row=document.createElement('div'); row.className='activity-reference-row '+(String(x.type||x.status||'').toLowerCase().includes('reject')?'bad':'ok');
       row.innerHTML='<span class="event-icon">'+(row.classList.contains('bad')?'×':'✓')+'</span><div><div class="event-label">'+String(x.label||x.type||'SHARE ACCEPTED')+'</div><small>'+String(x.worker||x.miner||x.message||'FixedCoin forge event')+'</small></div><time>'+String(x.time||x.ts||'LIVE')+'</time>';
       return row;
@@ -119,7 +111,6 @@ JS = r'''(() => {
 '''
 JS_PATH.write_text(JS, encoding='utf-8')
 
-# Fail fast on syntax errors in this patch itself; compile the source text once.
 source = Path(__file__).read_text(encoding='utf-8')
 compile(source, str(__file__), 'exec')
 print('dashboard complete reference installed: responsive desktop/mobile, Arcane Treasury, activity, Chronicle layout, depth, glow and motion')
