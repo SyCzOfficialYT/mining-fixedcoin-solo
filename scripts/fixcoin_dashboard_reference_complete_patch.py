@@ -100,13 +100,18 @@ JS = r'''(() => {
     set('estimatedEarnings',estimated==null?'—':fmt(estimated)+' FX');
     set('pendingOutput',pending==null?'—':fmt(pending)+' FX');
     set('totalPaidRewards',paid==null?'—':fmt(paid)+' FX');
-    set('treasuryBalance',total==null?(confirmed==null?'—':fmt(num(confirmed)+num(pending)+num(immature))+' FX'):fmt(total)+' FX');
+    const balance=total!=null?total:(confirmed!=null?num(confirmed)+num(pending)+num(immature):null);
+    set('treasuryBalance',balance==null?'—':fmt(balance)+' FX');
   }
   function activity(s){
-    const host=$('activityReferenceGrid'); if(!host)return;
-    const events=Array.isArray(s.shares)?s.shares.slice(-8).reverse():[];
-    if(!events.length){host.innerHTML='<div class="activity-reference-empty">Waiting for live share events…</div>';return;}
-    host.innerHTML=events.map(x=>{const ok=x.accepted!==false&&!x.rejected;const t=String(x.ts||x.time||'');return `<div class="activity-reference-row ${ok?'ok':'bad'}"><span class="event-icon">${ok?'✓':'×'}</span><span><b class="event-label">${ok?'ACCEPTED SHARE':'REJECTED SHARE'}</b><small>WORK ${fmt(x.work??x.pool_diff??x.diff??0)} · LIVE FORGE</small></span><time>${t.slice(11,19)}</time></div>`}).join('');
+    const grid=$('activityReferenceGrid'); if(!grid)return;
+    const items=pick(s,['activity','recent_activity','events','recentActivity']);
+    if(!Array.isArray(items))return;
+    grid.replaceChildren(...items.slice(0,12).map((x,i)=>{
+      const row=document.createElement('div'); row.className='activity-reference-row '+(String(x.type||x.status||'').toLowerCase().includes('reject')?'bad':'ok');
+      row.innerHTML='<span class="event-icon">'+(row.classList.contains('bad')?'×':'✓')+'</span><div><div class="event-label">'+String(x.label||x.type||'SHARE ACCEPTED')+'</div><small>'+String(x.worker||x.miner||x.message||'FixedCoin forge event')+'</small></div><time>'+String(x.time||x.ts||'LIVE')+'</time>';
+      return row;
+    }));
   }
   async function poll(){try{const r=await fetch('/api/status?ts='+Date.now(),{cache:'no-store'});if(!r.ok)return;const s=await r.json();treasury(s);activity(s);}catch(_){}}
   poll(); setInterval(poll,2000);
@@ -114,6 +119,7 @@ JS = r'''(() => {
 '''
 JS_PATH.write_text(JS, encoding='utf-8')
 
-# Fail fast on syntax errors in this patch itself; this keeps Docker failures actionable.
-compile(compile(Path(__file__).read_text(encoding='utf-8'), str(__file__), 'exec'), str(__file__), 'exec')
+# Fail fast on syntax errors in this patch itself; compile the source text once.
+source = Path(__file__).read_text(encoding='utf-8')
+compile(source, str(__file__), 'exec')
 print('dashboard complete reference installed: responsive desktop/mobile, Arcane Treasury, activity, Chronicle layout, depth, glow and motion')
