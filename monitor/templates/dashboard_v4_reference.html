@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#03030b">
+<meta name="description" content="LiveShare — FixedCoin solo mining arcane command center">
+<title>LiveShare · FixedCoin Solo Mining</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/dashboard_v4_reference_visual.css?v=20260828-reference4">
+<link rel="stylesheet" href="/static/dashboard_v4_core_motion.css?v=20260828-reference4">
+<style>
+/* Reference compatibility + live telemetry hooks. Visual composition lives in arcane-reference.css. */
+.reference-dashboard .hidden-telemetry{display:none!important}
+.reference-dashboard .forge-stage-hook{position:relative}
+.reference-dashboard #particleCanvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:8}
+.reference-dashboard .forgeStage{position:relative;min-height:330px}
+.reference-dashboard .core-hot{filter:drop-shadow(0 0 26px rgba(112,236,255,.55))}
+.reference-dashboard .block-spark{position:fixed;width:6px;height:6px;border-radius:50%;background:#d7b4ff;box-shadow:0 0 16px #a56cff;pointer-events:none;z-index:9999}
+.reference-dashboard .status{display:inline-block;padding:4px 8px;border-radius:2px;font:800 7px var(--mono);letter-spacing:.1em}
+.reference-dashboard .status.active{color:var(--green);border:1px solid rgba(99,239,154,.34);background:rgba(99,239,154,.06)}
+.reference-dashboard .status.waiting{color:#8c7d9d;border:1px solid rgba(112,78,180,.24)}
+.reference-dashboard .candidate-track{height:6px;margin-top:9px;border:1px solid rgba(182,108,255,.25);border-radius:99px;background:#070510;overflow:hidden;position:relative}
+.reference-dashboard #candidateMeter{display:block;height:100%;background:linear-gradient(90deg,#6d28d9,#d28cff);box-shadow:0 0 14px #a56cff;width:0}
+.reference-dashboard #targetMeter{display:block;height:100%;background:linear-gradient(90deg,#7c3aed,#d19aff);box-shadow:0 0 14px #a56cff;width:0}
+.reference-dashboard .target-track{height:7px;position:relative;border:1px solid rgba(167,139,250,.22);border-radius:99px;background:#070612;overflow:hidden}
+.reference-dashboard .bar-particles{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.reference-dashboard #targetMarker{position:absolute;top:-3px;width:12px;height:12px;border-radius:50%;background:#ffd86a;box-shadow:0 0 14px #ffd86a;transform:translateX(-50%);left:0}
+.reference-dashboard .candidate-core{position:relative;overflow:hidden}
+.reference-dashboard .candidate-core .candidate-crystal-art{position:absolute;inset:20px;display:grid;place-items:center;color:#bd7cff;font-size:37px;transform:rotate(45deg);filter:drop-shadow(0 0 18px rgba(182,108,255,.55));border:1px solid rgba(182,108,255,.2);background:radial-gradient(circle,rgba(182,108,255,.15),transparent 67%)}
+.reference-dashboard .candidate-core .candidate-crystal-art span{transform:rotate(-45deg)}
+.reference-dashboard .candidate-core small,.reference-dashboard .candidate-core b{position:absolute;left:0;right:0;text-align:center;z-index:3}
+.reference-dashboard .candidate-core small{bottom:18px;color:#68758c;font:700 6px var(--mono)}
+.reference-dashboard .candidate-core b{bottom:7px;color:#8e7ca7;font:700 6px var(--mono)}
+.reference-dashboard .forge-counter.share-hit{animation:rfShareCard .72s cubic-bezier(.16,.84,.22,1)}
+.reference-dashboard .combo.share-hit{animation:rfComboHit .72s cubic-bezier(.16,.84,.22,1)}
+.reference-dashboard .share-burst{position:absolute;left:50%;top:50%;z-index:26;pointer-events:none;color:var(--green);font:800 10px/1 var(--mono);letter-spacing:.16em;text-shadow:0 0 10px rgba(77,255,114,.9);transform:translate(-50%,-50%);animation:rfShareBurst .78s cubic-bezier(.16,.84,.22,1) forwards}
+.reference-dashboard .share-burst.reject{color:var(--red);text-shadow:0 0 10px rgba(255,79,97,.9)}
+@keyframes rfShareCard{0%{transform:perspective(900px) rotateY(8deg) rotateX(2deg) translateZ(0) scale(1)}24%{transform:perspective(900px) rotateY(8deg) rotateX(2deg) translateZ(18px) scale(1.045);box-shadow:inset 0 0 0 1px rgba(77,255,114,.2),0 0 32px rgba(77,255,114,.38),0 20px 45px rgba(0,0,0,.7)}100%{transform:perspective(900px) rotateY(8deg) rotateX(2deg) translateZ(0) scale(1)}}
+@keyframes rfComboHit{0%,100%{transform:translateZ(45px) scale(1)}28%{transform:translateZ(75px) scale(1.12);filter:drop-shadow(0 0 14px rgba(255,181,47,.55))}55%{transform:translateZ(55px) scale(1.03)}}
+@keyframes rfShareBurst{0%{opacity:0;transform:translate(-50%,-50%) scale(.65)}18%{opacity:1}100%{opacity:0;transform:translate(-50%,-115px) scale(1.12)}}
+@media(prefers-reduced-motion:reduce){.reference-dashboard .share-burst,.reference-dashboard .forge-counter.share-hit,.reference-dashboard .combo.share-hit{animation:none!important}}
+</style>
+</head>
+<body>
+<main class="liveshareApp reference-dashboard">
+  <aside class="leftRail">
+    <div class="brandCrest"><div>✦</div></div>
+    <div class="nodeBrand">FIXEDCOIN<span>SOLO NODE</span></div>
+    <div class="railDivider"></div>
+    <nav>
+      <div class="navItem active"><span>✦</span>Dashboard</div><div class="navItem"><span>◇</span>Mining</div><div class="navItem"><span>◌</span>Shares</div><div class="navItem"><span>▣</span>Blocks</div><div class="navItem"><span>♙</span>Workers</div><div class="navItem"><span>⚙</span>Settings</div><div class="navItem"><span>≡</span>Logs</div><div class="navItem"><span>⬡</span>System</div>
+    </nav>
+    <div class="railGem"><div class="gemSmall">◆</div><div class="gemBase"></div></div>
+    <div class="nodeStatus"><label>NODE STATUS</label><strong><i></i> ONLINE</strong><label>UPTIME</label><b id="uptimeRail">—</b></div>
+  </aside>
+
+  <section class="centerColumn">
+    <header class="pageHeader"><div class="pageTitle">LIVESHARE <span>✦</span> ARCANE FORGE</div><div class="liveState"><i></i> STRATUM · LIVE</div></header>
+
+    <section class="heroPanel ornatePanel">
+      <div class="cornerRune tl">✧</div><div class="cornerRune tr">✧</div>
+      <svg class="dragon dragon-left" viewBox="0 0 300 470" aria-hidden="true"><defs><linearGradient id="dl" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#e0a4ff"/><stop offset=".38" stop-color="#7b3dd1"/><stop offset=".78" stop-color="#1a143e"/><stop offset="1" stop-color="#050713"/></linearGradient><linearGradient id="dlw" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#a866ff" stop-opacity=".72"/><stop offset="1" stop-color="#130d2d" stop-opacity=".05"/></linearGradient><filter id="dlg"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><g filter="url(#dlg)"><path d="M153 451C89 430 43 383 57 319c8-36 51-47 50-83-1-38-51-51-42-96 8-39 47-73 94-76-35 26-38 57-10 72 34 18 79-1 90 38 11 39-34 68-23 105 11 36 67 57 58 105-7 38-31 58-71 67Z" fill="url(#dl)" stroke="rgba(224,196,255,.82)" stroke-width="2"/><path d="M118 124L34 48l71 16 44-51 8 84Z" fill="url(#dlw)" stroke="rgba(155,116,255,.62)" stroke-width="2"/><path d="M178 127l92-68-73 15-37-51-9 85Z" fill="url(#dlw)" stroke="rgba(87,214,255,.4)" stroke-width="2"/><path d="M93 244c28 23 54 33 78 29 24-4 43-20 60-47M89 308c36 21 71 22 105 2" fill="none" stroke="rgba(205,159,255,.46)" stroke-width="2"/><circle cx="178" cy="117" r="6" fill="#fff"/><path d="M171 88l-19-21M181 88l19-21" stroke="#ffd86a" stroke-width="3" stroke-linecap="round"/></g></svg>
+      <svg class="dragon dragon-right" viewBox="0 0 300 470" aria-hidden="true"><defs><linearGradient id="dr" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#7feaff"/><stop offset=".38" stop-color="#237ec5"/><stop offset=".78" stop-color="#1a143e"/><stop offset="1" stop-color="#050713"/></linearGradient><linearGradient id="drw" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#3dd7ff" stop-opacity=".72"/><stop offset="1" stop-color="#130d2d" stop-opacity=".05"/></linearGradient><filter id="drg"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><g filter="url(#drg)"><path d="M153 451C89 430 43 383 57 319c8-36 51-47 50-83-1-38-51-51-42-96 8-39 47-73 94-76-35 26-38 57-10 72 34 18 79-1 90 38 11 39-34 68-23 105 11 36 67 57 58 105-7 38-31 58-71 67Z" fill="url(#dr)" stroke="rgba(135,235,255,.8)" stroke-width="2"/><path d="M118 124L34 48l71 16 44-51 8 84Z" fill="url(#drw)" stroke="rgba(66,217,255,.62)" stroke-width="2"/><path d="M178 127l92-68-73 15-37-51-9 85Z" fill="url(#drw)" stroke="rgba(87,214,255,.4)" stroke-width="2"/><circle cx="178" cy="117" r="6" fill="#fff"/><path d="M171 88l-19-21M181 88l19-21" stroke="#ffd86a" stroke-width="3" stroke-linecap="round"/></g></svg>
+      <div class="heroContent">
+        <div class="heroKicker">ARCANE SOLO MINING NETWORK</div><h1>LIVESHARE</h1><div class="heroSub">SOLO MINING · MAGICAL NETWORK</div>
+        <div class="versusGrid">
+          <div class="heroStat purple"><label>BEST SHARE DIFFICULTY</label><strong id="bestShare">—</strong><em id="bestRaw">≈ —</em><div class="goldBar"><i id="targetMeter"></i></div><small id="targetPct">0.000% of Network Target</small></div>
+          <div class="vsMedallion"><span>VS</span></div>
+          <div class="heroStat gold"><label>NETWORK TARGET DIFFICULTY</label><strong id="networkTarget">—</strong><em id="networkRaw">≈ —</em><div class="goldBar"><i id="targetMarker"></i></div><small id="remaining">— remaining</small></div>
+        </div>
+        <div class="target-track" id="targetTrack"><canvas class="bar-particles" id="targetParticles" aria-hidden="true"></canvas></div>
+      </div>
+      <aside class="heroRoundBadge"><label>CURRENT ROUND</label><strong id="roundId">#—</strong><div><span>⌛ ROUND AGE</span><b id="roundAge">—</b></div><div><span>⌛ TIME REMAINING</span><b class="cyan" id="timeRemain">00:00</b><small id="timePct">0.0%</small></div><div><span>ROUND STATUS</span><i class="activePill status active" id="roundStatus">ACTIVE</i></div></aside>
+    </section>
+
+    <section class="forgePanel ornatePanel forge-stage-hook" id="forge">
+      <div class="sectionStrip"><span>LIVE SHARE FORGE · REALTIME PROOF OF WORK</span><b><i></i> <span id="forgeLiveRate">—</span></b></div>
+      <div class="forgeGrid forgeStage" id="forgeStage">
+        <canvas class="particle-canvas" id="particleCanvas" aria-hidden="true"></canvas>
+        <div class="metricColumn">
+          <div class="metricCard parallax-card"><label>HASHRATE</label><strong id="forgeHashrate">—</strong><small>LIVE PERFORMANCE</small><div class="microChart"></div></div>
+          <div class="metricCard parallax-card"><label>SHARES / MIN</label><strong id="sharesMin">—</strong><small>LAST 10 MIN</small><div class="microChart"></div></div>
+          <div class="metricCard parallax-card gold"><label>NETWORK LUCK</label><strong id="networkLuck">100.0%</strong><small>ABOVE AVERAGE</small><div class="microChart"></div></div>
+        </div>
+        <div class="altar" id="anvil">
+          <div class="coreScene">
+            <div class="starfield"></div><div class="coreAura"></div><div class="orbit orbitA"></div><div class="orbit orbitB"></div><div class="orbit orbitC"></div>
+            <div class="core-logo coreCrystal" id="forgeCore" aria-label="FixedCoin Prism Core"><span>FX</span></div>
+            <div class="corePedestal"><i></i><i></i><i></i></div>
+          </div>
+          <div class="altarTitle">LIVESHARE <span>· ARCANE CORE</span></div><small>MAGIC ENERGY // LIVE HASH STREAM // SHA256</small>
+          <div id="liveVarDiff" class="hidden-telemetry">—</div><div id="minerFigure" class="hidden-telemetry">FX</div><div id="impact" class="hidden-telemetry"></div>
+        </div>
+        <div class="metricColumn">
+          <div class="metricCard green parallax-card" id="acceptedCounter"><label>ACCEPTED SHARES</label><strong id="acceptedCount">0</strong><small id="validPct">100.0% ACCEPTANCE</small><div class="microChart"></div></div>
+          <div class="metricCard red parallax-card rejected"><label>REJECTED SHARES</label><strong id="rejectedCount">0</strong><small id="invalidPct">0</small><div class="microChart"></div></div>
+          <div class="metricCard violet parallax-card"><label>LIVE WORKERS</label><strong id="liveWorkers">—</strong><small>CONNECTED</small><div class="microChart"></div></div>
+        </div>
+        <div id="combo" class="hidden-telemetry"><span>COMBO</span><strong id="comboValue">×0</strong><small id="comboBonus">STREAK READY</small></div>
+      </div>
+    </section>
+
+    <section class="altarRow">
+      <div class="candidatePanel ornatePanel" id="candidate">
+        <div class="panelHeading"><div class="sigil">✦</div><div><h2>BLOCK CANDIDATE</h2><p>Magical probability of a new block</p></div></div>
+        <div class="candidateBody"><div><div class="candidateValue" id="candidatePct">0.000%</div><small>PROGRESS TO BLOCK</small><strong>BEST BLOCK EVER <span id="nextHeight">#—</span></strong></div><div class="candidateCrystal"><span>◆</span></div></div>
+        <div class="purpleTrack candidate-track" id="candidateTrack"><i id="candidateMeter"></i><canvas class="bar-particles" id="candidateParticles" aria-hidden="true"></canvas></div>
+        <div id="candidateCore" class="hidden-telemetry candidate-core"><div class="candidate-crystal-art"><span>◆</span></div><small>BLOCK</small><b>VERY LOW</b></div>
+      </div>
+      <div class="balancePanel ornatePanel">
+        <div class="panelHeading"><div class="sigil gold">◈</div><div><h2>BALANCE</h2><p>Your Magical Earnings</p></div></div>
+        <div class="balanceArt"><svg class="scale-art" viewBox="0 0 300 240" aria-hidden="true"><defs><linearGradient id="scaleGold" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff2a5"/><stop offset=".42" stop-color="#e2ad3e"/><stop offset="1" stop-color="#71410e"/></linearGradient></defs><path d="M150 25v167M116 193h68M101 210h98" stroke="url(#scaleGold)" stroke-width="8" stroke-linecap="round"/><circle cx="150" cy="29" r="14" fill="#120f1c" stroke="#ffd86a" stroke-width="3"/><path d="M55 72h190M80 72l-35 77q35 27 70 0L80 72M220 72l-35 77q35 27 70 0l-35-77" fill="rgba(255,216,106,.07)" stroke="#d79c31" stroke-width="5"/><circle cx="80" cy="147" r="10" fill="#65ffad"/><circle cx="220" cy="147" r="10" fill="#48eaff"/></svg></div>
+        <div class="balanceValue" id="totalBalance">—</div><div class="balanceUnit">LIVESHARE</div><div class="balanceUsd" id="balanceUsd">≈ — USD</div>
+        <div class="hidden-telemetry"><span id="confirmedBalance">—</span><span id="unconfirmedBalance">—</span><span id="immatureBalance">—</span></div>
+      </div>
+    </section>
+
+    <section class="historyPanel ornatePanel" id="blockHistory">
+      <div class="historyHeading"><div class="panelHeading"><div class="sigil">◆</div><div><h2>BLOCK HISTORY</h2><p>Chronicles of the Eternal Chain</p></div></div><span class="recordCount" id="historyCount">0 RECORDS</span></div>
+      <div class="historyTable"><div class="historyRow head"><span>HEIGHT</span><span>TIME</span><span>DIFFICULTY</span><span>LUCK</span><span>SHARES</span><span>MINER</span><span>MAGIC HASH</span><span>REWARD</span></div><div id="blockHistoryList"><div class="history-empty">No block candidates recorded yet.</div></div></div>
+    </section>
+    <div class="footerBar"><strong>LIVESHARE · FIXEDCOIN SOLO</strong><span>UPTIME <b id="uptime">—</b></span><span>CONNECTED PEERS <b id="peers">—</b></span><span>NETWORK DIFFICULTY <b id="footerDiff">—</b></span><span>VERSION <b>v29.1.3</b></span><span id="eta" class="hidden-telemetry">—</span><span id="avgDiff" class="hidden-telemetry">—</span><span id="validShares" class="hidden-telemetry">0</span><span id="invalidShares" class="hidden-telemetry">0</span></div>
+  </section>
+
+  <aside class="rightRail">
+    <div class="railCard tone-violet"><div class="railIcon">◇</div><label>ESTIMATED EARNINGS</label><strong id="estimatedEarnings">0.00000000 FIX</strong><small>DAILY REWARD</small></div>
+    <div class="railCard tone-gold"><div class="railIcon">◈</div><label>PENDING PAYOUT</label><strong id="pendingPayout">0.00000000 FIX</strong><small>UNCONFIRMED</small></div>
+    <div class="railCard tone-cyan"><div class="railIcon">◆</div><label>TOTAL PAID</label><strong id="totalPaid">0.00000000 FIX</strong><small>RECORDED REWARDS</small></div>
+    <div class="railCard tone-violet"><div class="railIcon">♙</div><label>WORKERS ONLINE</label><strong id="railWorkers">0</strong><small>CONNECTED</small></div>
+    <div class="railCard tone-cyan"><div class="railIcon">⌁</div><label>NETWORK UPTIME</label><strong id="networkUptime">—</strong><small>NODE TELEMETRY</small></div>
+    <div class="railCard tone-gold"><div class="railIcon">◷</div><label>SERVER TIME</label><strong id="serverTime">—</strong><small>UTC+2</small></div>
+    <div class="blessingCard"><div class="blessingIcon">✦</div><label>ARCANE BLESSING</label><strong>ACTIVE</strong><small>CHAIN PROTECTED</small></div>
+  </aside>
+</main>
+<script defer src="/static/dashboard_v4.js?v=20260828-reference4"></script>
+<script defer src="/static/dashboard_v4_reference_final.js?v=20260828-reference4"></script>
+</body>
+</html>
