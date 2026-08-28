@@ -3,24 +3,14 @@
 from pathlib import Path
 import re
 
-HTML=Path('/app/monitor/templates/dashboard_v4.html')
-CSS=Path('/app/monitor/static/dashboard_v4_reference_final.css')
-JS=Path('/app/monitor/static/dashboard_v4_reference_final.js')
-SHELL_JS=Path('/app/monitor/static/dashboard_v4_reference_shell.js')
-CORE_CSS=Path('/app/monitor/static/dashboard_v4_core_motion.css')
-CORE_JS=Path('/app/monitor/static/dashboard_v4_core_motion.js')
-RTCSS=Path('/app/monitor/static/dashboard_v4_reference_realtime.css')
+HTML=Path('/app/monitor/templates/dashboard_v4.html');CSS=Path('/app/monitor/static/dashboard_v4_reference_final.css');JS=Path('/app/monitor/static/dashboard_v4_reference_final.js');SHELL_JS=Path('/app/monitor/static/dashboard_v4_reference_shell.js');CORE_CSS=Path('/app/monitor/static/dashboard_v4_core_motion.css');CORE_JS=Path('/app/monitor/static/dashboard_v4_core_motion.js');RTCSS=Path('/app/monitor/static/dashboard_v4_reference_realtime.css')
 html=HTML.read_text();css=CSS.read_text();js=JS.read_text();shell_js=SHELL_JS.read_text();core_css=CORE_CSS.read_text();core_js=CORE_JS.read_text();rtcss=RTCSS.read_text()
-rt_link='<link rel="stylesheet" href="/static/dashboard_v4_reference_realtime.css?v=20260825-1">'
-shell_script='<script defer src="/static/dashboard_v4_reference_shell.js?v=20260828-reference3"></script>'
-html=re.sub(r'<link rel="stylesheet" href="/static/dashboard_v4_reference_realtime\.css\?v=[^"\s>]+">','',html)
-head=html.find('</head>')
-if head<0:raise RuntimeError('dashboard reference final: </head> missing')
-html=html[:head]+rt_link+html[head:]
-html=re.sub(r'<script defer src="/static/dashboard_v4_reference_shell\.js\?v=[^"\s>]+"></script>','',html)
-body=html.find('</body>')
-if body<0:raise RuntimeError('dashboard reference final: </body> missing')
-html=html[:body]+shell_script+html[body:]
+rt_link='<link rel="stylesheet" href="/static/dashboard_v4_reference_realtime.css?v=20260828-reference3">';shell_script='<script defer src="/static/dashboard_v4_reference_shell.js?v=20260828-reference3"></script>'
+html=re.sub(r'<link rel="stylesheet" href="/static/dashboard_v4_reference_realtime\.css\?v=[^"\s>]+">','',html);html=re.sub(r'<script defer src="/static/dashboard_v4_reference_shell\.js\?v=[^"\s>]+"></script>','',html)
+html=re.sub(r'/static/dashboard_v4_reference_alignment\.css\?v=[^"\s>]+','/static/dashboard_v4_reference_alignment.css?v=20260828-reference3',html)
+head=html.find('</head>');body=html.find('</body>')
+if head<0 or body<0:raise RuntimeError('dashboard reference final: document boundary missing')
+html=html[:head]+rt_link+html[head:];body=html.find('</body>');html=html[:body]+shell_script+html[body:]
 height_marker='const heightFmt=v=>{const n=Math.trunc(Number(v)||0);return n.toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g,",")};'
 if height_marker not in js:
     anchor='const $=id=>document.getElementById(id);'
@@ -28,8 +18,7 @@ if height_marker not in js:
     js=js.replace(anchor,anchor+height_marker,1)
 for old,new in {"Number(r.height||n.height||0).toLocaleString()":"heightFmt(r.height||n.height||0)","(Number(r.height||n.height||0)+1).toLocaleString()":"heightFmt(Number(r.height||n.height||0)+1)","Number(b.height||0).toLocaleString()":"heightFmt(b.height||0)","Number(round[1]).toLocaleString()":"heightFmt(round[1])","Number(r.height||0).toLocaleString()":"heightFmt(r.height||0)"}.items():js=js.replace(old,new)
 HTML.write_text(html);JS.write_text(js)
-required_html=['id="forgeStage"','id="forgeCore"','id="particleCanvas"','id="forgeParticles"','id="targetParticles"','id="candidateParticles"','id="liveVarDiff"','id="confirmedBalance"','id="unconfirmedBalance"','id="immatureBalance"','id="totalBalance"','id="candidateCore"','id="blockHistoryList"','dashboard_v4_reference_final.css','dashboard_v4_reference_final.js','dashboard_v4_reference_shell.js','dashboard_v4_core_motion.css','dashboard_v4_core_motion.js',rt_link]
-missing=[x for x in required_html if x not in html]
+required_html=['id="forgeStage"','id="forgeCore"','id="particleCanvas"','id="forgeParticles"','id="targetParticles"','id="candidateParticles"','id="liveVarDiff"','id="confirmedBalance"','id="unconfirmedBalance"','id="immatureBalance"','id="totalBalance"','id="candidateCore"','id="blockHistoryList"','dashboard_v4_reference_final.css','dashboard_v4_reference_final.js','dashboard_v4_reference_shell.js','dashboard_v4_reference_alignment.css?v=20260828-reference3','dashboard_v4_core_motion.css','dashboard_v4_core_motion.js',rt_link];missing=[x for x in required_html if x not in html]
 if not re.search(r'class="[^"]*\breference-dashboard\b[^"]*"',html):missing.append('class token reference-dashboard')
 required_css=['.reference-dashboard .forge-stage','.reference-dashboard .core-logo','.reference-dashboard .balance-grid','.bar-particles','.reference-dashboard .candidate-core'];missing += [x for x in required_css if x not in css]
 required_js=['syncReferenceTelemetry','pointerMove','heightFmt','fixedcoin:live'];missing += [x for x in required_js if x not in js]
