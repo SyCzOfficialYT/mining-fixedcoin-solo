@@ -1,0 +1,9 @@
+/* Arcane reference geometry: two-column candidate/treasury composition. */
+.dashboard.reference-dashboard{grid-template-columns:minmax(0,1fr) 340px!important}
+.reference-dashboard .hero,.reference-dashboard .forge,.reference-dashboard .block-history,.reference-dashboard .footer{grid-column:1 / -1!important}
+.reference-dashboard .candidate{grid-column:1!important}
+.reference-dashboard .reference-balance{grid-column:2!important}
+@media(max-width:760px){
+  .dashboard.reference-dashboard{grid-template-columns:1fr!important}
+  .reference-dashboard .hero,.reference-dashboard .forge,.reference-dashboard .candidate,.reference-dashboard .reference-balance,.reference-dashboard .block-history,.reference-dashboard .footer{grid-column:1!important}
+}
