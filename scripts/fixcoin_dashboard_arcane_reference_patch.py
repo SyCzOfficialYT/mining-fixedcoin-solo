@@ -8,8 +8,14 @@ text = HTML.read_text(encoding="utf-8")
 changed = False
 
 css_link = '<link rel="stylesheet" href="/static/dashboard_v4_arcane_reference.css?v=20260828-arcane1">'
-if css_link not in text:
-    text = text.replace("</head>", css_link + "\n</head>", 1)
+layout_link = '<link rel="stylesheet" href="/static/dashboard_v4_arcane_layout.css?v=20260828-arcane1">'
+for link in (css_link, layout_link):
+    if link not in text:
+        text = text.replace("</head>", link + "\n</head>", 1)
+        changed = True
+
+if '<main id="top" class="dashboard reference-dashboard liveshare-dashboard">' not in text:
+    text = text.replace('<main class="dashboard reference-dashboard liveshare-dashboard">','<main id="top" class="dashboard reference-dashboard liveshare-dashboard">',1)
     changed = True
 
 nav = r'''
