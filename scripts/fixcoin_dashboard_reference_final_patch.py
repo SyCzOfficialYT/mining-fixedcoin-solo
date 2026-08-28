@@ -1,36 +1,56 @@
 #!/usr/bin/env python3
-"""Install/validate the repository-owned final dashboard reference composition."""
+"""Install the canonical LiveShare reference dashboard.
+
+All older visual patch layers run before this stage. The final stage replaces
+that output with one repository-owned reference template so the production
+composition cannot drift back to the legacy dashboard.
+"""
 from pathlib import Path
 import re
 
-HTML=Path('/app/monitor/templates/dashboard_v4.html');CSS=Path('/app/monitor/static/dashboard_v4_reference_final.css');JS=Path('/app/monitor/static/dashboard_v4_reference_final.js');SHELL_JS=Path('/app/monitor/static/dashboard_v4_reference_shell.js');CORE_CSS=Path('/app/monitor/static/dashboard_v4_core_motion.css');CORE_JS=Path('/app/monitor/static/dashboard_v4_core_motion.js');RTCSS=Path('/app/monitor/static/dashboard_v4_reference_realtime.css')
-html=HTML.read_text();css=CSS.read_text();js=JS.read_text();shell_js=SHELL_JS.read_text();core_css=CORE_CSS.read_text();core_js=CORE_JS.read_text();rtcss=RTCSS.read_text()
-VERSION='20260828-reference4'
-rt_link=f'<link rel="stylesheet" href="/static/dashboard_v4_reference_realtime.css?v={VERSION}">';shell_script=f'<script defer src="/static/dashboard_v4_reference_shell.js?v={VERSION}"></script>'
-html=re.sub(r'<link rel="stylesheet" href="/static/dashboard_v4_reference_realtime\.css\?v=[^"\s>]+">','',html);html=re.sub(r'<script defer src="/static/dashboard_v4_reference_shell\.js\?v=[^"\s>]+"></script>','',html)
-html=re.sub(r'/static/dashboard_v4_reference_alignment\.css\?v=[^"\s>]+',f'/static/dashboard_v4_reference_alignment.css?v={VERSION}',html)
-head=html.find('</head>');body=html.find('</body>')
-if head<0 or body<0:raise RuntimeError('dashboard reference final: document boundary missing')
-html=html[:head]+rt_link+html[head:];body=html.find('</body>');html=html[:body]+shell_script+html[body:]
-height_marker='const heightFmt=v=>{const n=Math.trunc(Number(v)||0);return n.toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g,",")};'
-if height_marker not in js:
-    anchor='const $=id=>document.getElementById(id);'
-    if anchor not in js:raise RuntimeError('dashboard reference final: JS height formatter anchor missing')
-    js=js.replace(anchor,anchor+height_marker,1)
-for old,new in {"Number(r.height||n.height||0).toLocaleString()":"heightFmt(r.height||n.height||0)","(Number(r.height||n.height||0)+1).toLocaleString()":"heightFmt(Number(r.height||n.height||0)+1)","Number(b.height||0).toLocaleString()":"heightFmt(b.height||0)","Number(round[1]).toLocaleString()":"heightFmt(round[1])","Number(r.height||0).toLocaleString()":"heightFmt(r.height||0)"}.items():js=js.replace(old,new)
-HTML.write_text(html);JS.write_text(js)
-required_html=['id="forgeStage"','id="forgeCore"','id="particleCanvas"','id="forgeParticles"','id="targetParticles"','id="candidateParticles"','id="liveVarDiff"','id="confirmedBalance"','id="unconfirmedBalance"','id="immatureBalance"','id="totalBalance"','id="candidateCore"','id="blockHistoryList"','dashboard_v4_reference_final.css','dashboard_v4_reference_final.js','dashboard_v4_reference_shell.js','dashboard_v4_reference_alignment.css', 'dashboard_v4_core_motion.css','dashboard_v4_core_motion.js',rt_link]
-missing=[x for x in required_html if x not in html]
-if not re.search(r'class="[^"]*\breference-dashboard\b[^"]*"',html):missing.append('class token reference-dashboard')
-required_css=['.reference-dashboard .forge-stage','.reference-dashboard .core-logo','.reference-dashboard .balance-grid','.bar-particles','.reference-dashboard .candidate-core'];missing += [x for x in required_css if x not in css]
-required_js=['syncReferenceTelemetry','pointerMove','heightFmt','fixedcoin:live'];missing += [x for x in required_js if x not in js]
-required_shell=['reference-nav','reference-rail','reference-balance-stack','railWorkers','IntersectionObserver'];missing += [x for x in required_shell if x not in shell_js]
-required_core_css=['.fix-core-mark','.fix-core-ring','will-change:transform','prefers-reduced-motion'];missing += [x for x in required_core_css if x not in core_css]
-required_core_js=['document.documentElement.dataset.fixedcoinCoreMotion','motion-active','fxCoreFloat','fxCoreHit','fxBlock','prefers-reduced-motion'];missing += [x for x in required_core_js if x not in core_js]
-if 'motion@13.1.1/mini/+esm' in core_js:raise RuntimeError('dashboard reference final: unexpected external Motion CDN in local core')
-if 'rfCoreHit' not in rtcss or 'rfCoreReject' not in rtcss:missing.append('reference realtime core animations')
-if missing:raise RuntimeError('dashboard reference final validation failed: '+', '.join(missing))
-if '<img' in html or '<image' in html or 'dashboard_v4_miner.js' in html:raise RuntimeError('dashboard reference final: legacy raster/miner markup found')
-ids=re.findall(r'id="([^"]+)"',html)
-if len(ids)!=len(set(ids)):raise RuntimeError('dashboard reference final: duplicate HTML id detected')
-print(f'dashboard reference final verified: LiveShare reference shell, dynamic nav/rail, FIX HUD, local Arcane motion, event-driven feedback, mobile composition, balances, candidate HUD, particles, and locale-safe block heights ({VERSION})')
+ROOT = Path('/app')
+TEMPLATE = ROOT / 'monitor/templates/dashboard_v4_reference.html'
+HTML = ROOT / 'monitor/templates/dashboard_v4.html'
+REFERENCE_CSS = ROOT / 'frontend/app/arcane-reference.css'
+VISUAL_CSS = ROOT / 'monitor/static/dashboard_v4_reference_visual.css'
+JS = ROOT / 'monitor/static/dashboard_v4.js'
+REF_JS = ROOT / 'monitor/static/dashboard_v4_reference_final.js'
+
+html = TEMPLATE.read_text(encoding='utf-8')
+css = REFERENCE_CSS.read_text(encoding='utf-8')
+VISUAL_CSS.write_text(css + '\n/* monitor runtime safety */\n.reference-dashboard img{max-width:100%;}\n', encoding='utf-8')
+HTML.write_text(html, encoding='utf-8')
+
+# Normalize the Chronicle renderer to the eight-column reference layout.
+js = JS.read_text(encoding='utf-8')
+old = """host.innerHTML=rows.map(b=>{const state=String(b.state||b.status||'').toUpperCase(),valid=state!=='ORPHANED',cls=!valid?'invalid':state==='MATURED'?'valid':'immature',label=!valid?'INVALID / ORPHANED':state==='MATURED'?'VALID · MATURED':'VALID · IMMATURE',conf=Number(b.confirmations||0),target=Number(b.validity_target||100),hash=(b.blockhash||b.txid||'—');return `<div class=\"history-row\"><span>#${Number(b.height||0).toLocaleString()}</span><span><b class=\"validity ${cls}\">${label}</b></span><span>${conf.toLocaleString()} / ${target.toLocaleString()}</span><span>${Number(b.reward||0).toFixed(4)}</span><span title=\"${hash}\">${hash}</span></div>`}).join('')"""
+new = """host.innerHTML=rows.map(b=>{const state=String(b.state||b.status||'').toUpperCase(),valid=state!=='ORPHANED',cls=!valid?'invalid':state==='MATURED'?'valid':'immature',label=!valid?'INVALID / ORPHANED':state==='MATURED'?'VALID · MATURED':'VALID · IMMATURE',conf=Number(b.confirmations||0),target=Number(b.validity_target||100),hash=(b.blockhash||b.txid||'—'),time=(b.time||b.ts||b.created_at||'—'),diff=Number(b.difficulty||b.diff||0),luck=Number(b.luck||b.luck_pct||0),shares=Number(b.shares||0),miner=(b.miner||b.worker||'liveshare'),reward=Number(b.reward||0);return `<div class=\"history-row\"><span class=\"height\">#${Number(b.height||0).toLocaleString()}</span><span>${time}</span><span>${fmt(diff)}</span><span class=\"luck\">${luck>0?('+'+luck.toFixed(1)+'%'):'—'}</span><span>${shares.toLocaleString()}</span><span>${miner}</span><span class=\"magicHash\" title=\"${hash}\">${hash}</span><span class=\"reward\">${reward.toFixed(4)}</span></div>`}).join('')"""
+if old not in js:
+    raise RuntimeError('dashboard reference final: legacy block renderer anchor missing')
+JS.write_text(js.replace(old, new, 1), encoding='utf-8')
+
+required_html = [
+    'class="liveshareApp reference-dashboard"', 'class="leftRail"', 'class="rightRail"',
+    'class="heroPanel ornatePanel"', 'class="dragon dragon-left"', 'class="dragon dragon-right"',
+    'id="forgeStage"', 'id="forgeCore"', 'id="particleCanvas"', 'id="targetParticles"',
+    'id="candidateParticles"', 'id="acceptedCounter"', 'id="rejectedCounter"', 'id="candidate"',
+    'id="candidateCore"', 'id="blockHistoryList"', 'id="historyCount"',
+    'dashboard_v4_reference_visual.css', 'dashboard_v4_reference_final.js',
+]
+missing = [x for x in required_html if x not in html]
+for token in ['.liveshareApp', '.heroPanel', '.dragon', '.forgeGrid', '.coreCrystal', '.altarRow', '.historyRow', '.rightRail', '@media(max-width:900px)', '@media(max-width:620px)']:
+    if token not in css:
+        missing.append('reference css '+token)
+ref_js = REF_JS.read_text(encoding='utf-8')
+for token in ['syncReferenceTelemetry', 'pointerMove', 'fixedcoin:live']:
+    if token not in ref_js:
+        missing.append('reference js '+token)
+if '<img' in html or '<image' in html or 'dashboard_v4_miner.js' in html:
+    raise RuntimeError('dashboard reference final: legacy raster/miner markup found')
+ids = re.findall(r'id="([^"]+)"', html)
+if len(ids) != len(set(ids)):
+    raise RuntimeError('dashboard reference final: duplicate HTML id detected')
+if missing:
+    raise RuntimeError('dashboard reference final validation failed: '+', '.join(missing))
+
+print('dashboard reference final verified: canonical Arcane LiveShare composition, dual dragons, crystal forge, ornate panels, balance scale, right telemetry rail, Chronicle history, and responsive desktop/mobile layout')
