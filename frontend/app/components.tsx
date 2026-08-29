@@ -15,24 +15,33 @@ export function OrnateCorners(){return <><span className="corner corner-tl"/><sp
 export function Dragon({side}:{side:'left'|'right'}){
   const flip=side==='right'?'scaleX(-1)':undefined;
   const id=`dragon-${side}`;
-  return <svg className={`dragon dragon-${side}`} viewBox="0 0 420 430" style={{transform:flip}} aria-hidden="true">
+  const glow=side==='left'?'#b45cff':'#45caff';
+  const edge=side==='left'?'#d7a2ff':'#8be6ff';
+  return <svg className={`dragon dragon-${side}`} viewBox="0 0 430 470" style={{transform:flip}} aria-hidden="true">
     <defs>
-      <linearGradient id={`${id}-body`} x1="0" y1="0" x2="1" y2="1"><stop stopColor={side==='left'?'#d28aff':'#73dcff'}/><stop offset=".28" stopColor={side==='left'?'#7b27ba':'#1b77a4'}/><stop offset=".7" stopColor={side==='left'?'#26104d':'#092c4c'}/><stop offset="1" stopColor="#04030c"/></linearGradient>
-      <linearGradient id={`${id}-edge`} x1="0" y1="0" x2="1" y2="1"><stop stopColor={side==='left'?'#f0c9ff':'#b7efff'}/><stop offset=".5" stopColor={side==='left'?'#8f43d0':'#38bde9'}/><stop offset="1" stopColor="#17203a"/></linearGradient>
-      <filter id={`${id}-glow`}><feGaussianBlur stdDeviation="3.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      <linearGradient id={`${id}-body`} x1="0" y1="0" x2="1" y2="1"><stop stopColor={side==='left'?'#8e3bd0':'#2b9ac5'}/><stop offset=".36" stopColor={side==='left'?'#35105f':'#0d4263'}/><stop offset="1" stopColor="#05040d"/></linearGradient>
+      <linearGradient id={`${id}-wing`} x1="0" y1="0" x2="1" y2="1"><stop stopColor={side==='left'?'#c36cff':'#55d7ff'} stopOpacity=".72"/><stop offset=".7" stopColor={side==='left'?'#32105c':'#0b3a57'} stopOpacity=".30"/><stop offset="1" stopColor="#03030b" stopOpacity=".05"/></linearGradient>
+      <filter id={`${id}-glow`}><feGaussianBlur stdDeviation="2.6" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
     </defs>
-    <g opacity=".42" fill="none" stroke={side==='left'?'#b45cff':'#4ccfff'}>
-      <ellipse cx="210" cy="214" rx="195" ry="112" transform="rotate(-18 210 214)"/>
-      <ellipse cx="210" cy="214" rx="172" ry="91" transform="rotate(25 210 214)"/>
+    <g opacity=".28" fill="none" stroke={glow} strokeWidth="1">
+      <path d="M55 390C10 278 70 128 202 77C314 34 409 95 414 205"/>
+      <path d="M28 423C78 304 119 215 258 134C327 94 384 107 421 152"/>
+      <ellipse cx="226" cy="241" rx="188" ry="119" transform="rotate(-19 226 241)"/>
     </g>
     <g filter={`url(#${id}-glow)`}>
-      <path d="M92 403c-31-33-38-70-18-101 19-30 58-36 66-70 7-29-12-50-1-82 13-38 49-62 92-76-19 25-21 47-5 59 17 13 47 4 69 17 27 15 34 45 20 69-16 27-53 34-55 67-2 37 49 55 58 92 9 38-15 70-54 89-39 19-100 21-172 5z" fill={`url(#${id}-body)`} stroke={`url(#${id}-edge)`} strokeWidth="2.4"/>
-      <path d="M125 119 44 55l72 20 43-67 7 88M251 124l91-70-74 18-43-61-5 87" fill={`url(#${id}-body)`} stroke={`url(#${id}-edge)`} strokeWidth="4" strokeLinejoin="round"/>
-      <path d="M135 115c25-21 50-31 75-27 28 5 42 27 36 48-5 18-27 31-44 25-18-6-23-26-11-40" fill="none" stroke={`url(#${id}-edge)`} strokeWidth="4"/>
-      <circle cx="221" cy="128" r="6.5" fill="#fff" stroke={side==='left'?'#d596ff':'#86eaff'} strokeWidth="3"/>
-      <path d="M97 194c38 23 79 26 119 7M86 231c48 26 96 27 143 5M82 270c49 24 101 27 150 6M91 310c43 21 89 23 132 6M111 349c36 16 73 17 108 5" fill="none" stroke={side==='left'?'#b75cff':'#3ab8e7'} strokeWidth="2" opacity=".48"/>
-      <path d="M119 170l-27 18 34 4M145 161l-21 26 35-8M176 154l-13 29 29-17M207 154l-3 28 22-24" fill="none" stroke={side==='left'?'#d19aff':'#78ddff'} strokeWidth="2" opacity=".65"/>
-      <path d="M112 385c48 21 102 22 154-5" fill="none" stroke={side==='left'?'#9d4dd2':'#287ca9'} strokeWidth="7" opacity=".38"/>
+      <path d="M93 442c-42-39-58-91-39-130 15-31 50-48 69-78 18-29 5-60 17-94 13-37 46-66 88-83-19 28-21 53-3 67 20 16 54 4 81 22 32 21 41 58 23 88-18 30-57 43-55 78 2 39 58 55 70 99 12 44-12 82-54 104-48 25-124 24-197-4z" fill={`url(#${id}-body)`} stroke={edge} strokeWidth="2.5"/>
+      <path d="M169 113C123 72 89 54 45 48l46 52-34 48 77-21 39 25z" fill={`url(#${id}-wing)`} stroke={edge} strokeWidth="2.3"/>
+      <path d="M242 124c47-45 93-69 144-77l-51 49 39 44-81-17-38 26z" fill={`url(#${id}-wing)`} stroke={edge} strokeWidth="2.3"/>
+      <path d="M173 112c15-24 39-38 67-35 31 4 52 26 49 51-3 25-27 43-52 38-19-4-31-19-29-36 2-12 10-21 22-27" fill="none" stroke={edge} strokeWidth="4"/>
+      <path d="M160 111 143 73 128 91 112 57 105 106M246 116l19-42 13 20 18-35 5 56" fill="none" stroke={edge} strokeWidth="3" strokeLinejoin="round"/>
+      <path d="M247 127c17-10 31-9 42 2" fill="none" stroke={edge} strokeWidth="2"/>
+      <circle cx="247" cy="126" r="6" fill="#fff" stroke={glow} strokeWidth="3"/>
+      <circle cx="248" cy="126" r="1.8" fill="#16001f"/>
+      <path d="M286 151c27 9 46 23 61 44M286 160c31 18 51 36 65 61M283 173c29 25 47 48 58 72" fill="none" stroke={edge} strokeWidth="1.4" opacity=".72"/>
+      <path d="M105 191c51 31 104 34 155 9M91 230c59 34 116 37 174 10M83 271c60 31 123 37 185 10M85 314c57 27 117 32 177 9M101 356c48 22 98 25 149 8M123 396c38 15 78 17 117 7" fill="none" stroke={glow} strokeWidth="2" opacity=".58"/>
+      <path d="M115 182l-25 26 37-8M146 176l-20 34 37-17M180 169l-12 39 31-28M215 166l-3 41 27-35M250 168l9 38 20-30" fill="none" stroke={edge} strokeWidth="1.8" opacity=".7"/>
+      <path d="M69 399c47 26 109 35 177 12 31-10 58-26 79-49" fill="none" stroke={edge} strokeWidth="5" opacity=".24"/>
+      <path d="M57 49l-25-13M79 76 42 88M351 50l27-17M365 78l38 12" stroke={edge} strokeWidth="2" opacity=".55"/>
     </g>
   </svg>
 }
@@ -40,10 +49,11 @@ export function Dragon({side}:{side:'left'|'right'}){
 export function Crystal({large=false}:{large?:boolean}){
   return <div className={`crystal-stage ${large?'crystal-stage-large':''}`}>
     <div className="magic-stars"/><div className="orbit orbit-a"/><div className="orbit orbit-b"/><div className="orbit orbit-c"/>
-    <div className="rune-ring rune-ring-a">✦ · ◇ · ✧ · ◇ · ✦</div><div className="rune-ring rune-ring-b">ᛉ · ✧ · ᛟ · ✦ · ᛉ</div>
-    <motion.div className="crystal-aura" animate={{scale:[.92,1.08,.92],opacity:[.35,.78,.35]}} transition={{duration:4.5,repeat:Infinity,ease:'easeInOut'}}/>
+    <div className="rune-ring rune-ring-a">✦ · ◇ · ✧ · ◇ · ✦ · ◇ · ✧</div><div className="rune-ring rune-ring-b">ᛉ · ✧ · ᛟ · ✦ · ᛉ · ✧</div>
+    <motion.div className="crystal-aura" animate={{scale:[.9,1.08,.9],opacity:[.3,.78,.3]}} transition={{duration:4.5,repeat:Infinity,ease:'easeInOut'}}/>
     <motion.div className="crystal-core" animate={{y:[0,-8,0],rotateY:[0,180,360]}} transition={{duration:8,repeat:Infinity,ease:'easeInOut'}}>
-      <div className="crystal-face crystal-front"><span>✦</span><i/><b/></div><div className="crystal-face crystal-back"><span>◆</span><i/><b/></div>
+      <div className="crystal-face crystal-front"><span>✦</span><i/><b/><em/><u/></div>
+      <div className="crystal-face crystal-back"><span>◆</span><i/><b/><em/><u/></div>
     </motion.div>
     <div className="crystal-pedestal"><span/><i/><b/></div>
   </div>
@@ -59,4 +69,4 @@ export function LiveBadge({degraded=false}:{degraded?:boolean}){return <span cla
 export function BrandMark(){return <div className="brand-mark"><Gem size={22}/><span>FIXEDCOIN<small>SOLO NODE</small></span></div>}
 export function StatusPill({children}:{children:ReactNode}){return <span className="badge badge-success badge-outline status-pill"><ShieldCheck size={13}/>{children}</span>}
 export function DataIcon({kind}:{kind:'wallet'|'cpu'|'network'|'blocks'}){const map={wallet:Wallet,cpu:Cpu,network:Network,blocks:Blocks} as const;const Icon=map[kind];return <Icon size={15}/>}
-export function DollarIcon(){return <CircleDollarSign size={15}/>}
+export function DollarIcon(){return <CircleDollarSign size={15}/>} 
