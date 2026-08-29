@@ -13,36 +13,34 @@ export const navItems: ReadonlyArray<readonly [string, LucideIcon]> = [
 export function OrnateCorners(){return <><span className="corner corner-tl"/><span className="corner corner-tr"/><span className="corner corner-bl"/><span className="corner corner-br"/></>}
 
 export function Dragon({side}:{side:'left'|'right'}){
-  const flip=side==='right'?'scaleX(-1)':undefined;
   const id=`dragon-${side}`;
-  const glow=side==='left'?'#b45cff':'#45caff';
-  const edge=side==='left'?'#d7a2ff':'#8be6ff';
-  return <svg className={`dragon dragon-${side}`} viewBox="0 0 430 470" style={{transform:flip}} aria-hidden="true">
+  const flip=side==='right'?'scaleX(-1)':undefined;
+  const body=side==='left'?'#2b0b4b':'#062d42';
+  const mid=side==='left'?'#6e2a9b':'#12627d';
+  const glow=side==='left'?'#c56cff':'#56d9ff';
+  const edge=side==='left'?'#e4b4ff':'#9beaff';
+  return <svg className={`dragon dragon-${side}`} viewBox="0 0 260 360" style={{transform:flip}} aria-hidden="true">
     <defs>
-      <linearGradient id={`${id}-body`} x1="0" y1="0" x2="1" y2="1"><stop stopColor={side==='left'?'#8e3bd0':'#2b9ac5'}/><stop offset=".36" stopColor={side==='left'?'#35105f':'#0d4263'}/><stop offset="1" stopColor="#05040d"/></linearGradient>
-      <linearGradient id={`${id}-wing`} x1="0" y1="0" x2="1" y2="1"><stop stopColor={side==='left'?'#c36cff':'#55d7ff'} stopOpacity=".72"/><stop offset=".7" stopColor={side==='left'?'#32105c':'#0b3a57'} stopOpacity=".30"/><stop offset="1" stopColor="#03030b" stopOpacity=".05"/></linearGradient>
-      <filter id={`${id}-glow`}><feGaussianBlur stdDeviation="2.6" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      <linearGradient id={`${id}-body`} x1="0" y1="0" x2="1" y2="1"><stop stopColor={body}/><stop offset=".34" stopColor={mid}/><stop offset=".72" stopColor="#120c20"/><stop offset="1" stopColor="#03030a"/></linearGradient>
+      <linearGradient id={`${id}-wing`} x1="0" y1="0" x2="1" y2="1"><stop stopColor={glow} stopOpacity=".72"/><stop offset=".55" stopColor={mid} stopOpacity=".35"/><stop offset="1" stopColor="#020208" stopOpacity=".08"/></linearGradient>
+      <radialGradient id={`${id}-scale`}><stop stopColor="#fff" stopOpacity=".45"/><stop offset=".35" stopColor={glow} stopOpacity=".22"/><stop offset="1" stopColor="#000" stopOpacity="0"/></radialGradient>
+      <filter id={`${id}-glow`} x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="1.8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      <filter id={`${id}-texture`} x="-20%" y="-20%" width="140%" height="140%"><feTurbulence type="fractalNoise" baseFrequency=".045" numOctaves="2" seed={side==='left'?7:11} result="n"/><feColorMatrix in="n" type="saturate" values="0" result="g"/><feComponentTransfer in="g"><feFuncA type="table" tableValues="0 .22"/></feComponentTransfer><feBlend in="SourceGraphic" in2="g" mode="screen"/></filter>
     </defs>
-    <g opacity=".28" fill="none" stroke={glow} strokeWidth="1">
-      <path d="M55 390C10 278 70 128 202 77C314 34 409 95 414 205"/>
-      <path d="M28 423C78 304 119 215 258 134C327 94 384 107 421 152"/>
-      <ellipse cx="226" cy="241" rx="188" ry="119" transform="rotate(-19 226 241)"/>
-    </g>
-    <g filter={`url(#${id}-glow)`}>
-      <path d="M93 442c-42-39-58-91-39-130 15-31 50-48 69-78 18-29 5-60 17-94 13-37 46-66 88-83-19 28-21 53-3 67 20 16 54 4 81 22 32 21 41 58 23 88-18 30-57 43-55 78 2 39 58 55 70 99 12 44-12 82-54 104-48 25-124 24-197-4z" fill={`url(#${id}-body)`} stroke={edge} strokeWidth="2.5"/>
-      <path d="M169 113C123 72 89 54 45 48l46 52-34 48 77-21 39 25z" fill={`url(#${id}-wing)`} stroke={edge} strokeWidth="2.3"/>
-      <path d="M242 124c47-45 93-69 144-77l-51 49 39 44-81-17-38 26z" fill={`url(#${id}-wing)`} stroke={edge} strokeWidth="2.3"/>
-      <path d="M173 112c15-24 39-38 67-35 31 4 52 26 49 51-3 25-27 43-52 38-19-4-31-19-29-36 2-12 10-21 22-27" fill="none" stroke={edge} strokeWidth="4"/>
-      <path d="M160 111 143 73 128 91 112 57 105 106M246 116l19-42 13 20 18-35 5 56" fill="none" stroke={edge} strokeWidth="3" strokeLinejoin="round"/>
-      <path d="M247 127c17-10 31-9 42 2" fill="none" stroke={edge} strokeWidth="2"/>
-      <circle cx="247" cy="126" r="6" fill="#fff" stroke={glow} strokeWidth="3"/>
-      <circle cx="248" cy="126" r="1.8" fill="#16001f"/>
-      <path d="M286 151c27 9 46 23 61 44M286 160c31 18 51 36 65 61M283 173c29 25 47 48 58 72" fill="none" stroke={edge} strokeWidth="1.4" opacity=".72"/>
-      <path d="M105 191c51 31 104 34 155 9M91 230c59 34 116 37 174 10M83 271c60 31 123 37 185 10M85 314c57 27 117 32 177 9M101 356c48 22 98 25 149 8M123 396c38 15 78 17 117 7" fill="none" stroke={glow} strokeWidth="2" opacity=".58"/>
-      <path d="M115 182l-25 26 37-8M146 176l-20 34 37-17M180 169l-12 39 31-28M215 166l-3 41 27-35M250 168l9 38 20-30" fill="none" stroke={edge} strokeWidth="1.8" opacity=".7"/>
-      <path d="M69 399c47 26 109 35 177 12 31-10 58-26 79-49" fill="none" stroke={edge} strokeWidth="5" opacity=".24"/>
-      <path d="M57 49l-25-13M79 76 42 88M351 50l27-17M365 78l38 12" stroke={edge} strokeWidth="2" opacity=".55"/>
-    </g>
+    <g opacity=".28" fill="none" stroke={glow}><ellipse cx="128" cy="190" rx="116" ry="78" transform="rotate(-18 128 190)"/><path d="M21 337C46 286 62 239 95 203M40 351C79 302 101 245 122 194M205 337C177 288 166 245 151 198"/></g>
+    <g filter={`url(#${id}-glow)`}><g filter={`url(#${id}-texture)`}>
+      <path d="M80 342C45 325 32 292 48 266C61 244 91 235 100 209C110 180 87 164 90 132C94 91 130 55 177 48C158 70 157 91 174 104C191 117 220 110 236 129C252 148 247 174 227 188C207 202 180 196 174 220C168 246 198 260 208 287C219 318 193 343 160 352C133 359 104 355 80 342Z" fill={`url(#${id}-body)`} stroke={edge} strokeWidth="2.4"/>
+      <path d="M154 104C119 65 79 44 34 42L75 83L45 122L108 105L151 132Z" fill={`url(#${id}-wing)`} stroke={edge} strokeWidth="2.1"/>
+      <path d="M168 105C197 66 226 47 254 42L226 82L247 119L195 105L165 130Z" fill={`url(#${id}-wing)`} stroke={edge} strokeWidth="2.1"/>
+      <path d="M153 106C165 88 184 78 202 84C220 90 228 106 224 121C219 139 199 149 181 143C166 138 158 126 161 115" fill="none" stroke={edge} strokeWidth="3.2"/>
+      <path d="M164 105L154 67L139 86L128 52L119 94M205 108L220 69L231 89L246 55L247 103" fill="none" stroke={edge} strokeWidth="2.8" strokeLinejoin="round"/>
+      <path d="M201 119C213 115 223 117 231 124" fill="none" stroke={edge} strokeWidth="1.8"/>
+      <circle cx="205" cy="116" r="5.5" fill="#fff" stroke={glow} strokeWidth="2.6"/><circle cx="206" cy="116" r="1.6" fill="#09020f"/>
+      <path d="M222 137C237 148 245 162 249 178M218 147C235 163 244 179 247 197M213 160C229 181 237 198 238 217" fill="none" stroke={edge} strokeWidth="1.2" opacity=".72"/>
+      <g fill="none" stroke={glow} strokeWidth="1.6" opacity=".62"><path d="M91 179C116 192 141 193 163 183"/><path d="M78 207C110 222 141 222 169 208"/><path d="M69 236C103 251 139 252 173 237"/><path d="M70 266C103 279 137 281 170 268"/><path d="M80 296C108 306 136 308 163 298"/><path d="M98 322C121 330 143 331 157 326"/></g>
+      <g fill="none" stroke={edge} strokeWidth="1.2" opacity=".72"><path d="M98 178l-18 18 27-7M123 184l-14 23 27-16M149 184l-7 24 23-18M173 182l5 22 17-16"/><path d="M84 208l-18 20 28-7M112 215l-13 22 27-14M142 215l-5 24 23-18M168 211l8 20 18-14"/><path d="M78 239l-14 18 25-6M108 246l-9 22 25-14M138 246l-2 22 22-17M164 241l8 20 17-14"/></g>
+      <ellipse cx="132" cy="210" rx="75" ry="92" fill={`url(#${id}-scale)`} opacity=".22"/><path d="M57 323C88 345 128 351 164 339C184 332 199 319 207 301" fill="none" stroke={edge} strokeWidth="4" opacity=".24"/><path d="M48 336C79 355 122 360 164 350" fill="none" stroke={glow} strokeWidth="1.4" opacity=".5"/>
+    </g></g>
   </svg>
 }
 
@@ -52,10 +50,8 @@ export function Crystal({large=false}:{large?:boolean}){
     <div className="rune-ring rune-ring-a">✦ · ◇ · ✧ · ◇ · ✦ · ◇ · ✧</div><div className="rune-ring rune-ring-b">ᛉ · ✧ · ᛟ · ✦ · ᛉ · ✧</div>
     <motion.div className="crystal-aura" animate={{scale:[.9,1.08,.9],opacity:[.3,.78,.3]}} transition={{duration:4.5,repeat:Infinity,ease:'easeInOut'}}/>
     <motion.div className="crystal-core" animate={{y:[0,-8,0],rotateY:[0,180,360]}} transition={{duration:8,repeat:Infinity,ease:'easeInOut'}}>
-      <div className="crystal-face crystal-front"><span>✦</span><i/><b/><em/><u/></div>
-      <div className="crystal-face crystal-back"><span>◆</span><i/><b/><em/><u/></div>
-    </motion.div>
-    <div className="crystal-pedestal"><span/><i/><b/></div>
+      <div className="crystal-face crystal-front"><span>✦</span><i/><b/><em/><u/></div><div className="crystal-face crystal-back"><span>◆</span><i/><b/><em/><u/></div>
+    </motion.div><div className="crystal-pedestal"><span/><i/><b/></div>
   </div>
 }
 
