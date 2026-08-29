@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
+import './reference-v3.css';
+import './reference-v3-runes.css';
 
 export const metadata: Metadata = {
   title: 'LiveShare · Solo Mining · Magical Network',
