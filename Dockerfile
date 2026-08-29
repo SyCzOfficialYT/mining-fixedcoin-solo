@@ -1,3 +1,13 @@
+FROM node:22-alpine AS dashboard-ui
+WORKDIR /ui
+COPY dashboard-ui/package.json dashboard-ui/package.json
+COPY dashboard-ui/tsconfig.json dashboard-ui/tsconfig.json
+COPY dashboard-ui/next-env.d.ts dashboard-ui/next-env.d.ts
+COPY dashboard-ui/next.config.ts dashboard-ui/next.config.ts
+COPY dashboard-ui/postcss.config.mjs dashboard-ui/postcss.config.mjs
+COPY dashboard-ui/app dashboard-ui/app
+RUN cd dashboard-ui && npm install --no-audit --no-fund && npm run build
+
 FROM python:3.12-slim-bookworm
 ARG FIX_VER=29.1.3
 RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates wget tar && rm -rf /var/lib/apt/lists/*
@@ -11,10 +21,10 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY . /app
+COPY --from=dashboard-ui /ui/dashboard-ui/out /app/monitor/static/next-ui
 
-# Apply deterministic backend/telemetry patches plus the repository-owned
-# complete Arcane LiveShare reference presentation. Historical visual layers
-# are intentionally not part of the production build.
+# Apply deterministic backend/telemetry patches and keep the production
+# dashboard root owned by the repository's Next.js/TSX LiveShare frontend.
 RUN STRATUM_BUILD_ONLY=1 python3 /app/stratum/server.py \
  && python3 /app/scripts/fixcoin_ghostbot_webhook_patch.py \
  && python3 /app/scripts/fixcoin_consensus_patch.py \
@@ -42,7 +52,8 @@ RUN STRATUM_BUILD_ONLY=1 python3 /app/stratum/server.py \
  && python3 -m py_compile /app/scripts/fixcoin_dashboard_reference_complete_patch.py \
  && python3 /app/scripts/fixcoin_dashboard_reference_complete_patch.py \
  && python3 /app/scripts/fixcoin_dashboard_reference_runtime_patch.py \
- && python3 -m py_compile /app/monitor/app.py /app/stratum/server.py /app/stratum/server_full.py /app/scripts/fixcoin_consensus_patch.py /app/scripts/fixcoin_network_difficulty_patch.py /app/scripts/fixcoin_stratum_difficulty_patch.py /app/scripts/fixcoin_stratum_miner_detection_patch.py /app/scripts/fixcoin_stratum_nmminer_diff_patch.py /app/scripts/fixcoin_stratum_diff_job_epoch_patch.py /app/scripts/fixcoin_dashboard_difficulty_patch.py /app/scripts/fixcoin_dashboard_realtime_patch.py /app/scripts/fixcoin_dashboard_route_v4_patch.py /app/scripts/fixcoin_dashboard_v4_patch.py /app/scripts/fixcoin_dashboard_v4_js_patch.py /app/scripts/fixcoin_dashboard_round_authority_patch.py /app/scripts/fixcoin_dashboard_forge_patch.py /app/scripts/fixcoin_dashboard_balance_activity_patch.py /app/scripts/fixcoin_dashboard_activity_authority_patch.py /app/scripts/fixcoin_axeos_hashrate_patch.py /app/scripts/fixcoin_dashboard_fx_identity_patch.py /app/scripts/fixcoin_dashboard_miner_identity_patch.py /app/scripts/fixcoin_dashboard_miner_stats_patch.py /app/scripts/fixcoin_dashboard_worker_attribution_patch.py /app/scripts/fixcoin_dashboard_block_fx_patch.py /app/scripts/fixcoin_dashboard_reference_complete_patch.py /app/scripts/fixcoin_dashboard_reference_runtime_patch.py /app/scripts/fixcoin_ghostbot_webhook_patch.py /app/scripts/test_stratum_authorization.py \
+ && python3 /app/scripts/fixcoin_dashboard_next_ui_patch.py \
+ && python3 -m py_compile /app/monitor/app.py /app/stratum/server.py /app/stratum/server_full.py /app/scripts/fixcoin_consensus_patch.py /app/scripts/fixcoin_network_difficulty_patch.py /app/scripts/fixcoin_stratum_difficulty_patch.py /app/scripts/fixcoin_stratum_miner_detection_patch.py /app/scripts/fixcoin_stratum_nmminer_diff_patch.py /app/scripts/fixcoin_stratum_diff_job_epoch_patch.py /app/scripts/fixcoin_dashboard_difficulty_patch.py /app/scripts/fixcoin_dashboard_realtime_patch.py /app/scripts/fixcoin_dashboard_route_v4_patch.py /app/scripts/fixcoin_dashboard_v4_patch.py /app/scripts/fixcoin_dashboard_v4_js_patch.py /app/scripts/fixcoin_dashboard_round_authority_patch.py /app/scripts/fixcoin_dashboard_forge_patch.py /app/scripts/fixcoin_dashboard_balance_activity_patch.py /app/scripts/fixcoin_dashboard_activity_authority_patch.py /app/scripts/fixcoin_axeos_hashrate_patch.py /app/scripts/fixcoin_dashboard_fx_identity_patch.py /app/scripts/fixcoin_dashboard_miner_identity_patch.py /app/scripts/fixcoin_dashboard_miner_stats_patch.py /app/scripts/fixcoin_dashboard_worker_attribution_patch.py /app/scripts/fixcoin_dashboard_block_fx_patch.py /app/scripts/fixcoin_dashboard_reference_complete_patch.py /app/scripts/fixcoin_dashboard_reference_runtime_patch.py /app/scripts/fixcoin_dashboard_next_ui_patch.py /app/scripts/fixcoin_ghostbot_webhook_patch.py /app/scripts/test_stratum_authorization.py \
  && python3 /app/scripts/test_stratum_authorization.py \
  && chmod +x /app/docker/entrypoint.sh /app/scripts/setup_address.py
 
