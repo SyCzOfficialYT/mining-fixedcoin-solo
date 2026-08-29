@@ -1,0 +1,23 @@
+/* Final reference-fidelity overrides. Keep live telemetry/data logic untouched. */
+.dragon{width:310px;height:370px;top:-10px;opacity:.9;mix-blend-mode:screen;filter:drop-shadow(0 0 12px rgba(164,87,255,.28)) drop-shadow(0 0 34px rgba(0,0,0,.62));}
+.dragon-left{left:-18px}.dragon-right{right:-18px;filter:drop-shadow(0 0 12px rgba(72,196,255,.25)) drop-shadow(0 0 34px rgba(0,0,0,.62));}
+.hero-card{isolation:isolate;background:radial-gradient(ellipse at 50% 65%,rgba(126,54,215,.27),transparent 38%),radial-gradient(ellipse at 13% 55%,rgba(111,48,181,.22),transparent 30%),radial-gradient(ellipse at 87% 52%,rgba(27,120,179,.19),transparent 28%),linear-gradient(180deg,rgba(16,8,36,.995),rgba(2,3,11,.995));}
+.hero-card:after{content:"";position:absolute;inset:8px;pointer-events:none;border:1px solid rgba(230,181,70,.12);box-shadow:inset 0 0 55px rgba(116,53,180,.12);z-index:1;}
+.hero-copy{z-index:4}.round-panel{z-index:5}.dragon{z-index:2}
+.crystal-stage-large .crystal-core{width:138px;height:222px;filter:drop-shadow(0 0 18px rgba(174,74,255,.4));}
+.crystal-stage-large .crystal-face{clip-path:polygon(50% 0,69% 7%,88% 20%,100% 48%,92% 69%,77% 89%,53% 100%,29% 91%,9% 73%,0 52%,11% 27%,29% 9%);background:linear-gradient(112deg,rgba(255,255,255,.9) 0 4%,rgba(217,139,255,.82) 5% 18%,rgba(126,47,211,.95) 25% 48%,rgba(67,17,143,.98) 63% 78%,#0e0524 100%),linear-gradient(155deg,#d39aff,#5a16a8 55%,#100524);box-shadow:inset 19px 0 30px rgba(255,255,255,.2),inset -22px -12px 35px rgba(0,0,0,.52),0 0 32px rgba(174,69,255,.68),0 0 80px rgba(125,46,220,.32);}
+.crystal-stage-large .crystal-face:before{content:"";position:absolute;inset:0;background:linear-gradient(148deg,transparent 0 30%,rgba(255,255,255,.2) 31% 32%,transparent 33% 57%,rgba(20,4,48,.38) 58% 59%,transparent 60%);clip-path:polygon(50% 0,100% 48%,77% 89%,53% 100%,29% 91%,0 52%);}
+.crystal-stage-large .crystal-face:after{content:"";position:absolute;left:30%;top:13%;width:38%;height:68%;border-left:1px solid rgba(255,255,255,.62);border-right:1px solid rgba(255,255,255,.16);transform:skewY(-13deg);opacity:.72;}
+.crystal-stage-large .crystal-face i,.crystal-stage-large .crystal-face b,.crystal-stage-large .crystal-face em,.crystal-stage-large .crystal-face u{position:absolute;display:block;pointer-events:none;text-decoration:none;}
+.crystal-stage-large .crystal-face i{left:16%;top:31%;width:28%;height:39%;border-left:2px solid rgba(226,167,255,.65);border-bottom:1px solid rgba(255,255,255,.28);transform:skewY(-18deg);}
+.crystal-stage-large .crystal-face b{right:12%;top:19%;width:27%;height:54%;border-right:2px solid rgba(61,11,125,.75);border-bottom:1px solid rgba(255,255,255,.18);transform:skewY(15deg);}
+.crystal-stage-large .crystal-face em{left:41%;top:8%;width:1px;height:78%;background:linear-gradient(180deg,rgba(255,255,255,.75),rgba(255,255,255,.05));transform:rotate(8deg);}
+.crystal-stage-large .crystal-face u{left:42%;top:43%;width:16%;height:16%;border:1px solid rgba(255,255,255,.85);background:rgba(255,255,255,.18);transform:rotate(45deg);box-shadow:0 0 14px rgba(255,255,255,.65);}
+.crystal-stage-large .crystal-face span{position:relative;z-index:3;font-size:34px;opacity:.82;}
+.crystal-stage-large .crystal-aura{width:175px;height:245px;background:radial-gradient(ellipse,rgba(190,83,255,.7),rgba(112,41,203,.2) 42%,transparent 70%);filter:blur(15px);}
+.crystal-stage-large .crystal-pedestal{width:270px;height:28px;}
+.crystal-stage-large .crystal-pedestal:before{height:21px;box-shadow:0 0 32px rgba(161,64,226,.55),inset 0 0 18px rgba(159,65,224,.45);}
+.crystal-stage-large .orbit-a{width:350px;height:126px}.crystal-stage-large .orbit-b{width:390px;height:166px}.crystal-stage-large .orbit-c{width:240px;height:305px}
+.rune-ring{font-size:8px!important;letter-spacing:.42em!important;text-shadow:0 0 10px rgba(188,105,255,.75);}
+@media(max-width:900px){.dragon{width:310px;height:370px}.hero-card:after{inset:5px}.crystal-stage-large .crystal-core{width:138px;height:222px}}
+@media(max-width:700px){.dragon{width:310px;height:370px}.crystal-stage-large .crystal-core{width:138px;height:222px}}
