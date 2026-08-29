@@ -2,14 +2,16 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'LiveShare · FixedCoin Arcane Forge',
+  title: 'LiveShare · Solo Mining · Magical Network',
   description: 'FixedCoin solo mining command center',
+  applicationName: 'LiveShare',
 };
 
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
+  themeColor: '#05040b',
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
