@@ -1,18 +1,27 @@
 #!/usr/bin/env python3
-"""Repair generated Stratum reject attribution after server.py generation."""
-import re
+"""Ensure generated low-difficulty rejects retain the authenticated worker."""
 from pathlib import Path
 
 PATH = Path(__file__).resolve().parent.parent / "stratum" / "server_full.py"
 text = PATH.read_text(encoding="utf-8")
+lines = text.splitlines(keepends=True)
+changed = 0
+for i, line in enumerate(lines):
+    if "REJECT reason=low-difficulty" not in line:
+        continue
+    if "worker=?" in line:
+        lines[i] = line.replace("worker=?", "worker={self.worker}", 1)
+        changed += 1
+        break
+    if "worker={self.worker}" in line:
+        changed = 1
+        break
 
-pattern = r'(REJECT reason=low-difficulty worker=)\? (job=\{job_id\})'
-text, count = re.subn(pattern, r'\1{self.worker} \2', text, count=1)
-if count != 1:
-    raise RuntimeError(f"low-difficulty worker attribution marker mismatch: expected 1, found {count}")
+if changed != 1:
+    raise RuntimeError("could not locate low-difficulty reject worker attribution")
 
-if 'REJECT reason=low-difficulty worker={self.worker}' not in text:
-    raise RuntimeError("worker attribution patch did not apply")
-
+text = "".join(lines)
+if "REJECT reason=low-difficulty worker={self.worker}" not in text:
+    raise RuntimeError("low-difficulty worker attribution is not present after patch")
 PATH.write_text(text, encoding="utf-8")
 print("patched Stratum low-difficulty worker attribution")
