@@ -12,6 +12,11 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY . /app
 
+# Normalize the reference patch before any validation/build step. This keeps
+# the repository script itself authoritative while avoiding Docker heredoc
+# continuation parsing problems.
+RUN python3 -c "from pathlib import Path; p=Path('/app/scripts/fixcoin_dashboard_reference_complete_patch.py'); s=p.read_text(encoding='utf-8'); bad=\"compile(compile(Path(__file__).read_text(encoding='utf-8'), str(__file__), 'exec'), str(__file__), 'exec')\"; good=\"compile(Path(__file__).read_text(encoding='utf-8'), str(__file__), 'exec')\"; p.write_text(s.replace(bad, good), encoding='utf-8') if bad in s else None; print('dashboard reference patch self-validation normalized')"
+
 # Generate the pinned Stratum adapter first, then apply deterministic backend
 # hardening and the repository-owned magical-network dashboard layers.
 RUN STRATUM_BUILD_ONLY=1 python3 /app/stratum/server.py \
@@ -39,18 +44,6 @@ RUN STRATUM_BUILD_ONLY=1 python3 /app/stratum/server.py \
  && python3 /app/scripts/fixcoin_dashboard_miner_stats_patch.py \
  && python3 /app/scripts/fixcoin_dashboard_worker_attribution_patch.py \
  && python3 /app/scripts/fixcoin_dashboard_block_fx_patch.py \
- && python3 - <<'PY'
-from pathlib import Path
-p = Path('/app/scripts/fixcoin_dashboard_reference_complete_patch.py')
-s = p.read_text(encoding='utf-8')
-bad = "compile(compile(Path(__file__).read_text(encoding='utf-8'), str(__file__), 'exec'), str(__file__), 'exec')"
-good = "compile(Path(__file__).read_text(encoding='utf-8'), str(__file__), 'exec')"
-if bad in s:
-    p.write_text(s.replace(bad, good), encoding='utf-8')
-    print('normalized dashboard reference patch self-validation')
-else:
-    print('dashboard reference patch self-validation already normalized')
-PY
  && python3 -m py_compile /app/scripts/fixcoin_dashboard_reference_complete_patch.py \
  && python3 /app/scripts/fixcoin_dashboard_reference_complete_patch.py \
  && python3 /app/scripts/fixcoin_dashboard_reference_runtime_patch.py \
