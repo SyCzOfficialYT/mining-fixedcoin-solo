@@ -3,6 +3,7 @@ import './globals.css';
 import './reference-v3.css';
 import './reference-v3-runes.css';
 import './reference-fidelity-final.css';
+import './reference-v5.css';
 
 export const metadata: Metadata = {
   title: 'LiveShare · Solo Mining · Magical Network',
