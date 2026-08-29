@@ -17,11 +17,9 @@ COPY . /app
 # continuation parsing problems.
 RUN python3 -c "from pathlib import Path; p=Path('/app/scripts/fixcoin_dashboard_reference_complete_patch.py'); s=p.read_text(encoding='utf-8'); bad=\"compile(compile(Path(__file__).read_text(encoding='utf-8'), str(__file__), 'exec'), str(__file__), 'exec')\"; good=\"compile(Path(__file__).read_text(encoding='utf-8'), str(__file__), 'exec')\"; p.write_text(s.replace(bad, good), encoding='utf-8') if bad in s else None; print('dashboard reference patch self-validation normalized')"
 
-# Generate the pinned Stratum adapter first, then apply deterministic backend
-# hardening and the repository-owned magical-network dashboard layers.
+# Generate the pinned Stratum adapter first. Difficulty/epoch patches must run
+# before the job-refresh patch so the latter owns the final same-round policy.
 RUN STRATUM_BUILD_ONLY=1 python3 /app/stratum/server.py \
- && python3 /app/scripts/fixcoin_stratum_job_patch.py \
- && python3 /app/scripts/fixcoin_stratum_logging_patch.py \
  && python3 /app/scripts/fixcoin_ghostbot_webhook_patch.py \
  && python3 /app/scripts/fixcoin_consensus_patch.py \
  && python3 /app/scripts/fixcoin_network_difficulty_patch.py \
@@ -29,6 +27,8 @@ RUN STRATUM_BUILD_ONLY=1 python3 /app/stratum/server.py \
  && python3 /app/scripts/fixcoin_stratum_miner_detection_patch.py \
  && python3 /app/scripts/fixcoin_stratum_nmminer_diff_patch.py \
  && python3 /app/scripts/fixcoin_stratum_diff_job_epoch_patch.py \
+ && python3 /app/scripts/fixcoin_stratum_job_patch.py \
+ && python3 /app/scripts/fixcoin_stratum_logging_patch.py \
  && python3 /app/scripts/fixcoin_dashboard_difficulty_patch.py \
  && python3 /app/scripts/fixcoin_dashboard_realtime_patch.py \
  && python3 /app/scripts/fixcoin_dashboard_route_v4_patch.py \
