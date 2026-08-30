@@ -1,0 +1,10 @@
+/* Reference-v7: use the finished dragon plates instead of the primitive inline SVG. */
+.hero-card{position:relative;isolation:isolate;overflow:hidden}
+.hero-card .dragon{display:none!important}
+.hero-card:before{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;background-image:url('/reference/left-dragon.svg'),url('/reference/right-dragon.svg');background-repeat:no-repeat,no-repeat;background-position:left center,right center;background-size:190px 315px,190px 315px;}
+.hero-card:after{z-index:6!important;pointer-events:none}
+.hero-copy{position:relative;z-index:4}
+.round-panel{z-index:5}
+@media (max-width:1100px){.hero-card:before{background-size:155px 258px,155px 258px;background-position:left center,right center}}
+@media (max-width:700px){.hero-card:before{background-size:126px 210px,126px 210px;background-position:left top,right top}.hero-copy{padding-left:14px!important;padding-right:14px!important;padding-top:104px!important}.hero-card:after{inset:5px}}
+@media (max-width:420px){.hero-card:before{background-size:104px 173px,104px 173px}.hero-copy{padding-top:94px!important}}
