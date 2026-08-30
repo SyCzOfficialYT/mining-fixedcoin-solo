@@ -1,0 +1,130 @@
+/*
+ * LiveShare reference-v6
+ *
+ * The supplied reference uses finished artwork for the dragons. The previous
+ * implementation attempted to recreate those dragons with primitive SVG paths,
+ * which lost the actual scale texture, horns, wing anatomy, pedestal and edge
+ * ornaments. v6 deliberately uses the existing reference plates instead.
+ */
+
+/* --- REFERENCE ARTWORK --- */
+.hero-card{position:relative;isolation:isolate;overflow:hidden}
+.hero-copy{position:relative;z-index:4}
+.round-panel{z-index:5}
+.dragon{
+  position:absolute!important;
+  top:0!important;
+  width:190px!important;
+  height:315px!important;
+  object-fit:fill;
+  object-position:center;
+  display:block;
+  pointer-events:none;
+  user-select:none;
+  z-index:2!important;
+  opacity:1!important;
+  filter:none!important;
+  mix-blend-mode:normal!important;
+  transform:none!important;
+}
+.dragon-left{left:0!important}
+.dragon-right{right:0!important}
+.hero-card:after{z-index:6!important;pointer-events:none}
+
+/* Keep the central typography/data clear of the physical artwork plates. */
+.hero-copy{padding-left:205px!important;padding-right:205px!important}
+
+/* --- REMOVE THE ARTIFICIAL MIN-WIDTHS THAT CAUSED THE PHONE TO PAN SIDEWAYS --- */
+.magical-shell,.dashboard-column,.hero-card,.forge-grid,.feature-grid,.magic-panel,
+.metric-stack,.metric-card,.altar,.panel-heading{min-width:0}
+
+@media (max-width:1100px){
+  .magical-shell{grid-template-columns:76px minmax(0,1fr);width:calc(100% - 12px)}
+  .right-rail{display:none}
+  .hero-copy{padding-left:155px!important;padding-right:155px!important}
+  .dragon{width:155px!important;height:258px!important}
+  .dragon-left{left:-2px!important}.dragon-right{right:-2px!important}
+}
+
+@media (max-width:700px){
+  html,body{width:100%;min-width:320px;overflow-x:hidden}
+  .magical-shell{display:block;width:100%;margin:0;padding:0}
+  .left-rail,.right-rail{display:none!important}
+  .dashboard-column{display:flex;width:100%;gap:6px}
+
+  .topbar{min-height:42px;padding:0 10px;border-left:0;border-right:0}
+  .topbar-title{display:none!important}
+  .mobile-brand{display:flex!important}
+
+  .hero-card{
+    display:grid;
+    grid-template-columns:minmax(0,1fr);
+    min-height:0;
+  }
+  .hero-copy{
+    min-height:300px;
+    padding:104px 14px 18px!important;
+    overflow:hidden;
+  }
+  .hero-copy h1{font-size:clamp(32px,10vw,58px);letter-spacing:.13em}
+  .hero-copy>p{margin-bottom:16px;letter-spacing:.22em}
+  .eyebrow{letter-spacing:.24em}
+  .versus-grid{grid-template-columns:minmax(0,1fr) 44px minmax(0,1fr);gap:5px}
+  .hero-difficulty strong{font-size:clamp(23px,7vw,38px)}
+  .versus-medallion{width:42px;height:42px;font-size:10px}
+
+  .dragon{width:126px!important;height:210px!important;top:0!important;opacity:.96!important}
+  .dragon-left{left:-3px!important}
+  .dragon-right{right:-3px!important}
+
+  .round-panel{
+    border-left:0!important;
+    border-top:1px solid rgba(224,178,76,.25);
+    padding:14px 15px 16px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    column-gap:18px;
+  }
+  .round-panel>span,.round-panel>strong{grid-column:1/-1}
+  .round-panel>strong{margin:5px 0 8px;font-size:25px}
+  .round-panel>div{margin:0;padding:8px 0}
+
+  .forge-grid{
+    display:grid;
+    grid-template-columns:minmax(0,1fr);
+    min-height:0;
+    height:auto;
+  }
+  .section-ribbon{grid-column:1;height:30px}
+  .metric-stack{grid-template-rows:none;grid-auto-rows:minmax(82px,auto);gap:6px;padding:8px}
+  .metric-card{min-height:82px}
+  .metric-card>strong{font-size:17px}
+  .altar{min-height:270px;order:2;display:flex;align-items:center;justify-content:center}
+  .forge-grid>.metric-stack:first-of-type{order:1}
+  .forge-grid>.metric-stack:last-child{order:3}
+  .crystal-stage-large{width:100%;height:270px}
+  .crystal-stage-large .crystal-core{width:92px;height:152px}
+  .crystal-stage-large .crystal-face{font-size:30px}
+  .crystal-stage-large .orbit-a{width:250px;height:92px}
+  .crystal-stage-large .orbit-b{width:275px;height:120px}
+  .crystal-stage-large .orbit-c{width:175px;height:240px}
+
+  .feature-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:6px}
+  .candidate-panel,.balance-panel{min-height:300px}
+  .history-panel{width:100%;overflow:hidden}
+  .history-table-wrap{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .magic-table{min-width:760px}
+
+  .panel-heading{padding-left:14px;padding-right:14px}
+}
+
+@media (max-width:420px){
+  .hero-copy{min-height:285px;padding-top:94px!important}
+  .dragon{width:104px!important;height:173px!important}
+  .hero-copy h1{font-size:31px}
+  .hero-copy>p{font-size:6px}
+  .hero-difficulty strong{font-size:22px}
+  .hero-difficulty b,.hero-difficulty i{font-size:6px}
+  .round-panel{grid-template-columns:1fr}
+  .round-panel>div{grid-column:1}
+}
