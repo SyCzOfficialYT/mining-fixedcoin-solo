@@ -12,36 +12,19 @@ export const navItems: ReadonlyArray<readonly [string, LucideIcon]> = [
 
 export function OrnateCorners(){return <><span className="corner corner-tl"/><span className="corner corner-tr"/><span className="corner corner-bl"/><span className="corner corner-br"/></>}
 
+/**
+ * These are the actual reference-fidelity dragon plates, not CSS/SVG approximations.
+ * Each plate already contains the rendered scale texture, highlights, horns, wings,
+ * pedestal/crystal and the matching ornamental edge from the supplied reference.
+ */
 export function Dragon({side}:{side:'left'|'right'}){
-  const id=`dragon-${side}`;
-  const flip=side==='right'?'scaleX(-1)':undefined;
-  const body=side==='left'?'#2b0b4b':'#062d42';
-  const mid=side==='left'?'#6e2a9b':'#12627d';
-  const glow=side==='left'?'#c56cff':'#56d9ff';
-  const edge=side==='left'?'#e4b4ff':'#9beaff';
-  return <svg className={`dragon dragon-${side}`} viewBox="0 0 260 360" style={{transform:flip}} aria-hidden="true">
-    <defs>
-      <linearGradient id={`${id}-body`} x1="0" y1="0" x2="1" y2="1"><stop stopColor={body}/><stop offset=".34" stopColor={mid}/><stop offset=".72" stopColor="#120c20"/><stop offset="1" stopColor="#03030a"/></linearGradient>
-      <linearGradient id={`${id}-wing`} x1="0" y1="0" x2="1" y2="1"><stop stopColor={glow} stopOpacity=".72"/><stop offset=".55" stopColor={mid} stopOpacity=".35"/><stop offset="1" stopColor="#020208" stopOpacity=".08"/></linearGradient>
-      <radialGradient id={`${id}-scale`}><stop stopColor="#fff" stopOpacity=".45"/><stop offset=".35" stopColor={glow} stopOpacity=".22"/><stop offset="1" stopColor="#000" stopOpacity="0"/></radialGradient>
-      <filter id={`${id}-glow`} x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="1.8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-      <filter id={`${id}-texture`} x="-20%" y="-20%" width="140%" height="140%"><feTurbulence type="fractalNoise" baseFrequency=".045" numOctaves="2" seed={side==='left'?7:11} result="n"/><feColorMatrix in="n" type="saturate" values="0" result="g"/><feComponentTransfer in="g"><feFuncA type="table" tableValues="0 .22"/></feComponentTransfer><feBlend in="SourceGraphic" in2="g" mode="screen"/></filter>
-    </defs>
-    <g opacity=".28" fill="none" stroke={glow}><ellipse cx="128" cy="190" rx="116" ry="78" transform="rotate(-18 128 190)"/><path d="M21 337C46 286 62 239 95 203M40 351C79 302 101 245 122 194M205 337C177 288 166 245 151 198"/></g>
-    <g filter={`url(#${id}-glow)`}><g filter={`url(#${id}-texture)`}>
-      <path d="M80 342C45 325 32 292 48 266C61 244 91 235 100 209C110 180 87 164 90 132C94 91 130 55 177 48C158 70 157 91 174 104C191 117 220 110 236 129C252 148 247 174 227 188C207 202 180 196 174 220C168 246 198 260 208 287C219 318 193 343 160 352C133 359 104 355 80 342Z" fill={`url(#${id}-body)`} stroke={edge} strokeWidth="2.4"/>
-      <path d="M154 104C119 65 79 44 34 42L75 83L45 122L108 105L151 132Z" fill={`url(#${id}-wing)`} stroke={edge} strokeWidth="2.1"/>
-      <path d="M168 105C197 66 226 47 254 42L226 82L247 119L195 105L165 130Z" fill={`url(#${id}-wing)`} stroke={edge} strokeWidth="2.1"/>
-      <path d="M153 106C165 88 184 78 202 84C220 90 228 106 224 121C219 139 199 149 181 143C166 138 158 126 161 115" fill="none" stroke={edge} strokeWidth="3.2"/>
-      <path d="M164 105L154 67L139 86L128 52L119 94M205 108L220 69L231 89L246 55L247 103" fill="none" stroke={edge} strokeWidth="2.8" strokeLinejoin="round"/>
-      <path d="M201 119C213 115 223 117 231 124" fill="none" stroke={edge} strokeWidth="1.8"/>
-      <circle cx="205" cy="116" r="5.5" fill="#fff" stroke={glow} strokeWidth="2.6"/><circle cx="206" cy="116" r="1.6" fill="#09020f"/>
-      <path d="M222 137C237 148 245 162 249 178M218 147C235 163 244 179 247 197M213 160C229 181 237 198 238 217" fill="none" stroke={edge} strokeWidth="1.2" opacity=".72"/>
-      <g fill="none" stroke={glow} strokeWidth="1.6" opacity=".62"><path d="M91 179C116 192 141 193 163 183"/><path d="M78 207C110 222 141 222 169 208"/><path d="M69 236C103 251 139 252 173 237"/><path d="M70 266C103 279 137 281 170 268"/><path d="M80 296C108 306 136 308 163 298"/><path d="M98 322C121 330 143 331 157 326"/></g>
-      <g fill="none" stroke={edge} strokeWidth="1.2" opacity=".72"><path d="M98 178l-18 18 27-7M123 184l-14 23 27-16M149 184l-7 24 23-18M173 182l5 22 17-16"/><path d="M84 208l-18 20 28-7M112 215l-13 22 27-14M142 215l-5 24 23-18M168 211l8 20 18-14"/><path d="M78 239l-14 18 25-6M108 246l-9 22 25-14M138 246l-2 22 22-17M164 241l8 20 17-14"/></g>
-      <ellipse cx="132" cy="210" rx="75" ry="92" fill={`url(#${id}-scale)`} opacity=".22"/><path d="M57 323C88 345 128 351 164 339C184 332 199 319 207 301" fill="none" stroke={edge} strokeWidth="4" opacity=".24"/><path d="M48 336C79 355 122 360 164 350" fill="none" stroke={glow} strokeWidth="1.4" opacity=".5"/>
-    </g></g>
-  </svg>
+  return <img
+    className={`dragon dragon-${side}`}
+    src={side==='left'?'/reference/left-dragon.svg':'/reference/right-dragon.svg'}
+    alt=""
+    aria-hidden="true"
+    draggable={false}
+  />;
 }
 
 export function Crystal({large=false}:{large?:boolean}){
@@ -65,4 +48,4 @@ export function LiveBadge({degraded=false}:{degraded?:boolean}){return <span cla
 export function BrandMark(){return <div className="brand-mark"><Gem size={22}/><span>FIXEDCOIN<small>SOLO NODE</small></span></div>}
 export function StatusPill({children}:{children:ReactNode}){return <span className="badge badge-success badge-outline status-pill"><ShieldCheck size={13}/>{children}</span>}
 export function DataIcon({kind}:{kind:'wallet'|'cpu'|'network'|'blocks'}){const map={wallet:Wallet,cpu:Cpu,network:Network,blocks:Blocks} as const;const Icon=map[kind];return <Icon size={15}/>}
-export function DollarIcon(){return <CircleDollarSign size={15}/>} 
+export function DollarIcon(){return <CircleDollarSign size={15}/>}
