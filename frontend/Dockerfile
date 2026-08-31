@@ -14,5 +14,8 @@ WORKDIR /app
 ENV NODE_ENV=production
 COPY --from=build /app/.next/standalone ./
 COPY --from=build /app/.next/static ./.next/static
+# Next.js standalone does not copy public/ automatically.
+# The LiveShare reference artwork lives there and must be present at runtime.
+COPY --from=build /app/public ./public
 EXPOSE 3000
 CMD ["node","server.js"]
