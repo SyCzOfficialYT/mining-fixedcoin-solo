@@ -12,15 +12,14 @@ export const navItems: ReadonlyArray<readonly [string, LucideIcon]> = [
 
 export function OrnateCorners(){return <><span className="corner corner-tl"/><span className="corner corner-tr"/><span className="corner corner-bl"/><span className="corner corner-br"/></>}
 
-/**
- * These are the actual reference-fidelity dragon plates, not CSS/SVG approximations.
- * Each plate already contains the rendered scale texture, highlights, horns, wings,
- * pedestal/crystal and the matching ornamental edge from the supplied reference.
- */
+/** Actual reference-fidelity artwork plates. */
+const REFERENCE_ARTWORK_VERSION = '20260831-v3';
+
 export function Dragon({side}:{side:'left'|'right'}){
+  const asset = side==='left' ? 'left-dragon.svg' : 'right-dragon.svg';
   return <img
     className={`dragon dragon-${side}`}
-    src={side==='left'?'/reference/left-dragon.svg':'/reference/right-dragon.svg'}
+    src={`/reference/${asset}?v=${REFERENCE_ARTWORK_VERSION}`}
     alt=""
     aria-hidden="true"
     draggable={false}
