@@ -13,8 +13,9 @@
   position:absolute!important;
   top:-10px!important;
   width:310px!important;
-  height:370px!important;
-  object-fit:fill!important;
+  height:auto!important;
+  aspect-ratio:3/4!important;
+  object-fit:contain!important;
   object-position:center!important;
   pointer-events:none!important;
   user-select:none!important;
@@ -35,14 +36,14 @@
 .hero-card:after{z-index:6!important;pointer-events:none!important}
 
 @media (max-width:1100px){
-  .hero-card .dragon{width:270px!important;height:322px!important}
+  .hero-card .dragon{width:270px!important;height:auto!important}
   .hero-card .dragon-left{left:-18px!important}
   .hero-card .dragon-right{right:-18px!important}
 }
 
 @media (max-width:700px){
   /* Preserve the actual artwork instead of reducing it to a tiny decorative icon. */
-  .hero-card .dragon{width:230px!important;height:274px!important;top:-6px!important;opacity:.88!important}
+  .hero-card .dragon{width:230px!important;height:auto!important;top:-6px!important;opacity:.88!important}
   .hero-card .dragon-left{left:-24px!important}
   .hero-card .dragon-right{right:-24px!important}
   .hero-copy{padding-left:14px!important;padding-right:14px!important;padding-top:88px!important}
@@ -50,7 +51,7 @@
 }
 
 @media (max-width:420px){
-  .hero-card .dragon{width:205px!important;height:241px!important}
+  .hero-card .dragon{width:205px!important;height:auto!important}
   .hero-card .dragon-left{left:-28px!important}
   .hero-card .dragon-right{right:-28px!important}
   .hero-copy{padding-top:82px!important}
