@@ -1,48 +1,57 @@
-/* LiveShare reference-v7 — direct artwork plates, no pseudo-element indirection. */
+/* LiveShare reference-v7 — final artwork positioning.
+ * Keep the supplied dragon plates at reference scale; do not replace them
+ * with simplified CSS/SVG approximations or shrink them into the hero copy.
+ */
 .hero-card{
   position:relative;
   isolation:isolate;
   overflow:hidden;
 }
 
-/* The Dragon component already renders the real reference SVGs as <img>. */
 .hero-card .dragon{
   display:block!important;
   position:absolute!important;
-  top:0!important;
-  width:190px!important;
-  height:315px!important;
+  top:-10px!important;
+  width:310px!important;
+  height:370px!important;
   object-fit:fill!important;
   object-position:center!important;
   pointer-events:none!important;
   user-select:none!important;
   z-index:2!important;
-  opacity:1!important;
-  filter:none!important;
-  mix-blend-mode:normal!important;
+  opacity:.9!important;
+  filter:drop-shadow(0 0 12px rgba(164,87,255,.28)) drop-shadow(0 0 34px rgba(0,0,0,.62))!important;
+  mix-blend-mode:screen!important;
   transform:none!important;
 }
-.hero-card .dragon-left{left:0!important;right:auto!important}
-.hero-card .dragon-right{right:0!important;left:auto!important}
+.hero-card .dragon-left{left:-18px!important;right:auto!important}
+.hero-card .dragon-right{
+  right:-18px!important;
+  left:auto!important;
+  filter:drop-shadow(0 0 12px rgba(72,196,255,.25)) drop-shadow(0 0 34px rgba(0,0,0,.62))!important;
+}
 .hero-copy{position:relative;z-index:4}
 .round-panel{position:relative;z-index:5}
 .hero-card:after{z-index:6!important;pointer-events:none!important}
 
 @media (max-width:1100px){
-  .hero-card .dragon{width:155px!important;height:258px!important}
-  .hero-card .dragon-left{left:-2px!important}
-  .hero-card .dragon-right{right:-2px!important}
+  .hero-card .dragon{width:270px!important;height:322px!important}
+  .hero-card .dragon-left{left:-18px!important}
+  .hero-card .dragon-right{right:-18px!important}
 }
 
 @media (max-width:700px){
-  .hero-card .dragon{width:126px!important;height:210px!important;top:0!important;opacity:.96!important}
-  .hero-card .dragon-left{left:-3px!important}
-  .hero-card .dragon-right{right:-3px!important}
-  .hero-copy{padding-left:14px!important;padding-right:14px!important;padding-top:104px!important}
+  /* Preserve the actual artwork instead of reducing it to a tiny decorative icon. */
+  .hero-card .dragon{width:230px!important;height:274px!important;top:-6px!important;opacity:.88!important}
+  .hero-card .dragon-left{left:-24px!important}
+  .hero-card .dragon-right{right:-24px!important}
+  .hero-copy{padding-left:14px!important;padding-right:14px!important;padding-top:88px!important}
   .hero-card:after{inset:5px}
 }
 
 @media (max-width:420px){
-  .hero-card .dragon{width:104px!important;height:173px!important}
-  .hero-copy{padding-top:94px!important}
+  .hero-card .dragon{width:205px!important;height:241px!important}
+  .hero-card .dragon-left{left:-28px!important}
+  .hero-card .dragon-right{right:-28px!important}
+  .hero-copy{padding-top:82px!important}
 }
