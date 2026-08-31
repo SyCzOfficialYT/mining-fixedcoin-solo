@@ -14,7 +14,7 @@ export function OrnateCorners(){return <><span className="corner corner-tl"/><sp
 
 /** Real generated dragon artwork from public/reference. */
 export function Dragon({side}:{side:'left'|'right'}){
-  const src=side==='left'?'/reference/left-dragon.webp':'/reference/right-dragon.svg';
+  const src=side==='left'?'/reference/left-dragon.svg':'/reference/right-dragon.svg';
   return <img className={`dragon dragon-${side}`} src={src} alt="" aria-hidden="true" draggable={false}/>;
 }
 
