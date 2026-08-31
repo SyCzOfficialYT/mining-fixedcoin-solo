@@ -12,40 +12,10 @@ export const navItems: ReadonlyArray<readonly [string, LucideIcon]> = [
 
 export function OrnateCorners(){return <><span className="corner corner-tl"/><span className="corner corner-tr"/><span className="corner corner-bl"/><span className="corner corner-br"/></>}
 
-/** Detailed reference-style dragon artwork. Kept as vector markup so it cannot break
- * because of a truncated/corrupt base64 image asset in the public folder. */
+/** Real generated dragon artwork from public/reference. */
 export function Dragon({side}:{side:'left'|'right'}){
-  const flip=side==='right'?'scaleX(-1)':undefined;
-  const id=`dragon-${side}`;
-  const body=side==='left'?'#d28aff':'#73dcff';
-  const deep=side==='left'?'#26104d':'#092c4c';
-  const edge=side==='left'?'#dba0ff':'#6fdcff';
-  return <svg className={`dragon dragon-${side}`} viewBox="0 0 420 430" style={{transform:flip}} aria-hidden="true" preserveAspectRatio="xMidYMid meet">
-    <defs>
-      <linearGradient id={`${id}-body`} x1="0" y1="0" x2="1" y2="1"><stop stopColor={body}/><stop offset=".25" stopColor={side==='left'?'#7626b5':'#1b759f'}/><stop offset=".68" stopColor={deep}/><stop offset="1" stopColor="#03020a"/></linearGradient>
-      <linearGradient id={`${id}-edge`} x1="0" y1="0" x2="1" y2="1"><stop stopColor="#fff"/><stop offset=".25" stopColor={edge}/><stop offset=".75" stopColor={side==='left'?'#7b2fb5':'#267fa6'}/><stop offset="1" stopColor="#11182e"/></linearGradient>
-      <radialGradient id={`${id}-halo`}><stop stopColor={side==='left'?'#b94cff':'#37caff'} stopOpacity=".34"/><stop offset="1" stopColor="#000" stopOpacity="0"/></radialGradient>
-      <filter id={`${id}-glow`}><feGaussianBlur stdDeviation="2.6" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-    </defs>
-    <ellipse cx="210" cy="218" rx="205" ry="190" fill={`url(#${id}-halo)`} opacity=".55"/>
-    <g fill="none" stroke={edge} opacity=".3">
-      <ellipse cx="208" cy="217" rx="193" ry="111" transform="rotate(-18 208 217)"/>
-      <ellipse cx="208" cy="217" rx="171" ry="91" transform="rotate(24 208 217)"/>
-      <ellipse cx="208" cy="217" rx="151" ry="75" transform="rotate(-41 208 217)"/>
-    </g>
-    <g filter={`url(#${id}-glow)`}>
-      <path d="M92 403c-31-33-38-70-18-101 19-30 58-36 66-70 7-29-12-50-1-82 13-38 49-62 92-76-19 25-21 47-5 59 17 13 47 4 69 17 27 15 34 45 20 69-16 27-53 34-55 67-2 37 49 55 58 92 9 38-15 70-54 89-39 19-100 21-172 5z" fill={`url(#${id}-body)`} stroke={`url(#${id}-edge)`} strokeWidth="2.8"/>
-      <path d="M125 119 44 55l72 20 43-67 7 88M251 124l91-70-74 18-43-61-5 87" fill={`url(#${id}-body)`} stroke={`url(#${id}-edge)`} strokeWidth="4" strokeLinejoin="round"/>
-      <path d="M135 115c25-21 50-31 75-27 28 5 42 27 36 48-5 18-27 31-44 25-18-6-23-26-11-40" fill="none" stroke={`url(#${id}-edge)`} strokeWidth="4"/>
-      <path d="M109 137c17-12 38-17 58-14M91 154c18-9 38-12 57-9" fill="none" stroke={edge} strokeWidth="2" opacity=".7"/>
-      <circle cx="221" cy="128" r="6.5" fill="#fff" stroke={edge} strokeWidth="3"/>
-      <path d="M97 194c38 23 79 26 119 7M86 231c48 26 96 27 143 5M82 270c49 24 101 27 150 6M91 310c43 21 89 23 132 6M111 349c36 16 73 17 108 5" fill="none" stroke={edge} strokeWidth="2.2" opacity=".55"/>
-      <path d="M119 170l-27 18 34 4M145 161l-21 26 35-8M176 154l-13 29 29-17M207 154l-3 28 22-24" fill="none" stroke={side==='left'?'#e0b4ff':'#8eeaff'} strokeWidth="2" opacity=".72"/>
-      <path d="M116 208l-20 12 24 5M109 247l-22 12 27 4M108 286l-18 11 25 5M119 326l-15 9 23 5M140 361l-11 8 20 3" fill="none" stroke={edge} strokeWidth="1.6" opacity=".65"/>
-      <path d="M112 385c48 21 102 22 154-5" fill="none" stroke={side==='left'?'#9d4dd2':'#287ca9'} strokeWidth="7" opacity=".42"/>
-      <path d="M96 395c34 10 68 13 101 9" fill="none" stroke="#fff" strokeWidth="1" opacity=".2"/>
-    </g>
-  </svg>
+  const src=side==='left'?'/reference/left-dragon.webp':'/reference/right-dragon.svg';
+  return <img className={`dragon dragon-${side}`} src={src} alt="" aria-hidden="true" draggable={false}/>;
 }
 
 export function Crystal({large=false}:{large?:boolean}){
