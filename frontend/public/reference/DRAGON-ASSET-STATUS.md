@@ -1,5 +1,9 @@
 # Dragon asset status
 
-The current `left-dragon.svg` on `main` contains an embedded WebP data URI that is malformed and does not decode as valid Base64. The exact generated artwork binary is not available to the repository write API from the current chat context, so this checkpoint intentionally does not replace the artwork with a fabricated approximation.
+The production dashboard now uses the generated dragon artwork from `frontend/public/reference/`.
 
-Required production action: add the actual generated dragon artwork as a real binary asset (preferably `left-dragon.webp` / `right-dragon.webp`) and reference those files directly from the dashboard. Do not continue patching the malformed Base64 URI.
+- `left-dragon.svg` — embedded WebP artwork, committed on `main`.
+- `right-dragon.svg` — embedded WebP artwork, committed on `main`.
+- `frontend/app/components.tsx` resolves the artwork to `/reference/left-dragon.svg` and `/reference/right-dragon.svg`.
+
+Do not replace these assets with CSS/SVG approximations or malformed Base64. If the artwork is regenerated, replace the complete SVG asset with a valid embedded WebP and verify that the Base64 payload decodes before committing.
