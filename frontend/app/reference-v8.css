@@ -1,0 +1,109 @@
+/* LiveShare reference-v8 — desktop composition + crisp dragon plates. */
+
+/* The supplied reference is a dense 1536px command-center layout. */
+.magical-shell{
+  width:min(1536px,calc(100vw - 16px));
+  margin:8px auto;
+  grid-template-columns:150px minmax(0,1fr) 270px;
+  gap:6px;
+}
+.dashboard-column{gap:6px}
+.topbar{display:none}
+
+.hero-card{
+  min-height:326px;
+  grid-template-columns:minmax(0,1fr) 206px;
+  border-color:rgba(230,181,70,.38);
+  background:
+    radial-gradient(ellipse at 13% 50%,rgba(125,48,210,.24),transparent 28%),
+    radial-gradient(ellipse at 87% 50%,rgba(23,130,205,.20),transparent 28%),
+    radial-gradient(ellipse at 50% 65%,rgba(126,54,215,.18),transparent 42%),
+    linear-gradient(180deg,#100824,#03030b);
+}
+.hero-copy{
+  padding:28px 24px 20px 190px!important;
+  padding-right:190px!important;
+}
+.hero-copy h1{font-size:clamp(44px,4.5vw,66px);letter-spacing:.23em}
+.versus-grid{max-width:760px}
+
+/* Native 300×400 artwork; never stretch it into a soft bitmap. */
+.hero-card .dragon{
+  width:250px!important;
+  height:333px!important;
+  top:-3px!important;
+  object-fit:contain!important;
+  object-position:center!important;
+  image-rendering:auto!important;
+  opacity:.98!important;
+  mix-blend-mode:screen!important;
+  filter:drop-shadow(0 0 14px rgba(164,87,255,.30)) drop-shadow(0 0 28px rgba(0,0,0,.70))!important;
+}
+.hero-card .dragon-left{left:-12px!important}
+.hero-card .dragon-right{
+  right:-12px!important;
+  transform:scaleX(-1)!important;
+  filter:hue-rotate(48deg) saturate(1.35) brightness(1.06) drop-shadow(0 0 14px rgba(72,196,255,.30)) drop-shadow(0 0 28px rgba(0,0,0,.70))!important;
+}
+.hero-copy,.round-panel{position:relative;z-index:4}
+.round-panel{z-index:5}
+.hero-card:after{z-index:6!important}
+
+.forge-grid{min-height:318px;grid-template-columns:1fr minmax(330px,1.25fr) 1fr}
+.metric-stack{padding:9px;gap:5px}
+.metric-card{padding:10px 11px}
+.altar{min-height:288px}
+
+.feature-grid{grid-template-columns:1fr 1fr;gap:6px}
+.candidate-panel,.balance-panel{min-height:188px}
+.history-panel{min-height:150px}
+.history-table-wrap{max-height:118px;overflow:hidden}
+
+.right-rail{padding:7px;gap:6px}
+
+@media (max-width:1250px){
+  .magical-shell{grid-template-columns:135px minmax(0,1fr) 235px}
+  .hero-copy{padding-left:175px!important;padding-right:175px!important}
+  .hero-card .dragon{width:220px!important;height:293px!important}
+}
+
+@media (max-width:1050px){
+  .magical-shell{grid-template-columns:76px minmax(0,1fr)}
+  .right-rail{display:none!important}
+  .hero-copy{padding-left:150px!important;padding-right:150px!important}
+  .hero-card .dragon{width:190px!important;height:253px!important}
+  .hero-card .dragon-left{left:-5px!important}
+  .hero-card .dragon-right{right:-5px!important}
+}
+
+@media (max-width:700px){
+  .magical-shell{display:block;width:100%;margin:0}
+  .left-rail{display:none!important}
+  .dashboard-column{width:100%;gap:6px}
+  .topbar{display:flex;min-height:42px;padding:0 10px;border-left:0;border-right:0}
+  .topbar-title{display:none!important}
+  .mobile-brand{display:flex!important}
+  .hero-card{display:grid;grid-template-columns:1fr;min-height:0}
+  .hero-copy{min-height:300px;padding:104px 14px 18px!important;overflow:hidden}
+  .hero-copy h1{font-size:clamp(32px,10vw,58px);letter-spacing:.13em}
+  .versus-grid{grid-template-columns:minmax(0,1fr) 44px minmax(0,1fr);gap:5px}
+  .hero-card .dragon{width:126px!important;height:168px!important;top:0!important;opacity:.96!important}
+  .hero-card .dragon-left{left:-4px!important}
+  .hero-card .dragon-right{right:-4px!important}
+  .round-panel{border-left:0!important;border-top:1px solid rgba(224,178,76,.25);padding:14px 15px 16px;display:grid;grid-template-columns:1fr 1fr;column-gap:18px}
+  .round-panel>span,.round-panel>strong{grid-column:1/-1}
+  .round-panel>strong{margin:5px 0 8px}
+  .forge-grid{grid-template-columns:1fr;min-height:0}
+  .feature-grid{grid-template-columns:1fr}
+  .history-table-wrap{max-height:none;overflow-x:auto}
+  .magic-table{min-width:760px}
+}
+
+@media (max-width:420px){
+  .hero-copy{min-height:285px;padding-top:94px!important}
+  .hero-card .dragon{width:104px!important;height:139px!important}
+  .hero-copy h1{font-size:31px}
+  .hero-difficulty strong{font-size:22px}
+  .round-panel{grid-template-columns:1fr}
+  .round-panel>div{grid-column:1}
+}
