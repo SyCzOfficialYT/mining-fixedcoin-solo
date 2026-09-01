@@ -7,6 +7,7 @@ import './reference-v5.css';
 import './reference-v6.css';
 import './reference-v7.css';
 import './reference-v8.css';
+import './reference-magical.css';
 
 export const metadata: Metadata = {
   title: 'LiveShare · Solo Mining · Magical Network',
