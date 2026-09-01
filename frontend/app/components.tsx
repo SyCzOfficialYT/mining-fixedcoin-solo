@@ -12,9 +12,9 @@ export const navItems: ReadonlyArray<readonly [string, LucideIcon]> = [
 
 export function OrnateCorners(){return <><span className="corner corner-tl"/><span className="corner corner-tr"/><span className="corner corner-bl"/><span className="corner corner-br"/></>}
 
-/** Production dragon plates. Both render from the valid committed WebP artwork. */
+/** Production dragon plates. Left is the committed reference WebP; right is the blue reference WebP. */
 export function Dragon({side}:{side:'left'|'right'}){
-  const src=side==='left'?'/reference/left-dragon.webp':'/reference/right-dragon.svg';
+  const src=side==='left'?'/reference/left-dragon.webp':'/reference/right-dragon.webp';
   return <img className={`dragon dragon-${side}`} src={src} alt="" aria-hidden="true" draggable={false}/>;
 }
 
