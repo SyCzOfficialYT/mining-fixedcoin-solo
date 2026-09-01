@@ -1,9 +1,10 @@
 # Dragon asset status
 
-The production dashboard now uses the generated dragon artwork from `frontend/public/reference/`.
+The production dashboard uses the committed dragon artwork in `frontend/public/reference/`.
 
-- `left-dragon.svg` — embedded WebP artwork, committed on `main`.
-- `right-dragon.svg` — embedded WebP artwork, committed on `main`.
-- `frontend/app/components.tsx` resolves the artwork to `/reference/left-dragon.svg` and `/reference/right-dragon.svg`.
+- `left-dragon.webp` is the canonical transparent purple dragon plate.
+- `right-dragon.svg` is a valid wrapper around the canonical WebP; the dashboard mirrors and color-shifts it to produce the blue counterpart without embedding malformed Base64.
+- `frontend/app/components.tsx` loads `/reference/left-dragon.webp` and `/reference/right-dragon.svg` directly.
+- `frontend/app/reference-v8.css` controls the reference-scale placement and responsive composition.
 
-Do not replace these assets with CSS/SVG approximations or malformed Base64. If the artwork is regenerated, replace the complete SVG asset with a valid embedded WebP and verify that the Base64 payload decodes before committing.
+The dashboard must not use the old malformed embedded-WebP payloads. Keep the artwork at native aspect ratio and avoid bitmap stretching that causes softness.
