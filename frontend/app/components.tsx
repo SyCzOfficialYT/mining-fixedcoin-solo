@@ -6,7 +6,7 @@ import type { LucideIcon } from 'lucide-react';
 import { Activity, Blocks, CircleDollarSign, Cpu, Gauge, Gem, Hammer, History, LayoutDashboard, Network, Settings, ShieldCheck, Sparkles, Users, Wallet } from 'lucide-react';
 
 export const navItems: ReadonlyArray<readonly [string, LucideIcon]> = [
-  ['Dashboard', LayoutDashboard], ['Mining', Hammer], ['Shares', Activity], ['Blocks', Blocks],
+  ['Dashboard', LayoutDashboard], ['Mempool', Activity], ['Mining', Hammer], ['Shares', Activity], ['Blocks', Blocks],
   ['Workers', Users], ['Settings', Settings], ['Logs', History], ['System', Network],
 ];
 
