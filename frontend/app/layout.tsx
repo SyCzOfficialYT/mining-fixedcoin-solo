@@ -11,16 +11,16 @@ import './reference-magical.css';
 import './redesign.css';
 
 export const metadata: Metadata = {
-  title: 'LiveShare · Solo Mining · Magical Network',
-  description: 'FixedCoin solo mining command center',
-  applicationName: 'LiveShare',
+  title: 'FixedCoin Explorer · Solo Mining & Mempool',
+  description: 'Live FixedCoin solo mining, blockchain and mempool explorer.',
+  applicationName: 'FixedCoin Explorer',
 };
 
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
-  themeColor: '#05040b',
+  themeColor: '#060a0e',
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
