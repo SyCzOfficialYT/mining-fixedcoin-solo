@@ -174,7 +174,7 @@ def api_mempool():
     if not isinstance(info, dict):
         return jsonify({"status":"unavailable","error":"FixedCoin Core mempool RPC unavailable","details":info_error}), 503
     if not isinstance(raw, dict):
-        raw = {}
+        return jsonify({"status":"unavailable","error":"FixedCoin Core transaction mempool RPC unavailable","details":raw_error}), 503
     transactions = []
     for txid, entry in raw.items():
         if not isinstance(entry, dict):
