@@ -166,6 +166,57 @@ def api_status(): return jsonify(status())
 def api_overview(): return jsonify(status())
 @app.get("/api/stats")
 def api_stats(): return jsonify(status())
+@app.get("/api/mempool")
+def api_mempool():
+    """Expose live mempool data from FixedCoin Core without leaking RPC credentials."""
+    info, info_error = rpc("getmempoolinfo", timeout=4)
+    raw, raw_error = rpc("getrawmempool", [True], timeout=6)
+    if not isinstance(info, dict):
+        return jsonify({"status":"unavailable","error":"FixedCoin Core mempool RPC unavailable","details":info_error}), 503
+    if not isinstance(raw, dict):
+        raw = {}
+    transactions = []
+    for txid, entry in raw.items():
+        if not isinstance(entry, dict):
+            continue
+        fee = entry.get("fees") if isinstance(entry.get("fees"), dict) else {}
+        base_fee = as_number(fee.get("base"), as_number(entry.get("fee"), 0.0))
+        vsize = int(as_number(entry.get("vsize"), as_number(entry.get("size"), 0)))
+        weight = int(as_number(entry.get("weight"), 0))
+        transactions.append({
+            "txid": str(txid),
+            "size": int(as_number(entry.get("size"), vsize)),
+            "vsize": vsize,
+            "weight": weight,
+            "fee": base_fee,
+            "fee_rate": (base_fee * 100000000 / vsize) if vsize > 0 else 0,
+            "time": int(as_number(entry.get("time"), 0)),
+            "height": int(as_number(entry.get("height"), 0)),
+            "ancestor_count": int(as_number(entry.get("ancestorcount"), 0)),
+            "descendant_count": int(as_number(entry.get("descendantcount"), 0)),
+        })
+    transactions.sort(key=lambda tx: tx["fee_rate"], reverse=True)
+    fees = [tx["fee_rate"] for tx in transactions if tx["fee_rate"] > 0]
+    return jsonify({
+        "status":"online",
+        "ts":int(time.time()),
+        "mempool":{
+            "loaded":bool(info.get("loaded", True)),
+            "size":int(as_number(info.get("size"), len(transactions))),
+            "bytes":int(as_number(info.get("bytes"), 0)),
+            "usage":int(as_number(info.get("usage"), 0)),
+            "total_fee":as_number(info.get("total_fee"), 0.0),
+            "min_fee":as_number(info.get("mempoolminfee"), 0.0),
+            "relay_fee":as_number(info.get("minrelaytxfee"), 0.0),
+            "transactions":len(transactions),
+            "fee_rate_min":min(fees) if fees else 0,
+            "fee_rate_median":sorted(fees)[len(fees)//2] if fees else 0,
+            "fee_rate_max":max(fees) if fees else 0,
+        },
+        "transactions":transactions[:250],
+        "error":raw_error,
+    })
+
 @app.get("/api/logs")
 def api_logs():
     events=[]
