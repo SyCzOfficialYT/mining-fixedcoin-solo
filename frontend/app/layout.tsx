@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
+import './redesign.css';
 import './reference-v3.css';
 import './reference-v3-runes.css';
 import './reference-fidelity-final.css';
