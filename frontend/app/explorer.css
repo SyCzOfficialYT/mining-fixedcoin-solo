@@ -79,3 +79,47 @@
 @media(max-width:1050px){.fx-app{grid-template-columns:190px minmax(0,1fr)}.fx-main{padding:0 18px 24px}.fx-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.fx-prob-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:720px){.fx-app{display:block}.fx-sidebar{position:relative;top:auto;height:auto;padding:13px;display:block;border-right:0;border-bottom:1px solid var(--fx-border)}.fx-brand{margin-bottom:12px}.fx-nav-caption,.fx-node-state{display:none}.fx-sidebar nav{display:flex;overflow-x:auto;gap:4px}.fx-nav{flex:none;padding:9px;font-size:10px}.fx-nav svg{display:none}.fx-main{padding:0 12px 20px}.fx-topbar{height:52px;font-size:8px}.fx-top-actions{gap:7px}.fx-top-actions button{padding:7px}.fx-page-heading{align-items:flex-start;padding:22px 0 16px}.fx-height{min-width:104px;padding:9px}.fx-height strong{font-size:18px}.fx-height span{font-size:8px}.fx-page-heading p{font-size:11px}.fx-metrics{gap:8px}.fx-metric{padding:12px}.fx-metric>strong{font-size:18px}.fx-content-grid{grid-template-columns:minmax(0,1fr);gap:9px}.fx-panel{padding:13px}.fx-prob-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}.fx-prob-grid>div{padding:7px}.fx-prob-grid small{font-size:8px}.fx-prob-grid strong{font-size:11px}.fx-footer{font-size:7px;letter-spacing:.04em}.fx-footer span{max-width:50%}}
 @media(max-width:390px){.fx-prob-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.fx-page-heading{display:block}.fx-height{margin-top:13px}.fx-topbar>span{max-width:42%;line-height:1.5}.fx-live{font-size:8px}}
+
+/* Match the dashboard to the Mempool Explorer visual system */
+:root{--fx-bg:#060a0e;--fx-panel:#0b1218;--fx-panel-alt:#0e1820;--fx-border:#1b3039;--fx-text:#e8f1f4;--fx-muted:#77909a;--fx-accent:#37e4f2;--fx-good:#7af0b1;--fx-bad:#ff8188;--fx-mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.fx-app{background:radial-gradient(ellipse at 60% -15%,rgba(22,108,123,.2),transparent 50%),var(--fx-bg);color:var(--fx-text)}
+.fx-sidebar{background:rgba(7,13,18,.94);border-color:var(--fx-border)}
+.fx-brand{color:#eaf8fa}
+.fx-brand small{color:#617b85}
+.fx-brand-icon{border-color:#24505b;background:#10252d;color:var(--fx-accent);border-radius:11px}
+.fx-nav-caption{color:#4f6b75}
+.fx-nav{border-radius:9px;color:#8ba1a9}
+.fx-nav:hover,.fx-nav.active{background:linear-gradient(90deg,rgba(38,196,210,.13),rgba(38,196,210,.025));border-color:#1d4650;color:#eafcff}
+.fx-nav.active svg{color:var(--fx-accent)}
+.fx-node-state{border-color:var(--fx-border);border-radius:10px;color:var(--fx-good)}
+.fx-main{max-width:1800px}
+.fx-topbar{border-color:var(--fx-border);color:#c8d7dc}
+.fx-live{color:var(--fx-good)}
+.fx-top-actions button{background:#101e25;border-color:#25434c;border-radius:8px;color:#d7e9ed;font:600 10px var(--fx-mono)}
+.fx-top-actions button:hover{border-color:var(--fx-accent);color:var(--fx-accent)}
+.fx-page-heading h1 em{color:var(--fx-accent)}
+.fx-eyebrow,.fx-panel-heading>div>small{color:#6d929d}
+.fx-height,.fx-metric,.fx-panel{border-color:var(--fx-border);border-radius:13px;background:linear-gradient(145deg,rgba(13,25,32,.97),rgba(8,15,20,.99));box-shadow:0 10px 28px rgba(0,0,0,.12)}
+.fx-metric{padding:17px}
+.fx-metric-top{color:#79949d}
+.fx-metric-top svg,.fx-panel-heading>svg{color:var(--fx-accent)}
+.fx-metric>strong{font-size:clamp(18px,2vw,26px)}
+.fx-content-grid{gap:14px}
+.fx-panel{padding:21px}
+.fx-prob-grid>div,.fx-data-grid>div{border-color:#1b3038;border-radius:8px;background:#09141a}
+.fx-prob-grid strong{color:var(--fx-accent)}
+.fx-panel-foot{border-color:#1b3038}
+.fx-table-wrap th{background:#091319;border-color:#1a2d35;color:#617d86}
+.fx-table-wrap td{border-color:#18282f;color:#9bb0b7;font-family:var(--fx-mono);font-size:10px}
+.fx-table-wrap tbody tr:hover{background:#0d1b21}
+.fx-table-wrap code,.fx-panel code{color:var(--fx-accent)}
+.fx-tag{border-color:#25424a;border-radius:5px;color:#81c9d0}
+.fx-health-row{border-color:#1b2b32}
+.fx-footer{color:#3f5b65}
+@media(max-width:720px){
+ .fx-sidebar{background:rgba(7,13,18,.96);border-color:var(--fx-border)}
+ .fx-nav{border:1px solid transparent;border-radius:8px}
+ .fx-nav.active{background:linear-gradient(90deg,rgba(38,196,210,.13),rgba(38,196,210,.025));border-color:#1d4650}
+ .fx-metric,.fx-panel{border-radius:11px}
+ .fx-panel{padding:15px}
+}
